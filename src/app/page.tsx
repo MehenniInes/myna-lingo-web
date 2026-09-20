@@ -1,11 +1,37 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 export default function Home() {
+  const [user, setUser] = useState<{ fullName: string; role: string } | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+    setUser(null);
+  }
+
   return (
     <main className="min-h-screen flex flex-col">
       <nav className="flex items-center justify-between px-8 py-6">
         <div className="text-2xl font-display font-bold text-myna-charcoal">Myna Lingo</div>
-        <div className="flex gap-4">
-          <a href="/login" className="px-5 py-2 rounded-full font-medium text-myna-charcoal hover:bg-myna-yellow/20 transition">Log In</a>
-          <a href="/register" className="px-5 py-2 rounded-full font-medium bg-myna-orange text-white hover:bg-myna-orange/90 transition">Sign Up</a>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              <span className="text-myna-charcoal font-medium">Hi, {user.fullName}</span>
+              <button onClick={handleLogout} className="px-5 py-2 rounded-full font-medium text-myna-charcoal hover:bg-myna-yellow/20 transition">Log Out</button>
+            </>
+          ) : (
+            <>
+              <a href="/login" className="px-5 py-2 rounded-full font-medium text-myna-charcoal hover:bg-myna-yellow/20 transition">Log In</a>
+              <a href="/register" className="px-5 py-2 rounded-full font-medium bg-myna-orange text-white hover:bg-myna-orange/90 transition">Sign Up</a>
+            </>
+          )}
         </div>
       </nav>
 
