@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "./language-provider";
 
 const content = {
@@ -29,12 +29,11 @@ const content = {
 export default function Home() {
   const { locale, setLocale } = useLanguage();
   const t = content[locale];
-  const [user, setUser] = useState<{ fullName: string; role: string } | null>(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState<{ fullName: string; role: string } | null>(() => {
+    if (typeof window === "undefined") return null;
     const stored = localStorage.getItem("user");
-    if (stored) setUser(JSON.parse(stored));
-  }, []);
+    return stored ? JSON.parse(stored) : null;
+  });
 
   function handleLogout() {
     localStorage.removeItem("accessToken");
