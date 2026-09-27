@@ -9,6 +9,7 @@ const content = {
     signUp: "Sign Up",
     logOut: "Log Out",
     hi: "Hi",
+    becomeTeacher: "Become a Teacher",
     heroTitle: "Start Your Language Learning Journey Today",
     heroSubtitle: "Learn languages by actually speaking, with real teachers, real conversations, real progress.",
     registerStudent: "Register as a Student",
@@ -19,6 +20,7 @@ const content = {
     signUp: "إنشاء حساب",
     logOut: "تسجيل الخروج",
     hi: "أهلاً",
+    becomeTeacher: "كن أستاذاً",
     heroTitle: "ابدأ رحلة تعلم اللغات اليوم",
     heroSubtitle: "تعلّم اللغات من خلال التحدث الفعلي، مع أساتذة حقيقيين ومحادثات حقيقية وتقدّم حقيقي.",
     registerStudent: "التسجيل كطالب",
@@ -54,6 +56,7 @@ export default function Home() {
           </button>
           {user ? (
             <>
+              <a href="/become-a-teacher" className="px-5 py-2 rounded-full font-medium text-myna-charcoal hover:bg-myna-yellow/20 transition">{t.becomeTeacher}</a>
               <span className="text-myna-charcoal font-medium">{t.hi}, {user.fullName}</span>
               <button onClick={handleLogout} className="px-5 py-2 rounded-full font-medium text-myna-charcoal hover:bg-myna-yellow/20 transition">{t.logOut}</button>
             </>
