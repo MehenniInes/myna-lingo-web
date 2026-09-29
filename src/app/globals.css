@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", "Noto Sans Arabic", sans-serif;
+  --font-display: "Fraunces", serif;
+  --font-arabic: "Noto Sans Arabic", sans-serif;
+
+  --color-myna-yellow: #FBC02D;
+  --color-myna-orange: #F26522;
+  --color-myna-charcoal: #2A211C;
+  --color-myna-cream: #FFF8EC;
+  --color-myna-white: #FFFFFF;
+}
+
+body {
+  background-color: var(--color-myna-cream);
+  color: var(--color-myna-charcoal);
+  font-family: var(--font-sans);
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-arabic);
+}
