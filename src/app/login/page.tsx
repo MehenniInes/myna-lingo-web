@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+    useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+      router.push("/");
+    }
+  }, [router]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,20 +21,23 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { api } = await import("@/lib/api");
-const data = await api<{ accessToken: string; user: any }>("/auth/login", {
-  method: "POST",
-  body: { email, password },
-});
+      const res = await fetch("http://localhost:4000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-localStorage.setItem("accessToken", data.accessToken);
-localStorage.setItem("user", JSON.stringify(data.user));
+      const data = await res.json();
 
-if (data.user.role === "STUDENT") router.push("/student");
-else if (data.user.role === "PARENT") router.push("/parent");
-else if (data.user.role === "TEACHER") router.push("/teacher");
-else if (data.user.role === "ADMIN") router.push("/admin");
-else router.push("/");
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/");
     } catch {
       setError("Could not connect to the server");
       setLoading(false);

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import NotificationsPanel from "@/components/NotificationsPanel";
-import UserMenu from "@/components/UserMenu";
-import Link from "next/link";
+import { LanguageProvider } from "./language-provider";
 
 export const metadata: Metadata = {
   title: "Myna Lingo",
@@ -23,21 +21,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <header className="sticky top-0 z-40 bg-cream/80 backdrop-blur border-b border-myna-charcoal/10">
-          <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <Link
-              href="/"
-              className="font-display text-xl font-bold text-myna-charcoal"
-            >
-              🐦 Myna Lingo
-            </Link>
-            <div className="flex items-center gap-4">
-              <UserMenu />
-              <NotificationsPanel />
-            </div>
-          </div>
-        </header>
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );
