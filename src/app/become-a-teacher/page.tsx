@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-const STEPS = ["About", "Photo", "Certification"] as const;
+const STEPS = ["About", "Photo", "ID", "Certification"] as const;
 type Step = typeof STEPS[number];
 
 interface Language {
@@ -30,21 +30,31 @@ export default function BecomeATeacherPage() {
 
   // Certification step fields
   const [teacherLanguageId, setTeacherLanguageId] = useState<string | null>(null);
-  const [hasNoCertificate, setHasNoCertificate] = useState(false);
-  const [certSubject, setCertSubject] = useState("");
   const [certDescription, setCertDescription] = useState("");
   const [certIssuedBy, setCertIssuedBy] = useState("");
-  const [certYears, setCertYears] = useState("");
+  const [certYearFrom, setCertYearFrom] = useState("");
+  const [certYearTo, setCertYearTo] = useState("");
   const [certFile, setCertFile] = useState<File | null>(null);
   const [certSubmitted, setCertSubmitted] = useState(false);
 
   // Photo step fields
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
-  const [cameraActive, setCameraActive] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const [photoCameraActive, setPhotoCameraActive] = useState(false);
+  const photoVideoRef = useRef<HTMLVideoElement>(null);
+  const photoCanvasRef = useRef<HTMLCanvasElement>(null);
+  const photoStreamRef = useRef<MediaStream | null>(null);
+
+  // ID document step fields
+  const [idFile, setIdFile] = useState<File | null>(null);
+  const [idPreviewUrl, setIdPreviewUrl] = useState<string | null>(null);
+  const [idCameraActive, setIdCameraActive] = useState(false);
+  const idVideoRef = useRef<HTMLVideoElement>(null);
+  const idCanvasRef = useRef<HTMLCanvasElement>(null);
+  const idStreamRef = useRef<MediaStream | null>(null);
+
+  // Final submit
+  const [finished, setFinished] = useState(false);
 
   function authHeaders() {
     const token = localStorage.getItem("accessToken");
@@ -80,6 +90,8 @@ export default function BecomeATeacherPage() {
         if (draft.phoneNumber) setPhoneNumber(draft.phoneNumber);
         if (draft.confirmedOver18) setConfirmedOver18(draft.confirmedOver18);
         if (draft.profilePhotoUrl) setPhotoPreviewUrl(draft.profilePhotoUrl);
+        if (draft.idDocumentUrl) setIdPreviewUrl(draft.idDocumentUrl);
+        if (draft.applicationStatus && draft.applicationStatus !== "DRAFT") setFinished(true);
         if (draft.teacherLanguages?.[0]) {
           setSubjectLanguageId(draft.teacherLanguages[0].languageId);
           setSubjectServiceType(draft.teacherLanguages[0].serviceType);
@@ -99,10 +111,16 @@ export default function BecomeATeacherPage() {
   }, [router]);
 
   useEffect(() => {
-    if (cameraActive && videoRef.current && streamRef.current) {
-      videoRef.current.srcObject = streamRef.current;
+    if (photoCameraActive && photoVideoRef.current && photoStreamRef.current) {
+      photoVideoRef.current.srcObject = photoStreamRef.current;
     }
-  }, [cameraActive]);
+  }, [photoCameraActive]);
+
+  useEffect(() => {
+    if (idCameraActive && idVideoRef.current && idStreamRef.current) {
+      idVideoRef.current.srcObject = idStreamRef.current;
+    }
+  }, [idCameraActive]);
 
   async function saveAboutStep() {
     setSaving(true);
@@ -132,6 +150,7 @@ export default function BecomeATeacherPage() {
     }
   }
 
+  // Photo step handlers
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
@@ -140,26 +159,26 @@ export default function BecomeATeacherPage() {
     }
   }
 
-  async function startCamera() {
+  async function startPhotoCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      streamRef.current = stream;
-      setCameraActive(true);
+      photoStreamRef.current = stream;
+      setPhotoCameraActive(true);
     } catch {
       setError("Could not access camera. Please check permissions or use file upload instead.");
     }
   }
 
-  function stopCamera() {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-    setCameraActive(false);
+  function stopPhotoCamera() {
+    photoStreamRef.current?.getTracks().forEach((track) => track.stop());
+    photoStreamRef.current = null;
+    setPhotoCameraActive(false);
   }
 
-  function capturePhoto() {
-    if (!videoRef.current || !canvasRef.current) return;
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+  function capturePhotoPic() {
+    if (!photoVideoRef.current || !photoCanvasRef.current) return;
+    const video = photoVideoRef.current;
+    const canvas = photoCanvasRef.current;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
@@ -171,7 +190,7 @@ export default function BecomeATeacherPage() {
         setPhotoPreviewUrl(URL.createObjectURL(blob));
       }
     }, "image/jpeg");
-    stopCamera();
+    stopPhotoCamera();
   }
 
   async function savePhotoStep() {
@@ -199,9 +218,85 @@ export default function BecomeATeacherPage() {
         });
       }
 
-      setStep("Certification");
+      setStep("ID");
     } catch {
       setError("Could not save photo. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // ID step handlers
+  function handleIdSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIdFile(file);
+      setIdPreviewUrl(URL.createObjectURL(file));
+    }
+  }
+
+  async function startIdCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      idStreamRef.current = stream;
+      setIdCameraActive(true);
+    } catch {
+      setError("Could not access camera. Please check permissions or use file upload instead.");
+    }
+  }
+
+  function stopIdCamera() {
+    idStreamRef.current?.getTracks().forEach((track) => track.stop());
+    idStreamRef.current = null;
+    setIdCameraActive(false);
+  }
+
+  function captureIdPic() {
+    if (!idVideoRef.current || !idCanvasRef.current) return;
+    const video = idVideoRef.current;
+    const canvas = idCanvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx?.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], "id-photo.jpg", { type: "image/jpeg" });
+        setIdFile(file);
+        setIdPreviewUrl(URL.createObjectURL(blob));
+      }
+    }, "image/jpeg");
+    stopIdCamera();
+  }
+
+  async function saveIdStep() {
+    if (!idFile && !idPreviewUrl) {
+      setError("Please upload or take a photo of your ID document.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      if (idFile) {
+        const formData = new FormData();
+        formData.append("file", idFile);
+        const uploadRes = await fetch("http://localhost:4000/teachers/upload/id-document", {
+          method: "POST",
+          headers: authHeaders(),
+          body: formData,
+        });
+        const uploadData = await uploadRes.json();
+
+        await fetch("http://localhost:4000/teachers/draft/id-document", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", ...authHeaders() },
+          body: JSON.stringify({ idDocumentUrl: uploadData.url }),
+        });
+      }
+
+      setStep("Certification");
+    } catch {
+      setError("Could not save ID document. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -212,8 +307,12 @@ export default function BecomeATeacherPage() {
       setError("Something went wrong — please go back to the About step.");
       return;
     }
-    if (!certFile) {
-      setError("Please upload your certificate file.");
+    if (!certIssuedBy || !certYearFrom || !certYearTo || !certFile) {
+      setError("Please fill in all fields and upload your certificate.");
+      return;
+    }
+    if (Number(certYearTo) < Number(certYearFrom)) {
+      setError("End year cannot be before start year.");
       return;
     }
     setSaving(true);
@@ -233,10 +332,10 @@ export default function BecomeATeacherPage() {
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           teacherLanguageId,
-          subject: certSubject,
           description: certDescription,
           issuedBy: certIssuedBy,
-          yearsOfStudy: certYears ? Number(certYears) : undefined,
+          yearFrom: Number(certYearFrom),
+          yearTo: Number(certYearTo),
           fileUrl: uploadData.url,
         }),
       });
@@ -249,14 +348,51 @@ export default function BecomeATeacherPage() {
     }
   }
 
+  async function finishApplication() {
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("http://localhost:4000/teachers/draft/submit", {
+        method: "POST",
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message || "Could not submit application.");
+        setSaving(false);
+        return;
+      }
+      setFinished(true);
+    } catch {
+      setError("Could not submit application. Please try again.");
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return <main className="min-h-screen flex items-center justify-center">Loading...</main>;
+  }
+
+  if (finished) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-6">
+        <div className="max-w-md bg-myna-white rounded-3xl shadow-sm p-8 text-center">
+          <h1 className="font-display text-3xl font-bold text-myna-charcoal">Application Submitted</h1>
+          <p className="text-myna-charcoal/70 mt-4">
+            Thank you! Your application is now under review. We'll notify you once it's been processed.
+          </p>
+          <a href="/" className="mt-6 inline-block px-8 py-3 rounded-full font-semibold bg-myna-orange text-white">
+            Back to Home
+          </a>
+        </div>
+      </main>
+    );
   }
 
   return (
     <main className="min-h-screen px-6 py-12">
       <div className="max-w-2xl mx-auto">
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex justify-center gap-2 mb-8 flex-wrap">
           {STEPS.map((s) => (
             <div
               key={s}
@@ -317,7 +453,7 @@ export default function BecomeATeacherPage() {
 
                 <label className="flex items-center gap-2 text-sm text-myna-charcoal">
                   <input type="checkbox" checked={confirmedOver18} onChange={(e) => setConfirmedOver18(e.target.checked)} />
-                  I confirm I'm over 18
+                  I confirm I&apos;m over 18
                 </label>
 
                 {error && <p className="text-red-600 text-sm">{error}</p>}
@@ -346,12 +482,12 @@ export default function BecomeATeacherPage() {
                       Remove and choose again
                     </button>
                   </div>
-                ) : cameraActive ? (
+                ) : photoCameraActive ? (
                   <div className="flex flex-col items-center gap-3">
-                    <video ref={videoRef} autoPlay playsInline muted className="max-h-64 rounded-xl border border-myna-charcoal/20" />
+                    <video ref={photoVideoRef} autoPlay playsInline muted className="max-h-64 rounded-xl border border-myna-charcoal/20" />
                     <div className="flex gap-3">
-                      <button type="button" onClick={capturePhoto} className="px-5 py-2 rounded-full font-medium bg-myna-orange text-white">Capture</button>
-                      <button type="button" onClick={stopCamera} className="px-5 py-2 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">Cancel</button>
+                      <button type="button" onClick={capturePhotoPic} className="px-5 py-2 rounded-full font-medium bg-myna-orange text-white">Capture</button>
+                      <button type="button" onClick={stopPhotoCamera} className="px-5 py-2 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">Cancel</button>
                     </div>
                   </div>
                 ) : (
@@ -360,17 +496,17 @@ export default function BecomeATeacherPage() {
                       Upload File
                       <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
                     </label>
-                    <button type="button" onClick={startCamera} className="flex-1 px-5 py-3 rounded-xl border-2 border-dashed border-myna-charcoal/20 hover:bg-myna-yellow/10 transition">
+                    <button type="button" onClick={startPhotoCamera} className="flex-1 px-5 py-3 rounded-xl border-2 border-dashed border-myna-charcoal/20 hover:bg-myna-yellow/10 transition">
                       Take Photo
                     </button>
                   </div>
                 )}
-                <canvas ref={canvasRef} className="hidden" />
+                <canvas ref={photoCanvasRef} className="hidden" />
 
                 {error && <p className="text-red-600 text-sm">{error}</p>}
 
                 <div className="flex gap-3 mt-2">
-                  <button onClick={() => setStep("About")} className="px-5 py-3 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">
+                  <button onClick={() => { setError(""); setStep("About"); }} className="px-5 py-3 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">
                     Back
                   </button>
                   <button
@@ -385,11 +521,63 @@ export default function BecomeATeacherPage() {
             </>
           )}
 
+          {step === "ID" && (
+            <>
+              <h1 className="font-display text-3xl font-bold text-myna-charcoal">ID Document</h1>
+              <p className="text-myna-charcoal/70 mt-2">We need this to verify your identity. It's kept private and never shown publicly.</p>
+
+              <div className="mt-8 flex flex-col gap-4">
+                {idPreviewUrl ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <img src={idPreviewUrl} alt="ID preview" className="max-h-64 rounded-xl border border-myna-charcoal/20" />
+                    <button type="button" onClick={() => { setIdFile(null); setIdPreviewUrl(null); }} className="text-sm text-myna-orange font-medium">
+                      Remove and choose again
+                    </button>
+                  </div>
+                ) : idCameraActive ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <video ref={idVideoRef} autoPlay playsInline muted className="max-h-64 rounded-xl border border-myna-charcoal/20" />
+                    <div className="flex gap-3">
+                      <button type="button" onClick={captureIdPic} className="px-5 py-2 rounded-full font-medium bg-myna-orange text-white">Capture</button>
+                      <button type="button" onClick={stopIdCamera} className="px-5 py-2 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <label className="flex-1 text-center px-5 py-3 rounded-xl border-2 border-dashed border-myna-charcoal/20 cursor-pointer hover:bg-myna-yellow/10 transition">
+                      Upload File
+                      <input type="file" accept="image/*" onChange={handleIdSelect} className="hidden" />
+                    </label>
+                    <button type="button" onClick={startIdCamera} className="flex-1 px-5 py-3 rounded-xl border-2 border-dashed border-myna-charcoal/20 hover:bg-myna-yellow/10 transition">
+                      Take Photo
+                    </button>
+                  </div>
+                )}
+                <canvas ref={idCanvasRef} className="hidden" />
+
+                {error && <p className="text-red-600 text-sm">{error}</p>}
+
+                <div className="flex gap-3 mt-2">
+                  <button onClick={() => { setError(""); setStep("Photo"); }} className="px-5 py-3 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">
+                    Back
+                  </button>
+                  <button
+                    onClick={saveIdStep}
+                    disabled={saving}
+                    className="flex-1 py-3 rounded-full font-semibold bg-myna-orange text-white hover:bg-myna-orange/90 transition disabled:opacity-50"
+                  >
+                    {saving ? "Saving..." : "Continue"}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
           {step === "Certification" && (
             <>
               <h1 className="font-display text-3xl font-bold text-myna-charcoal">Teaching Certification</h1>
               <p className="text-myna-charcoal/70 mt-2">
-                Do you have a teaching certificate? Adding one boosts your credibility with students.
+                Add a certificate for the language you teach. This is required before you can submit your application.
               </p>
 
               {certSubmitted ? (
@@ -397,42 +585,44 @@ export default function BecomeATeacherPage() {
                   <p className="text-green-700 bg-green-50 rounded-xl p-4 text-sm">
                     Certificate submitted. Our team will review it.
                   </p>
-                  <button className="w-full py-3 rounded-full font-semibold bg-myna-orange text-white hover:bg-myna-orange/90 transition">
-                    Finish Application
+                  {error && <p className="text-red-600 text-sm">{error}</p>}
+                  <button
+                    onClick={finishApplication}
+                    disabled={saving}
+                    className="w-full py-3 rounded-full font-semibold bg-myna-orange text-white hover:bg-myna-orange/90 transition disabled:opacity-50"
+                  >
+                    {saving ? "Submitting..." : "Finish Application"}
                   </button>
-                </div>
-              ) : hasNoCertificate ? (
-                <div className="mt-8 flex flex-col gap-4">
-                  <p className="text-myna-charcoal/70 text-sm">No certificate will be attached to your profile.</p>
-                  <button onClick={() => setHasNoCertificate(false)} className="text-sm text-myna-orange font-medium self-start">
-                    Actually, I do have one
-                  </button>
-                  <div className="flex gap-3 mt-2">
-                    <button onClick={() => setStep("Photo")} className="px-5 py-3 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">Back</button>
-                    <button className="flex-1 py-3 rounded-full font-semibold bg-myna-orange text-white">Finish Application</button>
-                  </div>
                 </div>
               ) : (
                 <div className="mt-8 flex flex-col gap-4">
-                  <button onClick={() => setHasNoCertificate(true)} className="text-sm text-myna-orange font-medium self-start">
-                    I don't have a teaching certificate
-                  </button>
-
-                  <div>
-                    <label className="block text-sm font-medium text-myna-charcoal mb-1">Subject</label>
-                    <input value={certSubject} onChange={(e) => setCertSubject(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3" />
-                  </div>
                   <div>
                     <label className="block text-sm font-medium text-myna-charcoal mb-1">Description</label>
-                    <input value={certDescription} onChange={(e) => setCertDescription(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3" />
+                    <input value={certDescription} onChange={(e) => setCertDescription(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3" placeholder="e.g. TEFL Certificate, CELTA..." />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-myna-charcoal mb-1">Issued by</label>
-                    <input value={certIssuedBy} onChange={(e) => setCertIssuedBy(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3" />
+                    <input value={certIssuedBy} onChange={(e) => setCertIssuedBy(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3" placeholder="e.g. Cambridge, British Council..." />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-myna-charcoal mb-1">Years of study</label>
-                    <input type="number" value={certYears} onChange={(e) => setCertYears(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3" />
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-myna-charcoal mb-1">Year from</label>
+                      <select value={certYearFrom} onChange={(e) => setCertYearFrom(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3">
+                        <option value="">Select</option>
+                        {Array.from({ length: 60 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-myna-charcoal mb-1">Year to</label>
+                      <select value={certYearTo} onChange={(e) => setCertYearTo(e.target.value)} className="w-full rounded-xl border border-myna-charcoal/20 px-4 py-3">
+                        <option value="">Select</option>
+                        {Array.from({ length: 60 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <label className="text-center px-4 py-3 rounded-xl border-2 border-dashed border-myna-charcoal/20 cursor-pointer hover:bg-myna-yellow/10 transition text-sm">
@@ -443,7 +633,7 @@ export default function BecomeATeacherPage() {
                   {error && <p className="text-red-600 text-sm">{error}</p>}
 
                   <div className="flex gap-3 mt-2">
-                    <button onClick={() => setStep("Photo")} className="px-5 py-3 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">
+                    <button onClick={() => { setError(""); setStep("ID"); }} className="px-5 py-3 rounded-full font-medium border border-myna-charcoal/20 text-myna-charcoal">
                       Back
                     </button>
                     <button

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLanguage } from "./language-provider";
 
+
 const content = {
   en: {
     logIn: "Log In",
