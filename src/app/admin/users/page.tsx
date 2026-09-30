@@ -3,18 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, getUser } from "@/lib/api";
+import { useLanguage } from "@/app/language-provider";
+import { formatShortDateTime } from "@/lib/i18n";
 
 type User = {
-  id: string;
-  email: string;
-  fullName: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
+  id: string; email: string; fullName: string; role: string;
+  isActive: boolean; createdAt: string;
 };
 
 export default function AdminUsersPage() {
   const router = useRouter();
+  const { t, locale } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,6 +24,7 @@ export default function AdminUsersPage() {
     if (!u) return router.push("/login");
     if (u.role !== "ADMIN") return router.push("/");
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   async function load() {
@@ -59,33 +59,34 @@ export default function AdminUsersPage() {
     return map[role] || "bg-gray-100 text-gray-700";
   }
 
-  function formatDate(s: string) {
-    return new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  function roleLabel(role: string) {
+    if (role === "STUDENT") return t("aUsers.students");
+    if (role === "PARENT") return t("aUsers.parents");
+    if (role === "TEACHER") return t("aUsers.teachers");
+    if (role === "ADMIN") return t("aUsers.admins");
+    return role;
   }
 
   return (
     <main className="min-h-screen bg-cream px-6 py-12">
       <div className="max-w-6xl mx-auto">
-        <a href="/admin" className="text-myna-orange font-semibold text-sm">← Back to Admin</a>
-        <h1 className="font-display text-4xl font-bold text-myna-charcoal mt-4">Users</h1>
-        <p className="text-myna-charcoal/60 mt-2">Manage all platform users</p>
+        <a href="/admin" className="text-myna-orange font-semibold text-sm">{t("admin.backToAdmin")}</a>
+        <h1 className="font-display text-4xl font-bold text-myna-charcoal mt-4">{t("aUsers.title")}</h1>
+        <p className="text-myna-charcoal/60 mt-2">{t("aUsers.subtitle")}</p>
 
-        {/* Filters */}
         <div className="mt-6 flex flex-wrap gap-2">
-          {[
-            ["", "All"],
-            ["STUDENT", "Students"],
-            ["PARENT", "Parents"],
-            ["TEACHER", "Teachers"],
-            ["ADMIN", "Admins"],
-          ].map(([value, label]) => (
+          {([
+            ["", t("aUsers.all")],
+            ["STUDENT", t("aUsers.students")],
+            ["PARENT", t("aUsers.parents")],
+            ["TEACHER", t("aUsers.teachers")],
+            ["ADMIN", t("aUsers.admins")],
+          ] as const).map(([value, label]) => (
             <button
               key={value}
               onClick={() => setFilter(value)}
               className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                filter === value
-                  ? "bg-myna-orange text-white"
-                  : "bg-white text-myna-charcoal/70 border"
+                filter === value ? "bg-myna-orange text-white" : "bg-white text-myna-charcoal/70 border"
               }`}
             >
               {label}
@@ -96,17 +97,15 @@ export default function AdminUsersPage() {
         {error && <p className="mt-6 text-red-600">{error}</p>}
 
         {loading ? (
-          <p className="mt-8 text-center text-myna-charcoal/60">Loading...</p>
+          <p className="mt-8 text-center text-myna-charcoal/60">{t("common.loading")}</p>
         ) : users.length === 0 ? (
-          <p className="mt-8 text-center text-myna-charcoal/60">No users found</p>
+          <p className="mt-8 text-center text-myna-charcoal/60">{t("aUsers.none")}</p>
         ) : (
           <div className="mt-8 bg-white rounded-3xl shadow-sm overflow-hidden">
             {users.map((u, i) => (
               <div
                 key={u.id}
-                className={`flex items-center justify-between p-5 ${
-                  i !== users.length - 1 ? "border-b border-cream" : ""
-                } ${!u.isActive ? "opacity-50" : ""}`}
+                className={`flex items-center justify-between p-5 ${i !== users.length - 1 ? "border-b border-cream" : ""} ${!u.isActive ? "opacity-50" : ""}`}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-myna-orange text-white flex items-center justify-center font-bold">
@@ -117,13 +116,12 @@ export default function AdminUsersPage() {
                     <p className="text-xs text-myna-charcoal/60">{u.email}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${roleBadge(u.role)}`}>
-                    {u.role}
+                    {roleLabel(u.role)}
                   </span>
                   <span className="text-xs text-myna-charcoal/40 hidden md:inline">
-                    {formatDate(u.createdAt)}
+                    {formatShortDateTime(locale, u.createdAt)}
                   </span>
                   <button
                     onClick={() => toggle(u.id)}
@@ -133,7 +131,7 @@ export default function AdminUsersPage() {
                         : "text-green-600 border-green-200 hover:bg-green-50"
                     }`}
                   >
-                    {u.isActive ? "Suspend" : "Reactivate"}
+                    {u.isActive ? t("aUsers.suspend") : t("aUsers.reactivate")}
                   </button>
                 </div>
               </div>

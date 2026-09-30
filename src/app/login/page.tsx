@@ -2,14 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/app/language-provider";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function LoginPage() {
   const router = useRouter();
-    useEffect(() => {
+  const { t } = useLanguage();
+
+  useEffect(() => {
     if (localStorage.getItem("accessToken")) {
       router.push("/");
     }
   }, [router]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,7 +35,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Login failed");
+        setError(data.message || t("login.failed"));
         setLoading(false);
         return;
       }
@@ -39,19 +44,27 @@ export default function LoginPage() {
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/");
     } catch {
-      setError("Could not connect to the server");
+      setError(t("login.connectError"));
       setLoading(false);
     }
   }
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="absolute top-6 end-8">
+        <LanguageSwitcher />
+      </div>
+
       <div className="w-full max-w-md bg-myna-white rounded-3xl shadow-sm p-8">
-        <h1 className="font-display text-3xl font-bold text-myna-charcoal text-center">Welcome back</h1>
+        <h1 className="font-display text-3xl font-bold text-myna-charcoal text-center">
+          {t("login.welcomeBack")}
+        </h1>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-myna-charcoal mb-1">Email</label>
+            <label className="block text-sm font-medium text-myna-charcoal mb-1">
+              {t("login.email")}
+            </label>
             <input
               type="email"
               required
@@ -62,7 +75,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-myna-charcoal mb-1">Password</label>
+            <label className="block text-sm font-medium text-myna-charcoal mb-1">
+              {t("login.password")}
+            </label>
             <input
               type="password"
               required
@@ -79,12 +94,15 @@ export default function LoginPage() {
             disabled={loading}
             className="mt-2 w-full py-3 rounded-full font-semibold bg-myna-orange text-white hover:bg-myna-orange/90 transition disabled:opacity-50"
           >
-            {loading ? "Logging in..." : "Log In"}
+            {loading ? t("login.loggingIn") : t("login.logIn")}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-myna-charcoal/70">
-          Don&apos;t have an account? <a href="/register" className="text-myna-orange font-medium">Sign up</a>
+          {t("login.noAccount")}{" "}
+          <a href="/register" className="text-myna-orange font-medium">
+            {t("login.signUp")}
+          </a>
         </p>
       </div>
     </main>

@@ -3,19 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, getUser } from "@/lib/api";
+import { useLanguage } from "@/app/language-provider";
+import { formatDateTime } from "@/lib/i18n";
 
 type Booking = {
-  id: string;
-  scheduledAt: string;
-  durationMin: number;
-  status: string;
-  serviceType: string;
-  notes: string | null;
+  id: string; scheduledAt: string; durationMin: number; status: string;
+  serviceType: string; notes: string | null;
   teacher: { user: { fullName: string } };
 };
 
 export default function BookingsPage() {
   const router = useRouter();
+  const { t, locale } = useLanguage();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"upcoming" | "completed" | "cancelled">("upcoming");
@@ -25,6 +24,7 @@ export default function BookingsPage() {
     const u = getUser();
     if (!u) return router.push("/login");
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function load() {
@@ -39,24 +39,13 @@ export default function BookingsPage() {
   }
 
   async function cancel(id: string) {
-    if (!confirm("Cancel this booking?")) return;
+    if (!confirm(t("bookings.cancelConfirm"))) return;
     try {
       await api(`/bookings/${id}`, { method: "DELETE", auth: true });
       await load();
     } catch (err: any) {
       setError(err.message);
     }
-  }
-
-  function formatDate(s: string) {
-    return new Date(s).toLocaleString("en-GB", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   const now = new Date();
@@ -66,21 +55,29 @@ export default function BookingsPage() {
     return b.status === "CANCELLED";
   });
 
-  if (loading) return <main className="min-h-screen flex items-center justify-center"><p>Loading...</p></main>;
+  function statusLabel(s: string) {
+    if (s === "PENDING") return t("bookings.statusPending");
+    if (s === "CONFIRMED") return t("bookings.statusConfirmed");
+    if (s === "CANCELLED") return t("bookings.statusCancelled");
+    return t("bookings.statusCompleted");
+  }
+
+  if (loading) return <main className="min-h-screen flex items-center justify-center">{t("common.loading")}</main>;
 
   return (
     <main className="min-h-screen bg-cream px-6 py-12">
       <div className="max-w-4xl mx-auto">
-        <a href="/student" className="text-myna-orange font-semibold text-sm">← Back to Dashboard</a>
-        <h1 className="font-display text-4xl font-bold text-myna-charcoal mt-4">My Bookings</h1>
+        <a href="/student" className="text-myna-orange font-semibold text-sm">
+          {t("common.backToDashboard")}
+        </a>
+        <h1 className="font-display text-4xl font-bold text-myna-charcoal mt-4">{t("bookings.title")}</h1>
 
-        {/* Tabs */}
-        <div className="mt-6 flex gap-2">
-          {[
-            ["upcoming", "Upcoming"],
-            ["completed", "Completed"],
-            ["cancelled", "Cancelled"],
-          ].map(([value, label]) => (
+        <div className="mt-6 flex gap-2 flex-wrap">
+          {([
+            ["upcoming", t("bookings.upcoming")],
+            ["completed", t("bookings.completed")],
+            ["cancelled", t("bookings.cancelled")],
+          ] as const).map(([value, label]) => (
             <button
               key={value}
               onClick={() => setTab(value as any)}
@@ -99,29 +96,24 @@ export default function BookingsPage() {
           <div className="mt-8 bg-white rounded-3xl shadow-sm p-12 text-center">
             <p className="text-5xl mb-4">📅</p>
             <p className="font-display text-2xl font-bold text-myna-charcoal">
-              No {tab} bookings
+              {t("bookings.noTab", { tab: statusLabel(tab === "upcoming" ? "CONFIRMED" : tab === "completed" ? "COMPLETED" : "CANCELLED").toLowerCase() })}
             </p>
-            <a
-              href="/student/call"
-              className="mt-6 inline-block px-6 py-3 rounded-full bg-myna-orange text-white font-semibold"
-            >
-              Find a Teacher
+            <a href="/student/call" className="mt-6 inline-block px-6 py-3 rounded-full bg-myna-orange text-white font-semibold">
+              {t("bookings.findTeacher")}
             </a>
           </div>
         ) : (
           <div className="mt-8 space-y-4">
             {filtered.map((b) => (
               <div key={b.id} className="bg-white rounded-3xl shadow-sm p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div>
                     <p className="font-semibold text-myna-charcoal">
-                      Lesson with {b.teacher.user.fullName}
+                      {t("bookings.lessonWith", { name: b.teacher.user.fullName })}
                     </p>
-                    <p className="text-sm text-myna-charcoal/60 mt-1">
-                      📅 {formatDate(b.scheduledAt)}
-                    </p>
+                    <p className="text-sm text-myna-charcoal/60 mt-1">📅 {formatDateTime(locale, b.scheduledAt)}</p>
                     <p className="text-xs text-myna-charcoal/50 mt-1">
-                      {b.durationMin} minutes · {b.serviceType.replace("_", " ")}
+                      {t("bookings.duration", { n: b.durationMin })} · {b.serviceType.replace("_", " ")}
                     </p>
                     {b.notes && <p className="text-xs text-myna-charcoal/60 mt-2 italic">"{b.notes}"</p>}
                   </div>
@@ -131,15 +123,12 @@ export default function BookingsPage() {
                     b.status === "CANCELLED" ? "bg-red-100 text-red-700" :
                     "bg-blue-100 text-blue-700"
                   }`}>
-                    {b.status}
+                    {statusLabel(b.status)}
                   </span>
                 </div>
                 {(b.status === "PENDING" || b.status === "CONFIRMED") && (
-                  <button
-                    onClick={() => cancel(b.id)}
-                    className="mt-4 text-sm text-red-600 font-semibold hover:underline"
-                  >
-                    Cancel booking
+                  <button onClick={() => cancel(b.id)} className="mt-4 text-sm text-red-600 font-semibold hover:underline">
+                    {t("bookings.cancel")}
                   </button>
                 )}
               </div>
