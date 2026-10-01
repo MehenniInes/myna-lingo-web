@@ -6,14 +6,12 @@ import {
   Menu, X, ArrowRight, ChevronRight, CheckCircle2,
   Phone, PhoneOff, Mic, Video, MonitorUp,
   Play, Pause, Podcast, Headphones,
-  BookOpen, Users, Trophy, Shield, Globe, Sparkles,
-  Star, Zap, MessageCircle, Wand2, GraduationCap,
+  BookOpen, Trophy, Zap, MessageCircle, Wand2, GraduationCap,
 } from "lucide-react";
 import { useLanguage } from "./language-provider";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface User { fullName: string; role: string; }
-
 type FeatureTab = "learn" | "listen" | "practice" | "improve";
 type MethodStage = 1 | 2 | 3 | 4;
 
@@ -27,7 +25,6 @@ export default function Home() {
   const [methodStage, setMethodStage] = useState<MethodStage>(1);
   const [playingAudio, setPlayingAudio] = useState(false);
   const [logoSpinning, setLogoSpinning] = useState(false);
-
   const [callOpen, setCallOpen] = useState(false);
   const [callTeacher, setCallTeacher] = useState<{ name: string; lang: string; flag: string; img: string } | null>(null);
   const [callConnected, setCallConnected] = useState(false);
@@ -65,10 +62,9 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col relative">
-      {/* faint pattern background */}
       <div className="fixed inset-0 bg-pattern pointer-events-none z-0" />
 
-      {/* ============ NAV ============ */}
+      {/* NAV */}
       <nav className="sticky top-0 z-40 bg-myna-cream/90 backdrop-blur-md border-b-2 border-myna-brown/10 px-4 lg:px-8 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <a href="/" className="flex items-center gap-3 group" onClick={spinLogo}>
@@ -88,7 +84,7 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8 font-semibold text-sm text-myna-brown">
             <a href="#how-it-works" className="hover:text-myna-terracotta transition-colors">How It Works</a>
             <a href="#features" className="hover:text-myna-terracotta transition-colors">Features</a>
-            <a href="#teachers" className="hover:text-myna-terracotta transition-colors flex items-center gap-1.5">
+            <a href="/find-teacher" className="hover:text-myna-terracotta transition-colors flex items-center gap-1.5">
               <span>Teachers</span>
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             </a>
@@ -103,6 +99,11 @@ export default function Home() {
                 <span className="font-bold text-sm text-myna-brown hidden lg:inline">
                   {t("home.hi")}, {user.fullName.split(" ")[0]}
                 </span>
+                {user.role === "TEACHER" && (
+                  <a href="/teacher" className="px-4 py-2 font-bold text-sm text-myna-brown hover:text-myna-terracotta transition-colors">
+                    Dashboard
+                  </a>
+                )}
                 <a href="/become-a-teacher" className="px-4 py-2 font-bold text-sm text-myna-brown hover:text-myna-terracotta transition-colors">
                   {t("home.becomeTeacher")}
                 </a>
@@ -135,7 +136,7 @@ export default function Home() {
           <div className="md:hidden pt-4 pb-3 px-4 border-t border-myna-brown/10 mt-3 space-y-3">
             <a href="#how-it-works" className="block font-semibold text-myna-brown py-1" onClick={() => setMobileOpen(false)}>How It Works</a>
             <a href="#features" className="block font-semibold text-myna-brown py-1" onClick={() => setMobileOpen(false)}>Features</a>
-            <a href="#teachers" className="block font-semibold text-myna-brown py-1" onClick={() => setMobileOpen(false)}>Find a Teacher</a>
+            <a href="/find-teacher" className="block font-semibold text-myna-brown py-1" onClick={() => setMobileOpen(false)}>Find a Teacher</a>
             <a href="#conversation" className="block font-semibold text-myna-brown py-1" onClick={() => setMobileOpen(false)}>4-Level Method</a>
             <a href="#for-teachers" className="block font-semibold text-myna-brown py-1" onClick={() => setMobileOpen(false)}>Become a Teacher</a>
             <div className="pt-2 flex flex-col gap-2">
@@ -146,7 +147,7 @@ export default function Home() {
         )}
       </nav>
 
-      {/* ============ HERO ============ */}
+      {/* HERO */}
       <section className="relative pt-8 pb-16 lg:pt-16 lg:pb-24 px-4 lg:px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
@@ -196,7 +197,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero visual — live call mockup */}
           <div className="lg:col-span-6 relative">
             <div className="absolute -inset-2 bg-myna-yellow rounded-3xl border-2 border-myna-brown rotate-2 shadow-myna-lg" />
 
@@ -217,53 +217,44 @@ export default function Home() {
               <div className="relative p-4 bg-gradient-to-b from-[#2B1810] to-[#1C0F0A] min-h-[360px] flex flex-col justify-between">
                 <div className="relative w-full h-56 rounded-xl overflow-hidden border border-myna-cream/20 bg-stone-800">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"
-                    alt="Teacher"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800" alt="Teacher" className="w-full h-full object-cover" />
                   <div className="absolute top-3 left-3 bg-myna-brown/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-semibold text-white flex items-center gap-2 border border-white/10">
                     <span>🇬🇧 Sarah Jenkins</span>
                     <span className="bg-myna-yellow text-myna-brown text-[10px] px-1.5 py-0.5 rounded font-bold">Native</span>
                   </div>
-
                   <div className="absolute bottom-3 left-3 right-3 bg-myna-brown/90 backdrop-blur-md p-3 rounded-xl border border-myna-yellow/30 text-xs text-white space-y-1 shadow-lg">
                     <p className="text-myna-yellow font-bold text-[11px] flex items-center gap-1">
                       <Wand2 size={12} /> Teacher Prompt:
                     </p>
                     <p className="font-medium text-slate-100">
-                      "Great pronunciation, Amine! Now try describing what you see in this picture using past simple tense."
+                      "Great pronunciation! Now try describing what you see using past simple tense."
                     </p>
                   </div>
                 </div>
 
                 <div className="absolute top-8 right-8 w-24 h-28 sm:w-28 sm:h-32 rounded-xl overflow-hidden border-2 border-myna-yellow shadow-xl bg-stone-900">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300"
-                    alt="Student"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=300" alt="Student" className="w-full h-full object-cover" />
                   <div className="absolute bottom-1 right-1 bg-black/60 px-1.5 py-0.5 rounded text-[9px] font-bold">You</div>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between gap-2 bg-[#140A07] p-3 rounded-xl border border-white/10">
                   <div className="flex items-center gap-2">
-                    <button title="Microphone" className="w-9 h-9 rounded-lg bg-myna-cream/10 hover:bg-myna-cream/20 flex items-center justify-center text-white transition-colors">
+                    <button title="Microphone" className="w-9 h-9 rounded-lg bg-myna-cream/10 hover:bg-myna-cream/20 flex items-center justify-center text-white">
                       <Mic size={14} className="text-green-400" />
                     </button>
-                    <button title="Camera" className="w-9 h-9 rounded-lg bg-myna-cream/10 hover:bg-myna-cream/20 flex items-center justify-center text-white transition-colors">
+                    <button title="Camera" className="w-9 h-9 rounded-lg bg-myna-cream/10 hover:bg-myna-cream/20 flex items-center justify-center text-white">
                       <Video size={14} className="text-green-400" />
                     </button>
-                    <button title="Share Screen" className="w-9 h-9 rounded-lg bg-myna-cream/10 hover:bg-myna-cream/20 flex items-center justify-center text-white transition-colors">
+                    <button title="Share" className="w-9 h-9 rounded-lg bg-myna-cream/10 hover:bg-myna-cream/20 flex items-center justify-center text-white">
                       <MonitorUp size={14} />
                     </button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-myna-yellow font-bold hidden sm:inline">Level 2: Express Yourself</span>
+                    <span className="text-xs text-myna-yellow font-bold hidden sm:inline">Level 2</span>
                     <button
                       onClick={() => openCall("Sarah Jenkins", "English", "🇬🇧", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300")}
-                      className="px-3.5 py-1.5 bg-myna-rose hover:bg-red-600 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 transition-colors"
+                      className="px-3.5 py-1.5 bg-myna-rose hover:bg-red-600 text-white rounded-lg font-bold text-xs flex items-center gap-1.5"
                     >
                       <PhoneOff size={12} />
                       <span>Demo Call</span>
@@ -286,7 +277,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ STRIP ============ */}
+      {/* STRIP */}
       <section className="bg-myna-yellow border-y-2 border-myna-brown py-6 px-4">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-myna-brown font-display font-extrabold">
           {[
@@ -308,7 +299,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ HOW IT WORKS ============ */}
+      {/* HOW IT WORKS */}
       <section id="how-it-works" className="py-20 px-4 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
           <span className="inline-block text-myna-terracotta font-extrabold text-sm uppercase tracking-wider bg-myna-terracotta/10 px-3 py-1 rounded-full border border-myna-terracotta/20">
@@ -322,8 +313,8 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { n: "01", title: "Choose Your Goal", body: "Pick your language (English, French, Arabic, more) and select your starting level from beginner to advanced.", foot: "Personalized Diagnostic Quiz" },
-            { n: "02", title: "Learn On Your Own", body: "Follow bite-sized modules, listen to podcasts on the go, and build active vocabulary with interactive activities.", foot: "Unlimited Course Access" },
+            { n: "01", title: "Choose Your Goal", body: "Pick your language and select your starting level from beginner to advanced.", foot: "Personalized Diagnostic Quiz" },
+            { n: "02", title: "Learn On Your Own", body: "Follow bite-sized modules, listen to podcasts on the go, and build active vocabulary.", foot: "Unlimited Course Access" },
             { n: "03", title: "Practice with Teachers", body: "Stuck or ready to speak? Tap \"Talk to Teacher\" and start an instant video or voice session.", foot: "Pay-As-You-Go Credits" },
           ].map((s, i) => (
             <div key={s.n} className="bg-myna-cream rounded-2xl border-2 border-myna-brown p-8 shadow-myna-bold hover:-translate-y-1 transition-transform relative flex flex-col items-center text-center">
@@ -341,14 +332,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ FEATURES TABS ============ */}
+      {/* FEATURES TABS */}
       <section id="features" className="py-16 px-4 lg:px-8 bg-myna-yellow/15 border-y-2 border-myna-brown/10">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-myna-brown">Everything You Need to Learn</h2>
-            <p className="text-myna-brown/80 font-medium">
-              Mynalingo isn't just another video library. It's a complete ecosystem built for real fluency.
-            </p>
+            <p className="text-myna-brown/80 font-medium">Mynalingo isn't just another video library. It's a complete ecosystem built for real fluency.</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-3">
@@ -361,9 +350,7 @@ export default function Home() {
               <button
                 key={key}
                 onClick={() => setTab(key)}
-                className={`px-6 py-3 rounded-xl font-extrabold text-sm border-2 border-myna-brown flex items-center gap-2 transition-all ${
-                  tab === key ? "bg-myna-yellow text-myna-brown shadow-myna-bold" : "bg-myna-cream text-myna-brown hover:bg-myna-yellow/30"
-                }`}
+                className={`px-6 py-3 rounded-xl font-extrabold text-sm border-2 border-myna-brown flex items-center gap-2 transition-all ${tab === key ? "bg-myna-yellow text-myna-brown shadow-myna-bold" : "bg-myna-cream text-myna-brown hover:bg-myna-yellow/30"}`}
               >
                 {icon}
                 <span>{label}</span>
@@ -375,12 +362,8 @@ export default function Home() {
             {tab === "learn" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-6 space-y-4">
-                  <div className="inline-block px-3 py-1 bg-myna-yellow/50 text-myna-brown rounded-lg text-xs font-bold">
-                    Structured Curriculum
-                  </div>
-                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">
-                    Self-Paced Courses Designed for Algerian Context
-                  </h3>
+                  <div className="inline-block px-3 py-1 bg-myna-yellow/50 text-myna-brown rounded-lg text-xs font-bold">Structured Curriculum</div>
+                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">Self-Paced Courses Designed for Algerian Context</h3>
                   <p className="text-myna-brown/80 leading-relaxed text-sm sm:text-base">
                     Every course is broken into digestible 5-minute lessons, interactive grammar slides, and practical vocabulary notes tailored to overcome common Arabic and French language interference.
                   </p>
@@ -395,8 +378,8 @@ export default function Home() {
                 </div>
                 <div className="lg:col-span-6 bg-myna-yellow/20 rounded-2xl border-2 border-myna-brown p-6 space-y-3">
                   {[
-                    { code: "B1", title: "Business English Essentials", mod: "Module 4: Email Writing & Negotiations", status: "75% Done", tone: "green" },
-                    { code: "A2", title: "French Fluency for Beginners", mod: "Module 2: Daily Life & Expressions", status: "In Progress", tone: "yellow" },
+                    { code: "B1", title: "Business English Essentials", mod: "Module 4: Email Writing", status: "75% Done", tone: "green" },
+                    { code: "A2", title: "French Fluency for Beginners", mod: "Module 2: Daily Life", status: "In Progress", tone: "yellow" },
                   ].map((c) => (
                     <div key={c.code} className="flex items-center justify-between bg-white p-3 rounded-xl border border-myna-brown/10 gap-3">
                       <div className="flex items-center gap-3 min-w-0">
@@ -420,20 +403,15 @@ export default function Home() {
             {tab === "listen" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-6 space-y-4">
-                  <div className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold">
-                    Audio & Immersion
-                  </div>
-                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">
-                    Bilingual Podcasts & Cultural Audio Stories
-                  </h3>
+                  <div className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold">Audio & Immersion</div>
+                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">Bilingual Podcasts & Cultural Audio Stories</h3>
                   <p className="text-myna-brown/80 leading-relaxed text-sm sm:text-base">
-                    Train your ear to natural native speeds with audio stories recorded by real speakers. Includes synchronized transcripts, clickable vocabulary translations, and audio speed controls.
+                    Train your ear to natural native speeds with audio stories recorded by real speakers. Includes synchronized transcripts, clickable vocabulary, and audio speed controls.
                   </p>
                   <div className="p-4 bg-white rounded-2xl border-2 border-myna-brown flex items-center gap-4 shadow-sm">
                     <button
                       onClick={() => setPlayingAudio(!playingAudio)}
                       className="w-12 h-12 rounded-full bg-myna-terracotta text-white flex items-center justify-center hover:scale-105 transition-transform shrink-0"
-                      aria-label={playingAudio ? "Pause" : "Play"}
                     >
                       {playingAudio ? <Pause size={18} /> : <Play size={18} />}
                     </button>
@@ -469,16 +447,12 @@ export default function Home() {
             {tab === "practice" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-6 space-y-4">
-                  <div className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold">
-                    Direct Human Connection
-                  </div>
-                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">
-                    Live Voice, Video & Text Practice
-                  </h3>
+                  <div className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold">Direct Human Connection</div>
+                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">Live Voice, Video & Text Practice</h3>
                   <p className="text-myna-brown/80 leading-relaxed text-sm sm:text-base">
-                    Never worry about getting stuck. Connect directly with available certified tutors for 1-on-1 feedback, accent reduction, or conversation practice on your own schedule.
+                    Never worry about getting stuck. Connect directly with available certified tutors for 1-on-1 feedback, accent reduction, or conversation practice.
                   </p>
-                  <a href="#teachers" className="inline-flex items-center gap-2 font-bold text-sm text-myna-terracotta hover:underline">
+                  <a href="/find-teacher" className="inline-flex items-center gap-2 font-bold text-sm text-myna-terracotta hover:underline">
                     <span>Browse available online teachers</span>
                     <ArrowRight size={14} />
                   </a>
@@ -490,9 +464,7 @@ export default function Home() {
                     <Video size={32} />
                   </div>
                   <h4 className="font-bold text-myna-brown">3 Ways to Connect</h4>
-                  <p className="text-xs text-myna-brown/70">
-                    Choose low-pressure text chat, flexible voice notes, or face-to-face video calling based on your comfort level.
-                  </p>
+                  <p className="text-xs text-myna-brown/70">Choose low-pressure text chat, flexible voice notes, or face-to-face video calling.</p>
                 </div>
               </div>
             )}
@@ -500,14 +472,10 @@ export default function Home() {
             {tab === "improve" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-6 space-y-4">
-                  <div className="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-lg text-xs font-bold">
-                    Gamified Motivation
-                  </div>
-                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">
-                    Build Daily Streaks & Earn XP
-                  </h3>
+                  <div className="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-lg text-xs font-bold">Gamified Motivation</div>
+                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">Build Daily Streaks & Earn XP</h3>
                   <p className="text-myna-brown/80 leading-relaxed text-sm sm:text-base">
-                    Stay consistent with daily micro-challenges, vocabulary review games, and community leaderboards. Earn extra conversation credits as you level up.
+                    Stay consistent with daily micro-challenges, vocabulary review games, and community leaderboards. Earn extra credits as you level up.
                   </p>
                 </div>
                 <div className="lg:col-span-6 grid grid-cols-2 gap-4">
@@ -528,18 +496,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ TEACHERS ============ */}
+      {/* TEACHERS */}
       <section id="teachers" className="py-20 px-4 lg:px-8 max-w-7xl mx-auto space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <span className="inline-block text-myna-terracotta font-extrabold text-sm uppercase tracking-wider bg-myna-terracotta/10 px-3 py-1 rounded-full border border-myna-terracotta/20">
               The Unique Differentiator
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-myna-brown">
-              "Need help? Talk to a teacher."
-            </h2>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-myna-brown">"Need help? Talk to a teacher."</h2>
             <p className="text-myna-brown/80 font-medium">
-              Don't stay stuck on a lesson or grammar rule. Connect with live tutors instantly using your credit balance.
+              Don't stay stuck on a lesson. Connect with live tutors instantly using your credit balance.
             </p>
           </div>
 
@@ -554,9 +520,7 @@ export default function Home() {
               <button
                 key={val}
                 onClick={() => setTeacherFilter(val)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold border border-myna-brown transition-colors ${
-                  teacherFilter === val ? "bg-myna-brown text-white" : "bg-myna-cream text-myna-brown hover:bg-myna-yellow/30"
-                }`}
+                className={`px-4 py-2 rounded-xl text-xs font-bold border border-myna-brown transition-colors ${teacherFilter === val ? "bg-myna-brown text-white" : "bg-myna-cream text-myna-brown hover:bg-myna-yellow/30"}`}
               >
                 {label}
               </button>
@@ -575,10 +539,6 @@ export default function Home() {
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     <span>{tc.status === "online" ? "ONLINE" : "IN CLASS"}</span>
                   </div>
-                  <div className="absolute bottom-3 right-3 bg-myna-cream/90 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-extrabold text-myna-brown border border-myna-brown/20 flex items-center gap-1">
-                    <Star size={11} className="fill-myna-yellow text-myna-yellow" />
-                    {tc.rating}
-                  </div>
                 </div>
 
                 <div className="flex items-start justify-between gap-2">
@@ -586,22 +546,16 @@ export default function Home() {
                     <h3 className="font-display font-extrabold text-lg text-myna-brown truncate">{tc.name}</h3>
                     <p className="text-xs text-myna-brown/60 font-medium truncate">{tc.flag} {tc.location}</p>
                   </div>
-                  <span className={`${tc.badgeBg} font-extrabold text-xs px-2 py-1 rounded-lg border ${tc.badgeBorder} whitespace-nowrap`}>
-                    {tc.lang}
-                  </span>
                 </div>
 
                 <p className="text-xs text-myna-brown/75 mt-3 line-clamp-2">{tc.bio}</p>
               </div>
 
               <div className="mt-6 pt-4 border-t border-myna-brown/10 flex items-center justify-between gap-2">
-                <div>
-                  <span className="text-xs text-myna-brown/60 block">Rate</span>
-                  <span className="font-extrabold text-sm text-myna-brown">{tc.rate}</span>
-                </div>
+                <span className="font-extrabold text-sm text-myna-brown">{tc.rate}</span>
                 <button
                   onClick={() => openCall(tc.name, tc.lang, tc.flag, tc.img)}
-                  className="px-4 py-2 bg-myna-yellow hover:bg-myna-yellow-light text-myna-brown font-extrabold text-xs rounded-xl border-2 border-myna-brown shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1.5"
+                  className="px-4 py-2 bg-myna-yellow hover:bg-myna-yellow-light text-myna-brown font-extrabold text-xs rounded-xl border-2 border-myna-brown shadow-sm flex items-center gap-1.5"
                 >
                   <Phone size={12} />
                   <span>Start Call</span>
@@ -610,18 +564,23 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        <div className="text-center">
+          <a href="/find-teacher" className="inline-flex items-center gap-2 px-6 py-3 bg-myna-brown text-myna-cream hover:bg-myna-terracotta font-extrabold text-sm rounded-2xl border-2 border-myna-brown shadow-myna-bold">
+            Browse all teachers
+            <ArrowRight size={14} />
+          </a>
+        </div>
       </section>
 
-      {/* ============ 4-STAGE METHOD ============ */}
-      <section id="conversation" className="py-20 px-4 lg:px-8 bg-myna-brown text-myna-cream relative overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-12 relative z-10">
+      {/* 4-STAGE METHOD */}
+      <section id="conversation" className="py-20 px-4 lg:px-8 bg-myna-brown text-myna-cream">
+        <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="inline-block text-myna-yellow font-extrabold text-sm uppercase tracking-wider bg-myna-yellow/10 px-3 py-1 rounded-full border border-myna-yellow/20">
               The Mynalingo Method
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
-              Turn Every Conversation Into Practice
-            </h2>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white">Turn Every Conversation Into Practice</h2>
             <p className="text-myna-cream/70 font-medium">
               Our structured 4-stage speaking blueprint guarantees you never run out of things to say in a live session.
             </p>
@@ -637,11 +596,7 @@ export default function Home() {
               <button
                 key={n}
                 onClick={() => setMethodStage(n as MethodStage)}
-                className={`p-4 rounded-2xl border-2 font-extrabold text-left transition-all ${
-                  methodStage === n
-                    ? "border-myna-yellow bg-myna-yellow text-myna-brown shadow-md"
-                    : "border-myna-cream/20 bg-myna-cream/10 text-myna-cream hover:bg-myna-cream/20"
-                }`}
+                className={`p-4 rounded-2xl border-2 font-extrabold text-left transition-all ${methodStage === n ? "border-myna-yellow bg-myna-yellow text-myna-brown shadow-md" : "border-myna-cream/20 bg-myna-cream/10 text-myna-cream hover:bg-myna-cream/20"}`}
               >
                 <div className="text-xs uppercase opacity-80 mb-1">{s}</div>
                 <div className="text-base sm:text-lg">{title}</div>
@@ -654,49 +609,31 @@ export default function Home() {
               <span className="inline-block px-3 py-1 bg-myna-yellow/20 text-myna-yellow border border-myna-yellow/30 text-xs font-bold rounded-full">
                 {METHOD[methodStage].badge}
               </span>
-              <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
-                {METHOD[methodStage].title}
-              </h3>
-              <p className="text-myna-cream/80 text-sm sm:text-base leading-relaxed">
-                {METHOD[methodStage].desc}
-              </p>
+              <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-white">{METHOD[methodStage].title}</h3>
+              <p className="text-myna-cream/80 text-sm sm:text-base leading-relaxed">{METHOD[methodStage].desc}</p>
               <div className="p-4 bg-myna-cream/5 rounded-2xl border border-myna-cream/10 space-y-1">
-                <span className="text-xs text-myna-yellow font-bold uppercase">Sample Stage Exercise Prompt:</span>
-                <p className="text-sm font-semibold text-white italic">
-                  {METHOD[methodStage].samplePrompt}
-                </p>
+                <span className="text-xs text-myna-yellow font-bold uppercase">Sample Prompt:</span>
+                <p className="text-sm font-semibold text-white italic">{METHOD[methodStage].samplePrompt}</p>
               </div>
             </div>
             <div className="lg:col-span-5 flex flex-col items-center justify-center p-8 bg-myna-cream/5 rounded-2xl border border-myna-cream/10 text-center space-y-3">
-              <div className="text-myna-yellow">
-                {METHOD[methodStage].icon}
-              </div>
-              <div className="font-extrabold text-lg text-myna-yellow">
-                {METHOD[methodStage].subtitle}
-              </div>
-              <button
-                onClick={() => openCall("Sarah Jenkins", "English", "🇬🇧", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300")}
-                className="mt-2 px-5 py-2.5 bg-myna-yellow text-myna-brown font-extrabold text-xs rounded-xl hover:bg-myna-yellow-light transition-colors"
-              >
-                Try Stage {methodStage} Live
-              </button>
+              <div className="text-myna-yellow">{METHOD[methodStage].icon}</div>
+              <div className="font-extrabold text-lg text-myna-yellow">{METHOD[methodStage].subtitle}</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ============ FOR TEACHERS ============ */}
+      {/* FOR TEACHERS */}
       <section id="for-teachers" className="py-20 px-4 lg:px-8 max-w-7xl mx-auto space-y-16">
         <div className="bg-gradient-to-br from-myna-yellow to-myna-yellow-light rounded-3xl border-2 border-myna-brown p-8 lg:p-12 shadow-myna-lg grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
             <span className="bg-myna-brown text-myna-cream text-xs font-bold px-3 py-1 rounded-full uppercase">
               For Language Educators
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-myna-brown">
-              Are you a language teacher? Turn your knowledge into income.
-            </h2>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-myna-brown">Are you a language teacher? Turn your knowledge into income.</h2>
             <p className="text-myna-brown/80 font-medium text-sm sm:text-base">
-              Join Algeria's growing network of online language instructors. Set your own availability, run live sessions, and earn directly from every lesson.
+              Join Algeria's growing network of online language instructors. Set your own availability, run live sessions, and earn directly.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 text-xs font-bold text-myna-brown">
               {["Set your hourly rate", "Flexible schedule", "Instant payouts"].map((b) => (
@@ -713,7 +650,6 @@ export default function Home() {
               </a>
             </div>
           </div>
-
           <div className="lg:col-span-5 bg-myna-cream rounded-2xl border-2 border-myna-brown p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-myna-yellow border border-myna-brown flex items-center justify-center shrink-0">
@@ -725,11 +661,7 @@ export default function Home() {
               </div>
             </div>
             <div className="bg-myna-yellow/20 p-4 rounded-xl border border-myna-brown/10 space-y-2">
-              {[
-                "Upload your certificate & ID",
-                "Set your availability and rate",
-                "Get matched with learners",
-              ].map((b, i) => (
+              {["Upload your certificate & ID", "Set your availability and rate", "Get matched with learners"].map((b, i) => (
                 <div key={b} className="flex items-center gap-2 text-xs font-semibold text-myna-brown">
                   <span className="w-6 h-6 rounded-full bg-myna-brown text-myna-cream flex items-center justify-center text-[11px] font-bold shrink-0">
                     {i + 1}
@@ -740,40 +672,11 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        <div className="space-y-8">
-          <div className="text-center max-w-xl mx-auto space-y-2">
-            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-myna-brown">Choose Your Language</h2>
-            <p className="text-sm text-myna-brown/70 font-medium">
-              Start learning today with native & bilingual tutors ready to help.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              ["🇬🇧", "English", "Courses & teachers"],
-              ["🇫🇷", "French", "Courses & teachers"],
-              ["🇪🇸", "Spanish", "Growing library"],
-              ["🇩🇪", "German", "Growing library"],
-              ["🇩🇿", "Darija / Arabic", "For expats"],
-            ].map(([flag, name, sub]) => (
-              <a
-                key={name}
-                href="/register?role=student"
-                className="bg-myna-cream p-5 rounded-2xl border-2 border-myna-brown shadow-myna-bold text-center hover:bg-myna-yellow/20 transition-all space-y-2"
-              >
-                <div className="text-4xl">{flag}</div>
-                <div className="font-display font-extrabold text-base text-myna-brown">{name}</div>
-                <div className="text-[11px] text-myna-brown/60 font-semibold">{sub}</div>
-              </a>
-            ))}
-          </div>
-        </div>
       </section>
 
-      {/* ============ FINAL CTA ============ */}
-      <section className="py-20 px-4 lg:px-8 bg-myna-yellow border-y-2 border-myna-brown text-center relative overflow-hidden">
-        <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+      {/* FINAL CTA */}
+      <section className="py-20 px-4 lg:px-8 bg-myna-yellow border-y-2 border-myna-brown text-center">
+        <div className="max-w-4xl mx-auto space-y-6">
           <div className="w-16 h-16 bg-myna-cream rounded-2xl border-2 border-myna-brown mx-auto flex items-center justify-center shadow-myna-bold rotate-3 overflow-hidden">
             <Image src="/myna-logo.png" alt="" width={64} height={64} className="object-cover" />
           </div>
@@ -783,19 +686,18 @@ export default function Home() {
           <p className="text-myna-brown/80 font-medium text-base sm:text-lg max-w-xl mx-auto">
             Learn at your own pace. Practice with real people. Become fluent with confidence.
           </p>
-
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="/register?role=student" className="w-full sm:w-auto px-8 py-4 bg-myna-brown hover:bg-myna-terracotta text-myna-cream font-extrabold text-base rounded-2xl border-2 border-myna-brown shadow-myna-bold active:translate-y-0.5 transition-all">
+            <a href="/register?role=student" className="w-full sm:w-auto px-8 py-4 bg-myna-brown hover:bg-myna-terracotta text-myna-cream font-extrabold text-base rounded-2xl border-2 border-myna-brown shadow-myna-bold">
               Start Learning Now
             </a>
-            <a href="#how-it-works" className="w-full sm:w-auto px-8 py-4 bg-myna-cream hover:bg-white text-myna-brown font-extrabold text-base rounded-2xl border-2 border-myna-brown shadow-myna-bold transition-all">
+            <a href="#how-it-works" className="w-full sm:w-auto px-8 py-4 bg-myna-cream hover:bg-white text-myna-brown font-extrabold text-base rounded-2xl border-2 border-myna-brown shadow-myna-bold">
               Explore How It Works
             </a>
           </div>
         </div>
       </section>
 
-      {/* ============ FOOTER ============ */}
+      {/* FOOTER */}
       <footer className="bg-myna-brown text-myna-cream py-12 px-4 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-myna-cream/10">
           <div className="space-y-3">
@@ -809,27 +711,22 @@ export default function Home() {
               Algeria's premier hybrid language learning platform combining structured courses with on-demand teacher interactions.
             </p>
           </div>
-
           <div>
             <h4 className="font-bold text-sm text-myna-yellow mb-3">Platform</h4>
             <ul className="space-y-2 text-xs text-myna-cream/70">
               <li><a href="#how-it-works" className="hover:text-white">How It Works</a></li>
               <li><a href="#features" className="hover:text-white">Features</a></li>
-              <li><a href="#teachers" className="hover:text-white">Live Tutors</a></li>
-              <li><a href="#conversation" className="hover:text-white">4-Level Method</a></li>
+              <li><a href="/find-teacher" className="hover:text-white">Live Tutors</a></li>
             </ul>
           </div>
-
           <div>
-            <h4 className="font-bold text-sm text-myna-yellow mb-3">Languages</h4>
+            <h4 className="font-bold text-sm text-myna-yellow mb-3">Learn</h4>
             <ul className="space-y-2 text-xs text-myna-cream/70">
               <li><a href="/register?role=student" className="hover:text-white">English</a></li>
               <li><a href="/register?role=student" className="hover:text-white">French</a></li>
-              <li><a href="/register?role=student" className="hover:text-white">Spanish</a></li>
               <li><a href="/register?role=student" className="hover:text-white">Arabic / Darija</a></li>
             </ul>
           </div>
-
           <div>
             <h4 className="font-bold text-sm text-myna-yellow mb-3">Community</h4>
             <ul className="space-y-2 text-xs text-myna-cream/70">
@@ -839,43 +736,39 @@ export default function Home() {
             </ul>
           </div>
         </div>
-
         <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-myna-cream/50 gap-4">
           <div>© {year} Myna Lingo. All rights reserved.</div>
           <div className="flex gap-4">
-            <a href="#" className="hover:underline">Privacy Policy</a>
-            <a href="#" className="hover:underline">Terms of Service</a>
+            <a href="#" className="hover:underline">Privacy</a>
+            <a href="#" className="hover:underline">Terms</a>
           </div>
         </div>
       </footer>
 
-      {/* ============ CALL MODAL ============ */}
+      {/* CALL MODAL */}
       {callOpen && callTeacher && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setCallOpen(false)}>
-          <div className="bg-myna-brown rounded-3xl border-2 border-myna-yellow w-full max-w-2xl overflow-hidden shadow-2xl text-myna-cream relative" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-myna-brown rounded-3xl border-2 border-myna-yellow w-full max-w-2xl overflow-hidden shadow-2xl text-myna-cream" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 bg-[#1C0F0A] flex items-center justify-between border-b border-white/10">
               <div className="flex items-center gap-3">
                 <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
                 <span className="font-bold text-sm text-myna-yellow">Live Practice Session</span>
               </div>
-              <button onClick={() => setCallOpen(false)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" aria-label="Close">
+              <button onClick={() => setCallOpen(false)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
                 <X size={16} />
               </button>
             </div>
-
             <div className="p-6 space-y-6 text-center">
-              <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-myna-yellow shadow-myna-glow">
+              <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-myna-yellow">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={callTeacher.img} alt={callTeacher.name} className="w-full h-full object-cover" />
               </div>
-
               <div className="space-y-1">
                 <h3 className="font-display text-2xl font-extrabold text-white">{callTeacher.name}</h3>
                 <p className="text-xs font-semibold text-myna-yellow">
                   {callTeacher.flag} {callTeacher.lang} Practice Session
                 </p>
               </div>
-
               <div className="bg-myna-cream/10 p-4 rounded-2xl border border-white/10 max-w-md mx-auto space-y-2">
                 {callConnected ? (
                   <div className="flex items-center justify-center gap-2 text-green-400 font-bold text-sm">
@@ -885,34 +778,22 @@ export default function Home() {
                 ) : (
                   <div className="flex items-center justify-center gap-2 text-green-400 font-bold text-sm">
                     <span className="w-4 h-4 rounded-full border-2 border-green-400 border-t-transparent animate-spin" />
-                    <span>Connecting with teacher...</span>
+                    <span>Connecting...</span>
                   </div>
                 )}
                 <p className="text-xs text-myna-cream/60">
-                  This is a design demo. Live WebRTC calls are not yet wired to the backend.
+                  Design demo. Live WebRTC calls are not yet wired.
                 </p>
               </div>
-
-              {callConnected && (
-                <div className="bg-stone-900/90 p-4 rounded-xl border border-myna-yellow/30 text-left text-xs space-y-2 font-mono max-w-md mx-auto">
-                  <div className="text-myna-yellow font-bold flex items-center gap-2">
-                    <Sparkles size={12} /> Live Speech Transcript:
-                  </div>
-                  <div className="text-slate-200">
-                    "Hi there! I'm {callTeacher.name}. I'm happy to help you practice your {callTeacher.lang} today. What topic would you like to focus on?"
-                  </div>
-                </div>
-              )}
-
               <div className="flex items-center justify-center gap-4 pt-2">
-                <button title="Toggle Mic" className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white">
+                <button className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white">
                   <Mic size={18} />
                 </button>
-                <button onClick={() => setCallOpen(false)} className="px-6 py-3 bg-myna-rose hover:bg-red-600 text-white font-extrabold rounded-2xl flex items-center gap-2 text-sm shadow-lg transition-colors">
+                <button onClick={() => setCallOpen(false)} className="px-6 py-3 bg-myna-rose hover:bg-red-600 text-white font-extrabold rounded-2xl flex items-center gap-2 text-sm shadow-lg">
                   <PhoneOff size={16} />
                   <span>End Session</span>
                 </button>
-                <button title="Toggle Camera" className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white">
+                <button className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white">
                   <Video size={18} />
                 </button>
               </div>
@@ -924,36 +805,34 @@ export default function Home() {
   );
 }
 
-/* ---------- Static data ---------- */
-
 const TEACHERS = [
   {
     name: "Sarah Jenkins", lang: "English", flag: "🇬🇧", location: "London, UK",
     img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
-    rating: "4.9 (120+)", rate: "20 Credits / 15m",
+    rate: "20 Credits / 15m",
     bio: "Specialized in helping Algerian professionals master conversational fluency & interview prep.",
-    status: "online", badgeBg: "bg-myna-yellow/40 text-myna-brown", badgeBorder: "border-myna-yellow",
+    status: "online",
   },
   {
     name: "Karim Benali", lang: "French", flag: "🇫🇷", location: "Paris / Algiers",
     img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300",
-    rating: "5.0 (98)", rate: "18 Credits / 15m",
+    rate: "18 Credits / 15m",
     bio: "TCF / DELF examination specialist with 6 years experience guiding university students.",
-    status: "online", badgeBg: "bg-blue-100 text-blue-800", badgeBorder: "border-blue-200",
+    status: "online",
   },
   {
     name: "Elena Rodriguez", lang: "Spanish", flag: "🇪🇸", location: "Madrid, Spain",
     img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300",
-    rating: "4.8 (85)", rate: "15 Credits / 15m",
+    rate: "15 Credits / 15m",
     bio: "Fun, high-energy conversation sessions focusing on daily travel and real-world expression.",
-    status: "class", badgeBg: "bg-red-100 text-red-800", badgeBorder: "border-red-200",
+    status: "class",
   },
   {
     name: "Yassine Mansouri", lang: "German", flag: "🇩🇪", location: "Berlin / Oran",
     img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300",
-    rating: "4.9 (140)", rate: "22 Credits / 15m",
+    rate: "22 Credits / 15m",
     bio: "Guided Goethe B1/B2 exam prep & university application interview practice.",
-    status: "online", badgeBg: "bg-yellow-100 text-yellow-800", badgeBorder: "border-yellow-200",
+    status: "online",
   },
 ];
 
@@ -961,7 +840,7 @@ const METHOD: Record<MethodStage, { title: string; subtitle: string; desc: strin
   1: {
     title: "01 — Break the Ice",
     subtitle: "Casual Questions & Warm-up Stories",
-    desc: "Start your live call with low-pressure questions designed to build initial confidence. Practice greeting native speakers and answering everyday warm-up prompts.",
+    desc: "Start your live call with low-pressure questions designed to build initial confidence.",
     samplePrompt: "What did you eat for breakfast today? Describe your commute in 3 sentences.",
     badge: "Low Anxiety Warm-up",
     icon: <MessageCircle size={48} />,
@@ -969,7 +848,7 @@ const METHOD: Record<MethodStage, { title: string; subtitle: string; desc: strin
   2: {
     title: "02 — Express Yourself",
     subtitle: "Visual Descriptions & Situational Scenarios",
-    desc: "Your tutor will share an image or situational roleplay on screen. You'll practice active vocabulary, prepositions, and descriptive adjectives in real time.",
+    desc: "Your tutor will share an image or roleplay on screen. Practice active vocabulary and descriptive adjectives.",
     samplePrompt: "Roleplay: Order a meal at a restaurant and ask for custom modifications.",
     badge: "Active Vocabulary Building",
     icon: <BookOpen size={48} />,
@@ -977,7 +856,7 @@ const METHOD: Record<MethodStage, { title: string; subtitle: string; desc: strin
   3: {
     title: "03 — Debate & Argue",
     subtitle: "Opinion Defense & Persuasive Speaking",
-    desc: "Challenge your fluency by expressing opinions on current topics, defending arguments, and using complex connective phrases without hesitating.",
+    desc: "Challenge your fluency by expressing opinions on current topics and using complex connective phrases.",
     samplePrompt: "Do you prefer working remotely or in an office? Give 2 compelling reasons.",
     badge: "Fluency & Complex Structure",
     icon: <Mic size={48} />,
@@ -985,7 +864,7 @@ const METHOD: Record<MethodStage, { title: string; subtitle: string; desc: strin
   4: {
     title: "04 — Shadowing Practice",
     subtitle: "Listen, Repeat & Accent Refinement",
-    desc: "Listen to a native audio clip snippet from your tutor, repeat sentence by sentence, and receive immediate phonetics feedback to sound like a native.",
+    desc: "Listen to a native audio clip, repeat sentence by sentence, and receive immediate phonetics feedback.",
     samplePrompt: "Repeat after me: 'It's essential to practice consistently every single day.'",
     badge: "Native Accent & Pronunciation",
     icon: <Headphones size={48} />,

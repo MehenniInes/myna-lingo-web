@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mynalingo - Authentication & Portal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Plus Jakarta Sans / Inter for modern polish -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#F5B731',
+                            goldLight: '#FCECB5',
+                            goldDark: '#D99B16',
+                            cream: '#FFFDF7',
+                            slate: '#2C2621',
+                            slateMuted: '#6B635B',
+                            accentGreen: '#34D399',
+                            cardBg: '#FFFFFF',
+                            border: '#EFEAE1'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'warm-sm': '0 2px 8px rgba(44, 38, 33, 0.04)',
+                        'warm-md': '0 4px 20px rgba(44, 38, 33, 0.08)',
+                        'warm-lg': '0 12px 36px rgba(245, 183, 49, 0.18)',
+                        'gold-glow': '0 8px 24px rgba(245, 183, 49, 0.35)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFFDF7;
+            color: #2C2621;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFDF7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E5DFC8;
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #F5B731;
+        }
+
+        /* Floating animation for speech bubbles */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(10px) rotate(-2deg); }
+        }
+        .animate-float-1 { animation: floatSlow 5s ease-in-out infinite; }
+        .animate-float-2 { animation: floatReverse 6s ease-in-out infinite; }
+        
+        /* Transition utility classes */
+        .view-transition {
+            transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+        }
+        .view-hidden {
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+        }
+        .view-visible {
+            opacity: 1;
+            transform: translateY(0);
+            position: relative;
+            width: 100%;
+        }
+
+        /* Active card selected state outline */
+        .card-selectable {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-selectable.selected {
+            border-color: #F5B731;
+            background-color: #FFFBF0;
+            box-shadow: 0 8px 20px rgba(245, 183, 49, 0.2);
+            transform: scale(1.02);
+        }
+
+        /* Custom toast popup */
+        #toast {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-brand-goldLight selection:text-brand-slate">
+
+    <!-- System Notification Toast -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] opacity-0 bg-brand-slate text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-stone-700 max-w-md">
+        <div id="toast-icon" class="text-brand-gold text-lg">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div class="text-sm font-medium" id="toast-message">Notification message here</div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-3 sm:p-6 md:p-8">
+        
+        <!-- Auth Card Shell -->
+        <div class="w-full max-w-6xl bg-white rounded-3xl sm:rounded-[32px] shadow-warm-md border border-brand-border overflow-hidden flex flex-col lg:flex-row min-h-[680px]">
+            
+            <!-- Left Side: Visual Branding Area -->
+            <div class="lg:w-5/12 bg-gradient-to-br from-[#F7BE38] via-[#F5B731] to-[#E59E15] p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden select-none min-h-[320px] lg:min-h-auto">
+                
+                <!-- Playful Background Patterns & Floating Language Bubbles -->
+                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#2C2621_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                
+                <!-- Floating Language Pills -->
+                <div class="absolute top-8 right-6 bg-white/90 backdrop-blur-md text-brand-slate px-4 py-2 rounded-2xl text-xs font-bold shadow-md animate-float-1 flex items-center gap-2">
+                    <span>🇬🇧</span> Hello!
+                </div>
+                <div class="absolute top-28 left-6 bg-white/90 backdrop-blur-md text-brand-slate px-4 py-2 rounded-2xl text-xs font-bold shadow-md animate-float-2 flex items-center gap-2">
+                    <span>🇫🇷</span> Bonjour!
+                </div>
+                <div class="absolute bottom-32 right-8 bg-white/90 backdrop-blur-md text-brand-slate px-4 py-2 rounded-2xl text-xs font-bold shadow-md animate-float-1 flex items-center gap-2">
+                    <span>🇩🇿</span> Salam!
+                </div>
+                <div class="absolute bottom-20 left-8 bg-white/90 backdrop-blur-md text-brand-slate px-4 py-2 rounded-2xl text-xs font-bold shadow-md animate-float-2 flex items-center gap-2">
+                    <span>🇪🇸</span> ¡Hola!
+                </div>
+
+                <!-- Brand Header -->
+                <div class="relative z-10 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-slate flex items-center justify-center text-brand-gold text-2xl font-extrabold shadow-md transform hover:rotate-6 transition-transform">
+                        <i class="fa-solid fa-feather-pointed"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-tight text-brand-slate block leading-none">Mynalingo</span>
+                        <span class="text-[11px] font-bold text-brand-slate/70 tracking-widest uppercase">Language Academy</span>
+                    </div>
+                </div>
+
+                <!-- Mascot & Dynamic Promo Content -->
+                <div class="relative z-10 my-auto py-8">
+                    
+                    <!-- Center Decorative Mascot Frame -->
+                    <div class="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-6 bg-white/20 backdrop-blur-lg rounded-full border-2 border-white/40 flex items-center justify-center relative shadow-inner">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-brand-slate text-brand-gold rounded-full flex items-center justify-center text-3xl sm:text-4xl shadow-xl">
+                            <i class="fa-solid fa-bird"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 bg-white text-brand-slate text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow border border-brand-border flex items-center gap-1">
+                            <span>✨</span> 4.9/5
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Branding Cards -->
+                    <div id="brand-card-login" class="text-center transition-all duration-300">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-slate tracking-tight mb-2">Master Languages Effortlessly</h2>
+                        <p class="text-brand-slate/80 text-sm font-medium max-w-xs mx-auto leading-relaxed">Join thousands of students and certified native tutors globally today.</p>
+                    </div>
+
+                    <div id="brand-card-student" class="text-center hidden transition-all duration-300">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-slate tracking-tight mb-2">Start Your Student Odyssey</h2>
+                        <p class="text-brand-slate/80 text-sm font-medium max-w-xs mx-auto leading-relaxed">Interactive courses, live group practice, and tailored 1-on-1 tutoring.</p>
+                    </div>
+
+                    <div id="brand-card-teacher" class="text-center hidden transition-all duration-300">
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-brand-slate tracking-tight mb-2">Empower Global Learners</h2>
+                        <p class="text-brand-slate/80 text-sm font-medium max-w-xs mx-auto leading-relaxed">Set your rates, teach on your schedule, and share your passion worldwide.</p>
+                    </div>
+                </div>
+
+                <!-- Bottom Testimonial / Trust Badge -->
+                <div class="relative z-10 pt-4 border-t border-brand-slate/10 flex items-center justify-between text-xs text-brand-slate/80 font-medium">
+                    <div class="flex items-center gap-2">
+                        <div class="flex -space-x-2">
+                            <img class="w-7 h-7 rounded-full border-2 border-brand-gold" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="User">
+                            <img class="w-7 h-7 rounded-full border-2 border-brand-gold" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="User">
+                            <img class="w-7 h-7 rounded-full border-2 border-brand-gold" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="User">
+                        </div>
+                        <span>Over 15,000+ active learners</span>
+                    </div>
+                    <span class="hidden sm:inline-block font-bold">#1 Platform</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Interactive Workspace Container -->
+            <div class="lg:w-7/12 bg-white p-6 sm:p-10 md:p-12 flex flex-col justify-center relative overflow-y-auto">
+                
+                <!-- Top Navigation Quick Back Link (Visible when deep in onboarding/forms) -->
+                <div id="top-nav-bar" class="flex justify-between items-center mb-6 hidden">
+                    <button onclick="navigateBack()" class="inline-flex items-center text-xs font-bold text-brand-slateMuted hover:text-brand-slate transition-colors py-1.5 px-3 rounded-xl hover:bg-stone-100">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <span id="wizard-step-indicator" class="text-xs font-extrabold text-brand-goldDark bg-brand-goldLight/50 px-3 py-1 rounded-full">Step 1 of 3</span>
+                </div>
+
+                <!-- ================= VIEW 1: LOGIN PAGE ================= -->
+                <div id="view-login" class="view-transition view-visible">
+                    <div class="mb-8">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-brand-slate tracking-tight flex items-center gap-2">
+                            Welcome back <span class="animate-bounce inline-block">👋</span>
+                        </h1>
+                        <p class="text-brand-slateMuted text-sm mt-1 font-medium">
+                            Continue your language-learning journey.
+                        </p>
+                    </div>
+
+                    <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                        <!-- Email or Phone -->
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase tracking-wider mb-1.5">
+                                Email or phone number
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-stone-400">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </span>
+                                <input type="text" id="login-identifier" required placeholder="Enter your email or phone number"
+                                    class="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium text-brand-slate placeholder:text-stone-400 focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 transition-all">
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="block text-xs font-bold text-brand-slate uppercase tracking-wider">
+                                    Password
+                                </label>
+                                <a href="#" onclick="showToast('Password reset link sent to your email! (Demo)', 'info')" class="text-xs font-bold text-brand-goldDark hover:underline">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-stone-400">
+                                    <i class="fa-solid fa-lock"></i>
+                                </span>
+                                <input type="password" id="login-password" required placeholder="Enter your password"
+                                    class="w-full pl-10 pr-12 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium text-brand-slate placeholder:text-stone-400 focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 transition-all">
+                                <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-brand-slate">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="flex items-center pt-1">
+                            <input type="checkbox" id="remember-me" class="w-4 h-4 rounded border-stone-300 text-brand-gold focus:ring-brand-gold accent-brand-gold cursor-pointer">
+                            <label for="remember-me" class="ml-2.5 text-xs font-semibold text-brand-slateMuted cursor-pointer select-none">
+                                Remember me on this device
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="login-submit-btn" class="w-full py-3.5 px-6 bg-brand-gold hover:bg-brand-goldDark text-brand-slate font-extrabold text-sm rounded-2xl shadow-gold-glow hover:shadow-lg transition-all active:scale-[0.99] flex items-center justify-center gap-2">
+                            <span>Log in</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="relative my-6 text-center">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200"></div></div>
+                        <span class="relative bg-white px-4 text-xs font-bold text-stone-400 uppercase tracking-widest">or continue with</span>
+                    </div>
+
+                    <!-- Social Google Auth -->
+                    <button type="button" onclick="handleSocialAuth('Google')" class="w-full py-3 px-4 border border-stone-200 rounded-2xl text-xs font-bold text-brand-slate hover:bg-stone-50 transition-colors flex items-center justify-center gap-3">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <!-- Footer toggle -->
+                    <p class="text-center text-xs font-semibold text-brand-slateMuted mt-6">
+                        Don't have an account? 
+                        <button type="button" onclick="switchView('view-register-role')" class="font-extrabold text-brand-slate hover:text-brand-goldDark underline underline-offset-2 ml-1">
+                            Create one
+                        </button>
+                    </p>
+                </div>
+
+                <!-- ================= VIEW 2: REGISTER ROLE SELECTOR ================= -->
+                <div id="view-register-role" class="view-transition view-hidden">
+                    <div class="mb-6 text-center sm:text-left">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-brand-slate tracking-tight">
+                            Create your Mynalingo account
+                        </h1>
+                        <p class="text-brand-slateMuted text-sm mt-1 font-medium">
+                            How do you want to use Mynalingo?
+                        </p>
+                    </div>
+
+                    <!-- Role Selection Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                        <!-- Student Option Card -->
+                        <div id="role-card-student" onclick="selectRole('student')" 
+                             class="card-selectable p-6 rounded-3xl border-2 border-stone-200 bg-white cursor-pointer hover:border-brand-gold/60 flex flex-col justify-between">
+                            <div>
+                                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mb-4 shadow-sm">
+                                    🎓
+                                </div>
+                                <h3 class="text-lg font-bold text-brand-slate mb-1">I'm a Student</h3>
+                                <p class="text-xs text-brand-slateMuted leading-relaxed font-medium">
+                                    Learn languages, take structured courses and practice live with top teachers.
+                                </p>
+                            </div>
+                            <div class="mt-6 flex items-center text-xs font-extrabold text-brand-goldDark">
+                                <span>Select Student</span>
+                                <i class="fa-solid fa-chevron-right ml-1.5 text-[10px]"></i>
+                            </div>
+                        </div>
+
+                        <!-- Teacher Option Card -->
+                        <div id="role-card-teacher" onclick="selectRole('teacher')" 
+                             class="card-selectable p-6 rounded-3xl border-2 border-stone-200 bg-white cursor-pointer hover:border-brand-gold/60 flex flex-col justify-between">
+                            <div>
+                                <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-2xl mb-4 shadow-sm">
+                                    👨‍🏫
+                                </div>
+                                <h3 class="text-lg font-bold text-brand-slate mb-1">I'm a Teacher</h3>
+                                <p class="text-xs text-brand-slateMuted leading-relaxed font-medium">
+                                    Teach languages, create engaging courses and connect with students globally.
+                                </p>
+                            </div>
+                            <div class="mt-6 flex items-center text-xs font-extrabold text-brand-goldDark">
+                                <span>Select Teacher</span>
+                                <i class="fa-solid fa-chevron-right ml-1.5 text-[10px]"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="role-continue-btn" onclick="proceedRoleRegistration()" disabled 
+                            class="w-full py-3.5 px-6 bg-stone-200 text-stone-400 font-extrabold text-sm rounded-2xl transition-all cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Continue</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+
+                    <p class="text-center text-xs font-semibold text-brand-slateMuted mt-6">
+                        Already have an account? 
+                        <button type="button" onclick="switchView('view-login')" class="font-extrabold text-brand-slate hover:text-brand-goldDark underline underline-offset-2 ml-1">
+                            Log in
+                        </button>
+                    </p>
+                </div>
+
+                <!-- ================= VIEW 3: STUDENT REGISTER FORM ================= -->
+                <div id="view-student-register" class="view-transition view-hidden">
+                    <div class="mb-6">
+                        <span class="text-xs font-extrabold tracking-widest uppercase text-amber-600 bg-amber-100 px-3 py-1 rounded-full inline-block mb-2">Student Account</span>
+                        <h1 class="text-2xl font-extrabold text-brand-slate">Create your student profile</h1>
+                    </div>
+
+                    <form onsubmit="handleStudentRegister(event)" class="space-y-3.5">
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Full name</label>
+                            <input type="text" required id="std-fullname" placeholder="Your full name"
+                                class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Email</label>
+                                <input type="email" required id="std-email" placeholder="example@email.com"
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Phone number</label>
+                                <input type="tel" id="std-phone" placeholder="+213" value="+213 "
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Password</label>
+                                <div class="relative">
+                                    <input type="password" required id="std-pass" placeholder="Create password"
+                                        class="w-full px-4 py-2.5 pr-10 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20">
+                                    <button type="button" onclick="togglePasswordVisibility('std-pass', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400">
+                                        <i class="fa-regular fa-eye text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Confirm password</label>
+                                <input type="password" required id="std-pass-confirm" placeholder="Repeat password"
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center pt-1">
+                            <input type="checkbox" id="std-terms" required class="w-4 h-4 rounded text-brand-gold focus:ring-brand-gold accent-brand-gold cursor-pointer">
+                            <label for="std-terms" class="ml-2.5 text-xs text-brand-slateMuted font-medium cursor-pointer">
+                                I agree to the <a href="#" class="font-bold underline text-brand-slate">Terms of Service</a> & <a href="#" class="font-bold underline text-brand-slate">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-6 bg-brand-gold hover:bg-brand-goldDark text-brand-slate font-extrabold text-sm rounded-2xl shadow-gold-glow transition-all active:scale-[0.99] mt-2">
+                            Create Account & Continue
+                        </button>
+                    </form>
+
+                    <p class="text-center text-xs font-semibold text-brand-slateMuted mt-4">
+                        Already have an account? 
+                        <button type="button" onclick="switchView('view-login')" class="font-extrabold text-brand-slate hover:underline ml-1">Log in</button>
+                    </p>
+                </div>
+
+                <!-- ================= VIEW 4: STUDENT ONBOARDING WIZARD ================= -->
+                <div id="view-student-onboarding" class="view-transition view-hidden">
+                    
+                    <!-- Visual Progress Bar -->
+                    <div class="w-full bg-stone-100 rounded-full h-2 mb-6 overflow-hidden">
+                        <div id="onboarding-progress-bar" class="bg-brand-gold h-full w-1/3 transition-all duration-300 rounded-full"></div>
+                    </div>
+
+                    <!-- Step 1: Language Choice -->
+                    <div id="onboard-step-1" class="onboard-step">
+                        <div class="mb-5">
+                            <h2 class="text-xl font-extrabold text-brand-slate">Step 1 — What do you want to learn?</h2>
+                            <p class="text-xs text-brand-slateMuted font-medium mt-1">Choose your primary target language</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                            <button type="button" onclick="selectOnboardLang(this, 'English')" class="lang-opt p-3.5 rounded-2xl border-2 border-stone-200 bg-white hover:border-brand-gold text-left font-bold text-sm text-brand-slate flex items-center gap-3 transition-all">
+                                <span class="text-2xl">🇬🇧</span> English
+                            </button>
+                            <button type="button" onclick="selectOnboardLang(this, 'French')" class="lang-opt p-3.5 rounded-2xl border-2 border-stone-200 bg-white hover:border-brand-gold text-left font-bold text-sm text-brand-slate flex items-center gap-3 transition-all">
+                                <span class="text-2xl">🇫🇷</span> French
+                            </button>
+                            <button type="button" onclick="selectOnboardLang(this, 'Spanish')" class="lang-opt p-3.5 rounded-2xl border-2 border-stone-200 bg-white hover:border-brand-gold text-left font-bold text-sm text-brand-slate flex items-center gap-3 transition-all">
+                                <span class="text-2xl">🇪🇸</span> Spanish
+                            </button>
+                            <button type="button" onclick="selectOnboardLang(this, 'German')" class="lang-opt p-3.5 rounded-2xl border-2 border-stone-200 bg-white hover:border-brand-gold text-left font-bold text-sm text-brand-slate flex items-center gap-3 transition-all">
+                                <span class="text-2xl">🇩🇪</span> German
+                            </button>
+                            <button type="button" onclick="selectOnboardLang(this, 'Russian')" class="lang-opt p-3.5 rounded-2xl border-2 border-stone-200 bg-white hover:border-brand-gold text-left font-bold text-sm text-brand-slate flex items-center gap-3 transition-all">
+                                <span class="text-2xl">🇷🇺</span> Russian
+                            </button>
+                            <button type="button" onclick="selectOnboardLang(this, 'Arabic')" class="lang-opt p-3.5 rounded-2xl border-2 border-stone-200 bg-white hover:border-brand-gold text-left font-bold text-sm text-brand-slate flex items-center gap-3 transition-all">
+                                <span class="text-2xl">🇦🇪</span> Arabic
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Level Choice -->
+                    <div id="onboard-step-2" class="onboard-step hidden">
+                        <div class="mb-5">
+                            <h2 class="text-xl font-extrabold text-brand-slate">Step 2 — What's your current level?</h2>
+                            <p class="text-xs text-brand-slateMuted font-medium mt-1">Don't worry, you can always adjust this later</p>
+                        </div>
+
+                        <div class="space-y-2.5 mb-6">
+                            <button type="button" onclick="selectOnboardLevel(this, 'Beginner (A1)')" class="level-opt w-full p-3.5 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs sm:text-sm text-brand-slate flex justify-between items-center transition-all">
+                                <span>🌱 Beginner (A1)</span>
+                                <span class="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full">Just starting</span>
+                            </button>
+                            <button type="button" onclick="selectOnboardLevel(this, 'Elementary (A2)')" class="level-opt w-full p-3.5 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs sm:text-sm text-brand-slate flex justify-between items-center transition-all">
+                                <span>🌿 Elementary (A2)</span>
+                                <span class="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full">Basic phrases</span>
+                            </button>
+                            <button type="button" onclick="selectOnboardLevel(this, 'Intermediate (B1)')" class="level-opt w-full p-3.5 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs sm:text-sm text-brand-slate flex justify-between items-center transition-all">
+                                <span>🌳 Intermediate (B1)</span>
+                                <span class="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full">Conversational</span>
+                            </button>
+                            <button type="button" onclick="selectOnboardLevel(this, 'Upper Intermediate (B2)')" class="level-opt w-full p-3.5 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs sm:text-sm text-brand-slate flex justify-between items-center transition-all">
+                                <span>🎓 Upper Intermediate (B2)</span>
+                                <span class="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full">Fluent everyday</span>
+                            </button>
+                            <button type="button" onclick="selectOnboardLevel(this, 'Advanced (C1-C2)')" class="level-opt w-full p-3.5 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs sm:text-sm text-brand-slate flex justify-between items-center transition-all">
+                                <span>⚡ Advanced (C1-C2)</span>
+                                <span class="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full">Near Native</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Goals Choice -->
+                    <div id="onboard-step-3" class="onboard-step hidden">
+                        <div class="mb-5">
+                            <h2 class="text-xl font-extrabold text-brand-slate">Step 3 — What's your goal?</h2>
+                            <p class="text-xs text-brand-slateMuted font-medium mt-1">Select one or more primary motivations</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-6">
+                            <button type="button" onclick="toggleGoal(this, 'Speak confidently')" class="goal-pill p-3 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs text-brand-slate flex items-center gap-2 transition-all">
+                                <span>🗣</span> Speak confidently
+                            </button>
+                            <button type="button" onclick="toggleGoal(this, 'Study')" class="goal-pill p-3 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs text-brand-slate flex items-center gap-2 transition-all">
+                                <span>🎓</span> Academic Study
+                            </button>
+                            <button type="button" onclick="toggleGoal(this, 'Work')" class="goal-pill p-3 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs text-brand-slate flex items-center gap-2 transition-all">
+                                <span>💼</span> Work & Career
+                            </button>
+                            <button type="button" onclick="toggleGoal(this, 'Travel')" class="goal-pill p-3 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs text-brand-slate flex items-center gap-2 transition-all">
+                                <span>✈️</span> Travel & Culture
+                            </button>
+                            <button type="button" onclick="toggleGoal(this, 'Exams')" class="goal-pill p-3 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs text-brand-slate flex items-center gap-2 transition-all">
+                                <span>📝</span> Language Exams
+                            </button>
+                            <button type="button" onclick="toggleGoal(this, 'Personal interest')" class="goal-pill p-3 rounded-2xl border-2 border-stone-200 bg-white text-left font-bold text-xs text-brand-slate flex items-center gap-2 transition-all">
+                                <span>❤️</span> Personal Interest
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Wizard Action Button -->
+                    <button type="button" id="onboard-next-btn" onclick="nextOnboardingStep()" disabled 
+                            class="w-full py-3.5 px-6 bg-stone-200 text-stone-400 font-extrabold text-sm rounded-2xl transition-all cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Next Step</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- ================= VIEW 5: TEACHER REGISTER & APPLICATION ================= -->
+                <div id="view-teacher-register" class="view-transition view-hidden">
+                    <div class="mb-5">
+                        <span class="text-xs font-extrabold tracking-widest uppercase text-blue-700 bg-blue-100 px-3 py-1 rounded-full inline-block mb-2">Teacher Application</span>
+                        <h1 class="text-2xl font-extrabold text-brand-slate" id="teacher-step-heading">Create your teacher profile</h1>
+                    </div>
+
+                    <!-- Teacher Sub-Step 1: Account Info -->
+                    <form id="teacher-form-1" onsubmit="handleTeacherStep1(event)" class="space-y-3.5">
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Full name</label>
+                            <input type="text" required id="tch-fullname" placeholder="Full legal name"
+                                class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Email</label>
+                                <input type="email" required id="tch-email" placeholder="example@email.com"
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Phone number</label>
+                                <input type="tel" required id="tch-phone" placeholder="+213" value="+213 "
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Password</label>
+                                <input type="password" required id="tch-pass" placeholder="Create password"
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Confirm password</label>
+                                <input type="password" required id="tch-pass-confirm" placeholder="Repeat password"
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-gold">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-6 bg-brand-gold hover:bg-brand-goldDark text-brand-slate font-extrabold text-sm rounded-2xl shadow-gold-glow transition-all active:scale-[0.99] mt-3">
+                            Next: Teaching Background →
+                        </button>
+                    </form>
+
+                    <!-- Teacher Sub-Step 2: Profile Details -->
+                    <form id="teacher-form-2" onsubmit="handleTeacherStep2(event)" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase mb-2">Languages you teach</label>
+                            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer">
+                                    <input type="checkbox" name="tch-lang" value="English" class="accent-brand-gold"> 🇬🇧 English
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer">
+                                    <input type="checkbox" name="tch-lang" value="French" class="accent-brand-gold"> 🇫🇷 French
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer">
+                                    <input type="checkbox" name="tch-lang" value="Spanish" class="accent-brand-gold"> 🇪🇸 Spanish
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer">
+                                    <input type="checkbox" name="tch-lang" value="German" class="accent-brand-gold"> 🇩🇪 German
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Target Levels</label>
+                                <select id="tch-levels" class="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-xs font-bold text-brand-slate focus:outline-none">
+                                    <option value="All levels">All levels (A1 - C2)</option>
+                                    <option value="Beginner">Beginner focus</option>
+                                    <option value="Intermediate">Intermediate focus</option>
+                                    <option value="Advanced">Advanced focus</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Years of Experience</label>
+                                <input type="text" id="tch-exp" placeholder="e.g. 3 years" required
+                                    class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-2xl text-xs font-medium focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Short Bio</label>
+                            <textarea id="tch-bio" rows="2" placeholder="Tell prospective students about yourself and your teaching methodology..." required
+                                class="w-full p-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs font-medium focus:outline-none"></textarea>
+                        </div>
+
+                        <!-- Simulated File Upload -->
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase mb-1">Teaching Certification (PDF / Photo)</label>
+                            <div class="border-2 border-dashed border-stone-300 rounded-2xl p-3 text-center cursor-pointer hover:bg-stone-50 transition-colors">
+                                <i class="fa-solid fa-cloud-arrow-up text-brand-gold text-lg mb-1"></i>
+                                <span class="block text-xs font-bold text-brand-slate">Click to upload document</span>
+                                <span class="text-[10px] text-stone-400">PDF, JPG or PNG up to 10MB</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-6 bg-brand-gold hover:bg-brand-goldDark text-brand-slate font-extrabold text-sm rounded-2xl shadow-gold-glow transition-all active:scale-[0.99]">
+                            Submit Application
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ================= VIEW 6: TEACHER APPLICATION PENDING ================= -->
+                <div id="view-teacher-pending" class="view-transition view-hidden text-center py-4">
+                    <!-- Status Badge -->
+                    <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-800 border border-amber-300 font-extrabold text-xs px-4 py-2 rounded-full mb-6">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                        <span>🟡 Application Under Review</span>
+                    </div>
+
+                    <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600 text-3xl shadow-inner">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+
+                    <h2 class="text-2xl font-extrabold text-brand-slate mb-2">Application Received!</h2>
+                    <p class="text-xs text-brand-slateMuted font-medium max-w-md mx-auto leading-relaxed mb-6">
+                        Thank you for applying to teach at Mynalingo. Our team reviews all applications carefully to ensure native fluency and quality standards.
+                    </p>
+
+                    <div class="bg-stone-50 rounded-2xl p-4 text-left border border-stone-200 max-w-md mx-auto mb-6 space-y-2 text-xs">
+                        <div class="flex justify-between font-bold text-brand-slate">
+                            <span>Applicant:</span>
+                            <span id="review-applicant-name" class="text-brand-slateMuted">Alex Dupont</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-brand-slate">
+                            <span>Status:</span>
+                            <span class="text-amber-600">Pending Manual Verification</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-brand-slate">
+                            <span>Estimated Time:</span>
+                            <span class="text-brand-slateMuted">24 - 48 hours</span>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="switchDashboard('teacher-pending')" class="py-3 px-6 bg-brand-slate text-white text-xs font-bold rounded-2xl hover:bg-black transition-colors">
+                        Go to Teacher Portal Preview
+                    </button>
+                </div>
+
+                <!-- ================= VIEW 7: DASHBOARD SIMULATOR SCREEN ================= -->
+                <div id="view-dashboard-sim" class="view-transition view-hidden">
+                    
+                    <!-- Student Dashboard Content -->
+                    <div id="dash-student-content" class="dash-role-content hidden space-y-5">
+                        <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Student Mode</span>
+                                <h2 class="text-xl font-black text-brand-slate mt-1">Welcome, <span id="dash-student-name">Student</span>! 🎉</h2>
+                            </div>
+                            <button onclick="switchView('view-login')" class="text-xs font-bold text-stone-400 hover:text-brand-slate">Sign out</button>
+                        </div>
+
+                        <!-- Card Stats -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-brand-cream border border-brand-goldLight p-3.5 rounded-2xl">
+                                <span class="text-[10px] font-bold text-brand-slateMuted uppercase">Active Course</span>
+                                <p class="text-base font-extrabold text-brand-slate mt-0.5 flex items-center gap-1.5">
+                                    <span id="dash-std-lang-flag">🇬🇧</span> <span id="dash-std-lang">English</span>
+                                </p>
+                            </div>
+                            <div class="bg-stone-50 border border-stone-200 p-3.5 rounded-2xl">
+                                <span class="text-[10px] font-bold text-brand-slateMuted uppercase">Current Level</span>
+                                <p id="dash-std-level" class="text-base font-extrabold text-brand-slate mt-0.5">Intermediate (B1)</p>
+                            </div>
+                        </div>
+
+                        <!-- Recommendation Banner -->
+                        <div class="bg-stone-900 text-white p-5 rounded-3xl relative overflow-hidden">
+                            <span class="text-xs font-bold text-brand-gold uppercase tracking-wider block mb-1">Recommended Tutors</span>
+                            <p class="text-sm font-semibold mb-3">Book your 1-on-1 speaking session with certified native tutors.</p>
+                            <button onclick="showToast('Browsing active teachers...', 'info')" class="py-2 px-4 bg-brand-gold text-brand-slate text-xs font-extrabold rounded-xl hover:bg-brand-goldDark">
+                                Find a Teacher
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Teacher Pending Dashboard Content -->
+                    <div id="dash-teacher-content" class="dash-role-content hidden space-y-5">
+                        <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">Teacher Portal</span>
+                                <h2 class="text-xl font-black text-brand-slate mt-1">Welcome, <span id="dash-teacher-name">Teacher</span> 👋</h2>
+                            </div>
+                            <button onclick="switchView('view-login')" class="text-xs font-bold text-stone-400 hover:text-brand-slate">Sign out</button>
+                        </div>
+
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-600 text-lg mt-0.5"></i>
+                            <div>
+                                <h4 class="text-xs font-extrabold text-amber-900">Application Status: Pending Review</h4>
+                                <p class="text-[11px] text-amber-800/80 font-medium mt-0.5 leading-relaxed">
+                                    You cannot schedule live classes yet. Once our admins verify your certificates, you will gain full teacher privileges.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 opacity-60">
+                            <div class="bg-stone-100 p-4 rounded-2xl">
+                                <span class="text-xs font-bold text-stone-500">Upcoming Lessons</span>
+                                <p class="text-lg font-black text-stone-400">0</p>
+                            </div>
+                            <div class="bg-stone-100 p-4 rounded-2xl">
+                                <span class="text-xs font-bold text-stone-500">Earnings</span>
+                                <p class="text-lg font-black text-stone-400">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Dashboard Content -->
+                    <div id="dash-admin-content" class="dash-role-content hidden space-y-5">
+                        <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full">System Administrator</span>
+                                <h2 class="text-xl font-black text-brand-slate mt-1">Mynalingo Admin Panel</h2>
+                            </div>
+                            <button onclick="switchView('view-login')" class="text-xs font-bold text-stone-400 hover:text-brand-slate">Exit Admin</button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h3 class="text-xs font-extrabold text-brand-slate uppercase tracking-wider">Pending Teacher Applications (1)</h3>
+                            <div class="p-4 bg-white border border-stone-200 rounded-2xl flex items-center justify-between shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
+                                        TD
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-brand-slate" id="admin-applicant-title">Teacher Applicant</h4>
+                                        <p class="text-[10px] text-stone-400">Languages: English, French</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="approveTeacherApplication()" class="py-1.5 px-3 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700">Approve</button>
+                                    <button onclick="showToast('Application rejected', 'error')" class="py-1.5 px-3 bg-stone-200 text-stone-600 text-xs font-bold rounded-xl hover:bg-stone-300">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Persistent Interactive Bottom Switcher Bar -->
+    <footer class="bg-brand-slate text-white py-3 px-4 shadow-xl border-t border-stone-800 sticky bottom-0 z-40">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
+                <span class="font-bold text-stone-300">Role & Flow Simulator:</span>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="switchView('view-login')" class="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold transition-all border border-stone-700">
+                    🔑 Login View
+                </button>
+                <button onclick="switchView('view-register-role')" class="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold transition-all border border-stone-700">
+                    ✨ Register Role Chooser
+                </button>
+                <button onclick="switchDashboard('student')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold transition-all border border-amber-500/30">
+                    🎓 Student Dash
+                </button>
+                <button onclick="switchDashboard('teacher-pending')" class="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-bold transition-all border border-blue-500/30">
+                    👨‍🏫 Teacher Dash
+                </button>
+                <button onclick="switchDashboard('admin')" class="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-bold transition-all border border-purple-500/30">
+                    🛡️ Admin Panel
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application State & Logic -->
+    <script>
+        // Global User State Store
+        const appState = {
+            currentView: 'view-login',
+            selectedRole: null, // 'student' | 'teacher'
+            history: [],
+            studentOnboarding: {
+                step: 1,
+                language: '',
+                level: '',
+                goals: []
+            },
+            userProfile: {
+                fullName: 'Guest User',
+                email: '',
+                phone: '',
+                role: 'STUDENT',
+                teacherApproved: false
+            }
+        };
+
+        // DOM Elements
+        const topNav = document.getElementById('top-nav-bar');
+        const stepIndicator = document.getElementById('wizard-step-indicator');
+        const progressBar = document.getElementById('onboarding-progress-bar');
+
+        // View Navigation Helper
+        function switchView(viewId, pushHistory = true) {
+            if (pushHistory && appState.currentView !== viewId) {
+                appState.history.push(appState.currentView);
+            }
+
+            // Hide active view
+            const currentEl = document.getElementById(appState.currentView);
+            if (currentEl) {
+                currentEl.classList.remove('view-visible');
+                currentEl.classList.add('view-hidden');
+            }
+
+            // Show target view
+            const targetEl = document.getElementById(viewId);
+            if (targetEl) {
+                targetEl.classList.remove('view-hidden');
+                targetEl.classList.add('view-visible');
+            }
+
+            appState.currentView = viewId;
+
+            // Manage Top Nav Back Button Visibility & Left Branding Cards
+            updateBrandingAndHeader(viewId);
+        }
+
+        function navigateBack() {
+            if (appState.history.length > 0) {
+                const prevView = appState.history.pop();
+                switchView(prevView, false);
+            } else {
+                switchView('view-login', false);
+            }
+        }
+
+        // Left Promo Branding Card Synchronization
+        function updateBrandingAndHeader(viewId) {
+            const cardLogin = document.getElementById('brand-card-login');
+            const cardStudent = document.getElementById('brand-card-student');
+            const cardTeacher = document.getElementById('brand-card-teacher');
+
+            cardLogin.classList.add('hidden');
+            cardStudent.classList.add('hidden');
+            cardTeacher.classList.add('hidden');
+
+            if (viewId === 'view-student-register' || viewId === 'view-student-onboarding') {
+                cardStudent.classList.remove('hidden');
+                topNav.classList.remove('hidden');
+            } else if (viewId === 'view-teacher-register' || viewId === 'view-teacher-pending') {
+                cardTeacher.classList.remove('hidden');
+                topNav.classList.remove('hidden');
+            } else if (viewId === 'view-register-role') {
+                cardLogin.classList.remove('hidden');
+                topNav.classList.remove('hidden');
+                stepIndicator.innerText = "Role Selection";
+            } else {
+                cardLogin.classList.remove('hidden');
+                topNav.classList.add('hidden');
+            }
+        }
+
+        // Password Show/Hide Toggle
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+
+        // Role Selection Handler
+        function selectRole(role) {
+            appState.selectedRole = role;
+            const cardStd = document.getElementById('role-card-student');
+            const cardTch = document.getElementById('role-card-teacher');
+            const btn = document.getElementById('role-continue-btn');
+
+            cardStd.classList.remove('selected');
+            cardTch.classList.remove('selected');
+
+            if (role === 'student') {
+                cardStd.classList.add('selected');
+            } else {
+                cardTch.classList.add('selected');
+            }
+
+            btn.disabled = false;
+            btn.className = "w-full py-3.5 px-6 bg-brand-gold hover:bg-brand-goldDark text-brand-slate font-extrabold text-sm rounded-2xl shadow-gold-glow transition-all cursor-pointer flex items-center justify-center gap-2";
+        }
+
+        function proceedRoleRegistration() {
+            if (appState.selectedRole === 'student') {
+                switchView('view-student-register');
+            } else if (appState.selectedRole === 'teacher') {
+                switchView('view-teacher-register');
+            }
+        }
+
+        // Login Handler
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value;
+            appState.userProfile.fullName = identifier.split('@')[0] || "User";
+            showToast(`Welcome back, ${appState.userProfile.fullName}!`, 'success');
+            switchDashboard('student');
+        }
+
+        // Social Authentication Simulation
+        function handleSocialAuth(provider) {
+            showToast(`Connecting with ${provider}...`, 'info');
+            setTimeout(() => {
+                appState.userProfile.fullName = "Google User";
+                showToast("Authenticated via Google!", "success");
+                switchDashboard('student');
+            }, 800);
+        }
+
+        // Student Account Submit Handler
+        function handleStudentRegister(e) {
+            e.preventDefault();
+            const pass = document.getElementById('std-pass').value;
+            const confirm = document.getElementById('std-pass-confirm').value;
+
+            if (pass !== confirm) {
+                showToast("Passwords do not match!", "error");
+                return;
+            }
+
+            appState.userProfile.fullName = document.getElementById('std-fullname').value;
+            appState.userProfile.email = document.getElementById('std-email').value;
+            appState.userProfile.role = 'STUDENT';
+
+            showToast("Account created! Let's personalize your learning.", "success");
+            switchView('view-student-onboarding');
+            updateOnboardingStep(1);
+        }
+
+        // Student Onboarding Interactive Handlers
+        function selectOnboardLang(btn, lang) {
+            document.querySelectorAll('.lang-opt').forEach(el => el.classList.remove('border-brand-gold', 'bg-amber-50'));
+            btn.classList.add('border-brand-gold', 'bg-amber-50');
+            appState.studentOnboarding.language = lang;
+            enableOnboardNext();
+        }
+
+        function selectOnboardLevel(btn, level) {
+            document.querySelectorAll('.level-opt').forEach(el => el.classList.remove('border-brand-gold', 'bg-amber-50'));
+            btn.classList.add('border-brand-gold', 'bg-amber-50');
+            appState.studentOnboarding.level = level;
+            enableOnboardNext();
+        }
+
+        function toggleGoal(btn, goal) {
+            btn.classList.toggle('border-brand-gold');
+            btn.classList.toggle('bg-amber-50');
+            
+            const idx = appState.studentOnboarding.goals.indexOf(goal);
+            if (idx > -1) {
+                appState.studentOnboarding.goals.splice(idx, 1);
+            } else {
+                appState.studentOnboarding.goals.push(goal);
+            }
+
+            if (appState.studentOnboarding.goals.length > 0) {
+                enableOnboardNext();
+            }
+        }
+
+        function enableOnboardNext() {
+            const btn = document.getElementById('onboard-next-btn');
+            btn.disabled = false;
+            btn.className = "w-full py-3.5 px-6 bg-brand-gold hover:bg-brand-goldDark text-brand-slate font-extrabold text-sm rounded-2xl shadow-gold-glow transition-all cursor-pointer flex items-center justify-center gap-2";
+        }
+
+        function updateOnboardingStep(step) {
+            appState.studentOnboarding.step = step;
+            stepIndicator.innerText = `Step ${step} of 3`;
+            progressBar.style.width = `${(step / 3) * 100}%`;
+
+            document.querySelectorAll('.onboard-step').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`onboard-step-${step}`).classList.remove('hidden');
+
+            const nextBtn = document.getElementById('onboard-next-btn');
+            nextBtn.disabled = true;
+            nextBtn.className = "w-full py-3.5 px-6 bg-stone-200 text-stone-400 font-extrabold text-sm rounded-2xl transition-all cursor-not-allowed flex items-center justify-center gap-2";
+
+            if (step === 3) {
+                nextBtn.querySelector('span').innerText = "Start Learning →";
+            } else {
+                nextBtn.querySelector('span').innerText = "Next Step";
+            }
+        }
+
+        function nextOnboardingStep() {
+            if (appState.studentOnboarding.step < 3) {
+                updateOnboardingStep(appState.studentOnboarding.step + 1);
+            } else {
+                showToast("Setup complete! Redirecting to dashboard...", "success");
+                switchDashboard('student');
+            }
+        }
+
+        // Teacher Flow Handlers
+        function handleTeacherStep1(e) {
+            e.preventDefault();
+            const pass = document.getElementById('tch-pass').value;
+            const confirm = document.getElementById('tch-pass-confirm').value;
+
+            if (pass !== confirm) {
+                showToast("Passwords do not match!", "error");
+                return;
+            }
+
+            appState.userProfile.fullName = document.getElementById('tch-fullname').value;
+            appState.userProfile.role = 'TEACHER';
+
+            document.getElementById('teacher-form-1').classList.add('hidden');
+            document.getElementById('teacher-form-2').classList.remove('hidden');
+            document.getElementById('teacher-step-heading').innerText = "Tell us about yourself";
+            stepIndicator.innerText = "Step 2 of 2";
+        }
+
+        function handleTeacherStep2(e) {
+            e.preventDefault();
+            document.getElementById('review-applicant-name').innerText = appState.userProfile.fullName;
+            document.getElementById('admin-applicant-title').innerText = appState.userProfile.fullName;
+            switchView('view-teacher-pending');
+        }
+
+        // Dashboard Switcher Handler
+        function switchDashboard(role) {
+            switchView('view-dashboard-sim');
+            document.querySelectorAll('.dash-role-content').forEach(d => d.classList.add('hidden'));
+
+            if (role === 'student') {
+                document.getElementById('dash-student-content').classList.remove('hidden');
+                document.getElementById('dash-student-name').innerText = appState.userProfile.fullName || "Student";
+                if (appState.studentOnboarding.language) {
+                    document.getElementById('dash-std-lang').innerText = appState.studentOnboarding.language;
+                }
+                if (appState.studentOnboarding.level) {
+                    document.getElementById('dash-std-level').innerText = appState.studentOnboarding.level;
+                }
+            } else if (role === 'teacher-pending') {
+                document.getElementById('dash-teacher-content').classList.remove('hidden');
+                document.getElementById('dash-teacher-name').innerText = appState.userProfile.fullName || "Teacher";
+            } else if (role === 'admin') {
+                document.getElementById('dash-admin-content').classList.remove('hidden');
+            }
+        }
+
+        function approveTeacherApplication() {
+            showToast("Teacher application approved by Admin!", "success");
+            appState.userProfile.teacherApproved = true;
+            setTimeout(() => switchDashboard('teacher-pending'), 1000);
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+
+            if (type === 'success') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            } else if (type === 'error') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+            } else {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-brand-gold"></i>';
+            }
+
+            toast.classList.remove('translate-y-[-150%]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-150%]', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mynalingo — Bold Black-Line Auth Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-yellow: #F5B731;
+      --brand-terracotta: #C86228;
+      --brand-cream: #FFFDF7;
+      --brand-black: #121212;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--brand-yellow);
+      color: var(--brand-black);
+    }
+
+    /* Bold Line Art Styles */
+    .border-line {
+      border: 3.5px solid var(--brand-black);
+    }
+    .border-line-sm {
+      border: 2px solid var(--brand-black);
+    }
+
+    /* Comic / Pop-Art Offset Shadows */
+    .shadow-pop {
+      box-shadow: 5px 5px 0px var(--brand-black);
+      transition: all 0.15s ease-in-out;
+    }
+    .shadow-pop:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0px var(--brand-black);
+    }
+    .shadow-pop:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px var(--brand-black);
+    }
+
+    .shadow-pop-static {
+      box-shadow: 6px 6px 0px var(--brand-black);
+    }
+    
+    .shadow-pop-sm {
+      box-shadow: 3px 3px 0px var(--brand-black);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--brand-yellow);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--brand-black);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 md:p-8">
+
+  <!-- TOP BRAND HEADER -->
+  <header class="max-w-6xl w-full mx-auto flex items-center justify-between mb-6">
+    <div class="flex items-center space-x-3 bg-white px-5 py-2.5 rounded-2xl border-line shadow-pop">
+      <div class="w-9 h-9 bg-[#F5B731] rounded-xl border-line-sm flex items-center justify-center font-black text-xl">
+        🐤
+      </div>
+      <span class="text-xl font-black tracking-wider uppercase text-black">MYNALINGO</span>
+    </div>
+
+    <!-- Auth Toggle Tabs -->
+    <div class="flex items-center bg-white p-1.5 rounded-2xl border-line shadow-pop space-x-1">
+      <button id="tab-login" onclick="switchMainTab('login')" class="px-5 py-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-[#F5B731] text-black border-line-sm">
+        Log In
+      </button>
+      <button id="tab-register" onclick="switchMainTab('register')" class="px-5 py-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-transparent text-black border-transparent hover:bg-yellow-100">
+        Register
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN AUTH WORKSPACE -->
+  <main class="max-w-6xl w-full mx-auto bg-[#FFFDF7] rounded-3xl border-line shadow-pop-static overflow-hidden grid grid-cols-1 lg:grid-cols-12 mb-20">
+    
+    <!-- LEFT PANEL: Hero Graphic & Mascot Art (Line Art Style) -->
+    <div class="lg:col-span-5 bg-[#F5B731] p-8 sm:p-10 border-b-4 lg:border-b-0 lg:border-r-4 border-black flex flex-col justify-between relative overflow-hidden">
+      <!-- Halftone/Pop Art Graphic Circles -->
+      <div class="absolute -top-12 -left-12 w-36 h-36 bg-white rounded-full border-line opacity-30 pointer-events-none"></div>
+      <div class="absolute -bottom-16 -right-16 w-48 h-48 bg-[#C86228] rounded-full border-line opacity-20 pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-6">
+        <!-- Badge -->
+        <div class="inline-flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border-line-sm shadow-pop-sm">
+          <span class="text-xs font-black uppercase tracking-wider text-black">⚡ Learn & Practice Live</span>
+        </div>
+
+        <!-- Mascot Display Box -->
+        <div class="bg-white p-6 rounded-2xl border-line shadow-pop space-y-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-[#F5B731] rounded-2xl border-line flex items-center justify-center text-3xl shadow-pop-sm">
+              🐤
+            </div>
+            <div>
+              <div class="font-black text-lg leading-tight uppercase">Myna Mascot</div>
+              <div class="text-xs font-bold text-gray-700">"Learn on your own. Practice with real teachers."</div>
+            </div>
+          </div>
+          <p class="text-xs font-extrabold text-black/80 leading-relaxed bg-amber-100 p-3 rounded-xl border-line-sm">
+            Course ➔ Question ➔ Teacher ➔ Conversation ➔ Progress!
+          </p>
+        </div>
+
+        <!-- Dynamic Live Teacher Feature Card -->
+        <div class="bg-white p-4 rounded-2xl border-line shadow-pop space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="relative">
+                <div class="w-11 h-11 bg-emerald-300 rounded-xl border-line flex items-center justify-center font-black text-sm">
+                  👩‍🏫
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-line-sm"></div>
+              </div>
+              <div>
+                <div class="font-black text-sm">Sarah Jenkins</div>
+                <div class="text-xs font-bold text-gray-600">🇬🇧 English • ⭐️ 4.9</div>
+              </div>
+            </div>
+            <span class="bg-emerald-400 text-black font-black text-[10px] uppercase px-2.5 py-1 rounded-lg border-line-sm">
+              Online
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative z-10 mt-8 pt-6 border-t-2 border-black/20 flex items-center justify-between">
+        <span class="font-black text-xs uppercase tracking-widest text-black">Learn. Speak. Connect.</span>
+        <span class="font-black text-xs uppercase tracking-widest bg-black text-white px-2.5 py-1 rounded-md">v2.0</span>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Interactive Forms -->
+    <div class="lg:col-span-7 p-6 sm:p-10 md:p-12 flex flex-col justify-center bg-[#FFFDF7]">
+
+      <!-- VIEW 1: LOGIN PAGE -->
+      <div id="view-login" class="space-y-6">
+        <div>
+          <h2 class="text-3xl font-black uppercase tracking-tight text-black">Welcome back 👋</h2>
+          <p class="text-sm font-bold text-gray-700 mt-1">Continue your language-learning journey.</p>
+        </div>
+
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <!-- Email / Phone Input -->
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">Email or phone number</label>
+            <input type="text" required placeholder="Enter your email or phone number" class="w-full px-4 py-3.5 rounded-xl border-line bg-white text-black font-bold text-sm focus:outline-none focus:ring-2 focus:ring-black shadow-pop-sm" />
+          </div>
+
+          <!-- Password Input -->
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">Password</label>
+            <div class="relative">
+              <input id="login-password" type="password" required placeholder="Enter your password" class="w-full px-4 py-3.5 rounded-xl border-line bg-white text-black font-bold text-sm focus:outline-none focus:ring-2 focus:ring-black shadow-pop-sm pr-12" />
+              <button type="button" onclick="togglePassword('login-password', 'eye-icon-1')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-lg font-black p-1">
+                <span id="eye-icon-1">👁</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="flex items-center justify-between pt-1">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" class="w-4 h-4 rounded border-line text-black focus:ring-black" />
+              <span class="text-xs font-bold text-black">Remember me</span>
+            </label>
+            <a href="#" onclick="alert('Password reset link sent!')" class="text-xs font-black text-black hover:underline uppercase tracking-wider">Forgot password?</a>
+          </div>
+
+          <!-- Login Button -->
+          <button type="submit" class="w-full py-4 bg-[#F5B731] text-black font-black rounded-xl border-line shadow-pop text-sm uppercase tracking-wider mt-2">
+            Log In ➔
+          </button>
+        </form>
+
+        <div class="relative my-6 text-center">
+          <div class="absolute inset-0 flex items-center"><div class="w-full border-t-2 border-black"></div></div>
+          <span class="relative bg-[#FFFDF7] px-4 text-xs font-black uppercase tracking-wider text-gray-700">or continue with</span>
+        </div>
+
+        <button onclick="handleLoginSubmit(event)" class="w-full py-3.5 bg-white text-black font-black rounded-xl border-line shadow-pop text-sm flex items-center justify-center space-x-3">
+          <span class="text-lg">🌐</span>
+          <span>Google Account</span>
+        </button>
+
+        <p class="text-center text-xs font-bold text-gray-700 mt-6">
+          Don't have an account? 
+          <button onclick="switchMainTab('register')" class="font-black text-black underline uppercase ml-1">Create one</button>
+        </p>
+      </div>
+
+      <!-- VIEW 2: REGISTER ROLE SELECTOR -->
+      <div id="view-register-role" class="hidden space-y-6">
+        <div>
+          <h2 class="text-3xl font-black uppercase tracking-tight text-black">Create your account</h2>
+          <p class="text-sm font-bold text-gray-700 mt-1">How do you want to use Mynalingo?</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 my-6">
+          <!-- Student Role Card -->
+          <button onclick="selectRole('student')" class="p-6 rounded-2xl border-line bg-white text-left shadow-pop hover:bg-yellow-50 relative group">
+            <div class="w-12 h-12 bg-[#F5B731] rounded-xl border-line flex items-center justify-center text-2xl mb-4 shadow-pop-sm">
+              🎓
+            </div>
+            <div class="font-black text-lg uppercase tracking-tight text-black">I'm a Student</div>
+            <p class="text-xs font-bold text-gray-700 mt-2 leading-relaxed">
+              Learn languages, take courses, and practice live with real teachers.
+            </p>
+          </button>
+
+          <!-- Teacher Role Card -->
+          <button onclick="selectRole('teacher')" class="p-6 rounded-2xl border-line bg-white text-left shadow-pop hover:bg-orange-50 relative group">
+            <div class="w-12 h-12 bg-[#C86228] text-white rounded-xl border-line flex items-center justify-center text-2xl mb-4 shadow-pop-sm">
+              👨‍🏫
+            </div>
+            <div class="font-black text-lg uppercase tracking-tight text-black">I'm a Teacher</div>
+            <p class="text-xs font-bold text-gray-700 mt-2 leading-relaxed">
+              Teach languages, create courses, and connect with eager students.
+            </p>
+          </button>
+        </div>
+
+        <p class="text-center text-xs font-bold text-gray-700">
+          Already have an account? 
+          <button onclick="switchMainTab('login')" class="font-black text-black underline uppercase ml-1">Log in</button>
+        </p>
+      </div>
+
+      <!-- VIEW 3: STUDENT REGISTER FORM -->
+      <div id="view-student-register" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="bg-[#F5B731] text-black font-black text-[10px] uppercase px-2.5 py-1 rounded-md border-line-sm shadow-pop-sm">Student Registration</span>
+            <h2 class="text-2xl font-black uppercase tracking-tight text-black mt-2">Create Student Account</h2>
+          </div>
+          <button onclick="switchMainTab('register')" class="text-xs font-black uppercase underline">Change Role</button>
+        </div>
+
+        <form onsubmit="handleStudentRegister(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-black mb-1">Full Name</label>
+            <input type="text" required placeholder="Your full name" class="w-full px-4 py-3 rounded-xl border-line bg-white font-bold text-sm shadow-pop-sm" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-black uppercase tracking-wider text-black mb-1">Email</label>
+              <input type="email" required placeholder="example@email.com" class="w-full px-4 py-3 rounded-xl border-line bg-white font-bold text-sm shadow-pop-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-wider text-black mb-1">Phone Number</label>
+              <input type="text" required value="+213 " class="w-full px-4 py-3 rounded-xl border-line bg-white font-bold text-sm shadow-pop-sm" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-black uppercase tracking-wider text-black mb-1">Password</label>
+              <input type="password" required placeholder="Create password" class="w-full px-4 py-3 rounded-xl border-line bg-white font-bold text-sm shadow-pop-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-wider text-black mb-1">Confirm Password</label>
+              <input type="password" required placeholder="Repeat password" class="w-full px-4 py-3 rounded-xl border-line bg-white font-bold text-sm shadow-pop-sm" />
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 pt-1">
+            <input type="checkbox" required class="w-4 h-4 rounded border-line text-black focus:ring-black" />
+            <span class="text-xs font-bold text-black">I agree to Terms of Service & Privacy Policy</span>
+          </div>
+
+          <button type="submit" class="w-full py-4 bg-[#F5B731] text-black font-black rounded-xl border-line shadow-pop text-sm uppercase tracking-wider mt-2">
+            Create Account ➔
+          </button>
+        </form>
+      </div>
+
+      <!-- VIEW 4: STUDENT ONBOARDING WIZARD -->
+      <div id="view-student-onboarding" class="hidden space-y-6">
+        <div class="flex items-center justify-between border-b-2 border-black pb-4">
+          <div>
+            <span class="bg-black text-white font-black text-[10px] uppercase px-2 py-0.5 rounded">Step <span id="onboard-step-num">1</span> of 3</span>
+            <h2 id="onboard-title" class="text-xl font-black uppercase tracking-tight text-black mt-1">What do you want to learn?</h2>
+          </div>
+        </div>
+
+        <!-- Step 1: Language -->
+        <div id="onboard-step-1" class="grid grid-cols-2 gap-3">
+          <button onclick="nextOnboardStep(2)" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop flex items-center space-x-3 hover:bg-yellow-100">
+            <span class="text-2xl">🇬🇧</span>
+            <span class="uppercase">English</span>
+          </button>
+          <button onclick="nextOnboardStep(2)" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop flex items-center space-x-3 hover:bg-yellow-100">
+            <span class="text-2xl">🇫🇷</span>
+            <span class="uppercase">French</span>
+          </button>
+          <button onclick="nextOnboardStep(2)" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop flex items-center space-x-3 hover:bg-yellow-100">
+            <span class="text-2xl">🇪🇸</span>
+            <span class="uppercase">Spanish</span>
+          </button>
+          <button onclick="nextOnboardStep(2)" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop flex items-center space-x-3 hover:bg-yellow-100">
+            <span class="text-2xl">🇩🇪</span>
+            <span class="uppercase">German</span>
+          </button>
+        </div>
+
+        <!-- Step 2: Level -->
+        <div id="onboard-step-2" class="hidden space-y-2">
+          <button onclick="nextOnboardStep(3)" class="w-full p-3.5 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100 flex items-center justify-between">
+            <span>Beginner (A1)</span>
+            <span class="text-xs bg-yellow-200 px-2 py-1 rounded border-line-sm">Starter</span>
+          </button>
+          <button onclick="nextOnboardStep(3)" class="w-full p-3.5 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100 flex items-center justify-between">
+            <span>Intermediate (B1)</span>
+            <span class="text-xs bg-orange-200 px-2 py-1 rounded border-line-sm">Conversational</span>
+          </button>
+          <button onclick="nextOnboardStep(3)" class="w-full p-3.5 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100 flex items-center justify-between">
+            <span>Advanced (C1)</span>
+            <span class="text-xs bg-emerald-200 px-2 py-1 rounded border-line-sm">Fluent</span>
+          </button>
+        </div>
+
+        <!-- Step 3: Goal -->
+        <div id="onboard-step-3" class="hidden grid grid-cols-2 gap-3">
+          <button onclick="finishOnboarding()" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100">
+            <div class="text-2xl">🗣</div>
+            <div class="uppercase text-xs mt-1">Speak Confidently</div>
+          </button>
+          <button onclick="finishOnboarding()" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100">
+            <div class="text-2xl">💼</div>
+            <div class="uppercase text-xs mt-1">Work & Career</div>
+          </button>
+          <button onclick="finishOnboarding()" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100">
+            <div class="text-2xl">🎓</div>
+            <div class="uppercase text-xs mt-1">Study Abroad</div>
+          </button>
+          <button onclick="finishOnboarding()" class="p-4 rounded-xl border-line bg-white font-black text-left shadow-pop hover:bg-yellow-100">
+            <div class="text-2xl">✈️</div>
+            <div class="uppercase text-xs mt-1">Travel</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 5: TEACHER REGISTER FORM -->
+      <div id="view-teacher-register" class="hidden space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="bg-[#C86228] text-white font-black text-[10px] uppercase px-2.5 py-1 rounded-md border-line-sm shadow-pop-sm">Teacher Application</span>
+            <h2 class="text-2xl font-black uppercase tracking-tight text-black mt-1">Teacher Account</h2>
+          </div>
+          <button onclick="switchMainTab('register')" class="text-xs font-black uppercase underline">Change Role</button>
+        </div>
+
+        <form onsubmit="handleTeacherSubmit(event)" class="space-y-3.5">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-black uppercase text-black mb-1">Full Name</label>
+              <input type="text" required placeholder="Full name" class="w-full px-3 py-2.5 rounded-xl border-line font-bold text-xs shadow-pop-sm" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-black uppercase text-black mb-1">Email</label>
+              <input type="email" required placeholder="Email" class="w-full px-3 py-2.5 rounded-xl border-line font-bold text-xs shadow-pop-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-black uppercase text-black mb-1">Languages you teach</label>
+            <div class="flex space-x-2">
+              <label class="flex items-center space-x-1.5 bg-white px-3 py-2 rounded-xl border-line text-xs font-bold">
+                <input type="checkbox" checked /> <span>🇬🇧 English</span>
+              </label>
+              <label class="flex items-center space-x-1.5 bg-white px-3 py-2 rounded-xl border-line text-xs font-bold">
+                <input type="checkbox" /> <span>🇫🇷 French</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-black uppercase text-black mb-1">Years of Experience</label>
+            <input type="text" required placeholder="e.g. 3 years" class="w-full px-3 py-2.5 rounded-xl border-line font-bold text-xs shadow-pop-sm" />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-black uppercase text-black mb-1">Short Bio</label>
+            <textarea rows="2" placeholder="Tell students about yourself..." class="w-full px-3 py-2 rounded-xl border-line font-bold text-xs shadow-pop-sm"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-[#C86228] text-white font-black rounded-xl border-line shadow-pop text-xs uppercase tracking-wider">
+            Submit Application ➔
+          </button>
+        </form>
+      </div>
+
+      <!-- VIEW 6: TEACHER REVIEW STATUS -->
+      <div id="view-teacher-review" class="hidden space-y-6 text-center">
+        <div class="w-20 h-20 bg-amber-300 rounded-3xl border-line mx-auto flex items-center justify-center text-4xl shadow-pop">
+          🟡
+        </div>
+        <div>
+          <span class="bg-amber-200 text-black font-black text-xs uppercase px-3 py-1 rounded-full border-line-sm">
+            Status: Under Review
+          </span>
+          <h2 class="text-3xl font-black uppercase tracking-tight text-black mt-3">Application Received!</h2>
+          <p class="text-xs font-bold text-gray-700 mt-2 max-w-sm mx-auto leading-relaxed">
+            Your application will be reviewed by the Mynalingo team before you can teach students. We will notify you by email.
+          </p>
+        </div>
+
+        <button onclick="simulateAdminApproval()" class="px-6 py-3 bg-black text-white font-black text-xs rounded-xl uppercase tracking-wider shadow-pop">
+          ⚡ Demo: Trigger Instant Admin Approval
+        </button>
+      </div>
+
+      <!-- DASHBOARD SIMULATOR PREVIEWS -->
+      <div id="view-dashboard-student" class="hidden space-y-4">
+        <div class="bg-yellow-300 p-4 rounded-2xl border-line shadow-pop flex items-center justify-between">
+          <div class="font-black uppercase text-sm">🎓 Student Dashboard Active</div>
+          <span class="bg-white text-black font-black text-xs px-2.5 py-1 rounded border-line-sm">120 XP</span>
+        </div>
+        <p class="text-xs font-bold">Welcome back to your learning portal! Ready for your next conversation?</p>
+      </div>
+
+      <div id="view-dashboard-teacher" class="hidden space-y-4">
+        <div class="bg-orange-400 text-white p-4 rounded-2xl border-line shadow-pop flex items-center justify-between">
+          <div class="font-black uppercase text-sm">👨‍🏫 Teacher Dashboard Active</div>
+          <span class="bg-black text-white font-black text-xs px-2.5 py-1 rounded">🟢 Online</span>
+        </div>
+        <p class="text-xs font-bold">You have 3 incoming student session requests today.</p>
+      </div>
+
+      <div id="view-dashboard-admin" class="hidden space-y-4">
+        <div class="bg-purple-400 text-white p-4 rounded-2xl border-line shadow-pop flex items-center justify-between">
+          <div class="font-black uppercase text-sm">👑 Admin Control Center</div>
+          <span class="bg-white text-black font-black text-xs px-2.5 py-1 rounded border-line-sm">4 Pending Teachers</span>
+        </div>
+        <p class="text-xs font-bold">System metrics, user role management, and content approval queues.</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- BOTTOM ROLE SIMULATION BAR -->
+  <footer class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-white px-4 py-2.5 rounded-2xl border-line shadow-pop flex items-center space-x-3 z-50">
+    <span class="text-[11px] font-black uppercase text-gray-500 hidden sm:inline">Role Simulator:</span>
+    <button onclick="switchRoleView('student')" class="px-3 py-1.5 bg-yellow-300 rounded-xl border-line-sm text-xs font-black uppercase shadow-pop-sm">
+      Student
+    </button>
+    <button onclick="switchRoleView('teacher')" class="px-3 py-1.5 bg-orange-300 rounded-xl border-line-sm text-xs font-black uppercase shadow-pop-sm">
+      Teacher
+    </button>
+    <button onclick="switchRoleView('admin')" class="px-3 py-1.5 bg-purple-300 rounded-xl border-line-sm text-xs font-black uppercase shadow-pop-sm">
+      Admin
+    </button>
+  </footer>
+
+  <!-- INTERACTIVE LOGIC SCRIPT -->
+  <script>
+    function hideAllViews() {
+      const views = [
+        'view-login', 'view-register-role', 'view-student-register', 
+        'view-student-onboarding', 'view-teacher-register', 'view-teacher-review',
+        'view-dashboard-student', 'view-dashboard-teacher', 'view-dashboard-admin'
+      ];
+      views.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+    }
+
+    function switchMainTab(tab) {
+      hideAllViews();
+      const loginBtn = document.getElementById('tab-login');
+      const regBtn = document.getElementById('tab-register');
+
+      if (tab === 'login') {
+        document.getElementById('view-login').classList.remove('hidden');
+        loginBtn.className = "px-5 py-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-[#F5B731] text-black border-line-sm";
+        regBtn.className = "px-5 py-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-transparent text-black border-transparent hover:bg-yellow-100";
+      } else {
+        document.getElementById('view-register-role').classList.remove('hidden');
+        regBtn.className = "px-5 py-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-[#F5B731] text-black border-line-sm";
+        loginBtn.className = "px-5 py-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-transparent text-black border-transparent hover:bg-yellow-100";
+      }
+    }
+
+    function selectRole(role) {
+      hideAllViews();
+      if (role === 'student') {
+        document.getElementById('view-student-register').classList.remove('hidden');
+      } else {
+        document.getElementById('view-teacher-register').classList.remove('hidden');
+      }
+    }
+
+    function handleLoginSubmit(e) {
+      if(e) e.preventDefault();
+      switchRoleView('student');
+    }
+
+    function handleStudentRegister(e) {
+      e.preventDefault();
+      hideAllViews();
+      document.getElementById('view-student-onboarding').classList.remove('hidden');
+    }
+
+    function nextOnboardStep(step) {
+      document.getElementById('onboard-step-1').classList.add('hidden');
+      document.getElementById('onboard-step-2').classList.add('hidden');
+      document.getElementById('onboard-step-3').classList.add('hidden');
+
+      document.getElementById(`onboard-step-${step}`).classList.remove('hidden');
+      document.getElementById('onboard-step-num').innerText = step;
+
+      if(step === 2) {
+        document.getElementById('onboard-title').innerText = "What's your current level?";
+      } else if(step === 3) {
+        document.getElementById('onboard-title').innerText = "What's your main goal?";
+      }
+    }
+
+    function finishOnboarding() {
+      switchRoleView('student');
+    }
+
+    function handleTeacherSubmit(e) {
+      e.preventDefault();
+      hideAllViews();
+      document.getElementById('view-teacher-review').classList.remove('hidden');
+    }
+
+    function simulateAdminApproval() {
+      alert('Application Approved by Admin!');
+      switchRoleView('teacher');
+    }
+
+    function switchRoleView(role) {
+      hideAllViews();
+      if (role === 'student') {
+        document.getElementById('view-dashboard-student').classList.remove('hidden');
+      } else if (role === 'teacher') {
+        document.getElementById('view-dashboard-teacher').classList.remove('hidden');
+      } else if (role === 'admin') {
+        document.getElementById('view-dashboard-admin').classList.remove('hidden');
+      }
+    }
+
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerText = '🙈';
+      } else {
+        input.type = 'password';
+        icon.innerText = '👁';
+      }
+    }
+  </script>
+
+</body>
+</html>
