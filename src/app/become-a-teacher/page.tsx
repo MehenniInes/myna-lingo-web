@@ -16,6 +16,7 @@ const API_URL =
 const MAX_PROFILE_PHOTO_SIZE = 20 * 1024 * 1024;
 const MAX_ID_SIZE = 5 * 1024 * 1024;
 const MAX_CERTIFICATE_SIZE = 10 * 1024 * 1024;
+const MAX_DIPLOMA_SIZE = 10 * 1024 * 1024;
 
 function getFileExtension(file: File) {
   return file.name.split(".").pop()?.toLowerCase() || "";
@@ -54,7 +55,6 @@ function validateIdDocument(file: File): string | null {
     "image/jpeg",
     "image/png",
     "image/webp",
-    "application/pdf",
   ];
 
   const allowedExtensions = [
@@ -62,7 +62,6 @@ function validateIdDocument(file: File): string | null {
     "jpeg",
     "png",
     "webp",
-    "pdf",
   ];
 
   const extension = getFileExtension(file);
@@ -71,7 +70,7 @@ function validateIdDocument(file: File): string | null {
     !allowedTypes.includes(file.type) ||
     !allowedExtensions.includes(extension)
   ) {
-    return "Invalid ID format. Please upload a JPG, PNG, WEBP, or PDF file.";
+    return "Invalid ID format. Please upload a JPG, PNG, or WEBP image.";
   }
 
   if (file.size > MAX_ID_SIZE) {
@@ -97,6 +96,27 @@ function validateCertificate(file: File): string | null {
 
   if (file.size > MAX_CERTIFICATE_SIZE) {
     return "Certificate is too large. The maximum allowed size is 10 MB.";
+  }
+
+  return null;
+}
+
+function validateDiploma(file: File): string | null {
+  const allowedTypes = [
+    "application/pdf",
+  ];
+
+  const extension = getFileExtension(file);
+
+  if (
+    !allowedTypes.includes(file.type) ||
+    extension !== "pdf"
+  ) {
+    return "Invalid diploma format. Please upload a PDF file.";
+  }
+
+  if (file.size > MAX_DIPLOMA_SIZE) {
+    return "Diploma is too large. The maximum allowed size is 10 MB.";
   }
 
   return null;
@@ -1254,18 +1274,10 @@ export default function BecomeATeacherPage() {
     setError("");
     setIdFile(file);
 
-    if (
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/webp"
-    ) {
-      const previewUrl =
-        URL.createObjectURL(file);
+    const previewUrl =
+      URL.createObjectURL(file);
 
-      setIdPreviewUrl(previewUrl);
-    } else {
-      setIdPreviewUrl(null);
-    }
+    setIdPreviewUrl(previewUrl);
   }
 
   async function startIdCamera() {
@@ -1627,6 +1639,19 @@ export default function BecomeATeacherPage() {
       );
     }
 
+    if (eduDiplomaFile) {
+      const validationError =
+        validateDiploma(
+          eduDiplomaFile
+        );
+
+      if (validationError) {
+        return setError(
+          validationError
+        );
+      }
+    }
+
     setSaving(true);
     setError("");
 
@@ -1662,6 +1687,12 @@ export default function BecomeATeacherPage() {
           throw new Error(
             uploadData.message ||
               "We couldn't upload your diploma. Please check the file and try again."
+          );
+        }
+
+        if (!uploadData.url) {
+          throw new Error(
+            "Your diploma was uploaded, but we couldn't save it to your application. Please try again."
           );
         }
 
@@ -2515,8 +2546,7 @@ export default function BecomeATeacherPage() {
 
                 <p>
                   Accepted formats:
-                  JPG/JPEG, PNG, WEBP,
-                  or PDF.
+                  JPG/JPEG, PNG, or WEBP.
                 </p>
 
                 <p className="mt-1">
@@ -2527,42 +2557,7 @@ export default function BecomeATeacherPage() {
 
               <div className="mt-6 flex flex-col gap-4">
 
-                {idFile &&
-                idFile.type ===
-                  "application/pdf" ? (
-                  <div className="flex flex-col items-center gap-3 rounded-xl border border-myna-charcoal/20 p-6">
-
-                    <div className="text-4xl">
-                      📄
-                    </div>
-
-                    <p className="text-sm font-medium text-myna-charcoal text-center break-all">
-                      {idFile.name}
-                    </p>
-
-                    <p className="text-xs text-myna-charcoal/60">
-                      PDF document
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIdFile(
-                          null
-                        );
-                        setIdPreviewUrl(
-                          null
-                        );
-                        setError("");
-                      }}
-                      className="text-sm text-myna-orange font-medium"
-                    >
-                      {t(
-                        "wizard.photo.remove"
-                      )}
-                    </button>
-                  </div>
-                ) : idPreviewUrl ? (
+                {idPreviewUrl ? (
                   <div className="flex flex-col items-center gap-3">
 
                     <img
@@ -2642,7 +2637,7 @@ export default function BecomeATeacherPage() {
 
                       <input
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        accept="image/jpeg,image/png,image/webp"
                         onChange={
                           handleIdSelect
                         }
@@ -3280,6 +3275,17 @@ export default function BecomeATeacherPage() {
                   </div>
                 </div>
 
+                <div className="bg-myna-yellow/15 border border-myna-yellow/40 rounded-xl p-4 text-sm text-myna-charcoal/80">
+                  <p className="font-semibold text-myna-charcoal">
+                    Diploma requirements
+                  </p>
+
+                  <p className="mt-1">
+                    PDF only • Maximum
+                    file size: 10 MB
+                  </p>
+                </div>
+
                 <label className="text-center px-4 py-3 rounded-xl border-2 border-dashed border-myna-charcoal/20 cursor-pointer hover:bg-myna-yellow/10 transition text-sm">
 
                   {eduDiplomaFile
@@ -3290,16 +3296,47 @@ export default function BecomeATeacherPage() {
 
                   <input
                     type="file"
-                    accept="image/jpeg,image/png"
-                    onChange={(e) =>
-                      setEduDiplomaFile(
+                    accept="application/pdf"
+                    onChange={(e) => {
+                      const file =
                         e.target.files?.[0] ||
+                        null;
+
+                      if (!file) {
+                        return;
+                      }
+
+                      const validationError =
+                        validateDiploma(file);
+
+                      if (
+                        validationError
+                      ) {
+                        setEduDiplomaFile(
                           null
-                      )
-                    }
+                        );
+                        setError(
+                          validationError
+                        );
+                        e.target.value =
+                          "";
+                        return;
+                      }
+
+                      setEduDiplomaFile(
+                        file
+                      );
+                      setError("");
+                    }}
                     className="hidden"
                   />
                 </label>
+
+                {eduDiplomaFile && (
+                  <p className="text-xs text-green-700">
+                    ✓ PDF selected successfully
+                  </p>
+                )}
 
                 {error && (
                   <p className="text-red-600 text-sm">
