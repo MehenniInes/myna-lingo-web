@@ -89,6 +89,10 @@ export default function AdminDashboard() {
             <p className="font-bold">📚 {t("admin.content")}</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("admin.manageActivities")}</p>
           </a>
+           <a href="/admin/applications" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+            <p className="font-bold">📝 Teacher Applications</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Approve or reject new teachers</p>
+          </a>
         </div>
       </div>
     </main>

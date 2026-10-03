@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CalendarDays, Clock, ArrowLeft, Send } from "lucide-react";
@@ -45,7 +44,7 @@ const DAY_NAMES: Record<string, string> = {
 
 const DAY_ORDER = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export default function NewBookingPage() {
+function NewBookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -101,8 +100,7 @@ export default function NewBookingPage() {
     if (!teacher?.availability) return [];
 
     return [...teacher.availability].sort(
-      (a, b) =>
-        DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day),
+      (a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day),
     );
   }, [teacher]);
 
@@ -110,7 +108,6 @@ export default function NewBookingPage() {
     if (!teacher?.availability || !date) return [];
 
     const selectedDate = new Date(`${date}T12:00:00`);
-
     const jsDay = selectedDate.getDay();
 
     const dayCode =
@@ -151,7 +148,6 @@ export default function NewBookingPage() {
     }
 
     const dateObject = new Date(`${selectedDate}T12:00:00`);
-
     const jsDay = dateObject.getDay();
 
     const dayCode =
@@ -208,9 +204,7 @@ export default function NewBookingPage() {
     }
 
     if (!isDateAvailable(date)) {
-      setError(
-        "The teacher is not available on the selected day.",
-      );
+      setError("The teacher is not available on the selected day.");
       return;
     }
 
@@ -242,10 +236,8 @@ export default function NewBookingPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-cream flex items-center justify-center">
-        <p className="text-myna-charcoal/60">
-          Loading teacher...
-        </p>
+      <main className="flex min-h-screen items-center justify-center bg-cream">
+        <p className="text-myna-charcoal/60">Loading teacher...</p>
       </main>
     );
   }
@@ -253,12 +245,12 @@ export default function NewBookingPage() {
   if (!teacher) {
     return (
       <main className="min-h-screen bg-cream px-6 py-12">
-        <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-sm p-8 text-center">
+        <div className="mx-auto max-w-xl rounded-3xl bg-white p-8 text-center shadow-sm">
           <p className="text-red-600">{error || "Teacher not found."}</p>
 
           <Link
             href="/find-teacher"
-            className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-full bg-myna-orange text-white font-semibold"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-myna-orange px-6 py-3 font-semibold text-white"
           >
             <ArrowLeft size={16} />
             Back to teachers
@@ -269,57 +261,51 @@ export default function NewBookingPage() {
   }
 
   const teacherName =
-    [teacher.firstName, teacher.lastName]
-      .filter(Boolean)
-      .join(" ") || teacher.user.fullName;
+    [teacher.firstName, teacher.lastName].filter(Boolean).join(" ") ||
+    teacher.user.fullName;
 
   return (
     <main className="min-h-screen bg-cream px-6 py-12">
-      <div className="max-w-2xl mx-auto">
+      <div className="mx-auto max-w-2xl">
         <Link
           href={`/teachers/${teacher.id}`}
-          className="inline-flex items-center gap-2 text-myna-orange font-semibold text-sm hover:underline"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-myna-orange hover:underline"
         >
           <ArrowLeft size={15} />
           Back to teacher
         </Link>
 
-        <div className="mt-5 bg-white rounded-3xl shadow-sm p-6 md:p-8">
+        <div className="mt-5 rounded-3xl bg-white p-6 shadow-sm md:p-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-myna-orange">
               Book a lesson
             </p>
 
-            <h1 className="font-display text-3xl font-bold text-myna-charcoal mt-2">
+            <h1 className="mt-2 font-display text-3xl font-bold text-myna-charcoal">
               Lesson with {teacherName}
             </h1>
 
             {teacher.profileTitle && (
-              <p className="text-myna-charcoal/60 mt-2">
+              <p className="mt-2 text-myna-charcoal/60">
                 {teacher.profileTitle}
               </p>
             )}
           </div>
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-myna-orange/5 border border-myna-orange/10 p-4">
-              <CalendarDays
-                size={18}
-                className="text-myna-orange"
-              />
-              <p className="text-xs text-myna-charcoal/50 mt-2">
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-myna-orange/10 bg-myna-orange/5 p-4">
+              <CalendarDays size={18} className="text-myna-orange" />
+
+              <p className="mt-2 text-xs text-myna-charcoal/50">
                 Available days
               </p>
 
-              <p className="text-sm font-semibold text-myna-charcoal mt-1">
+              <p className="mt-1 text-sm font-semibold text-myna-charcoal">
                 {availableDays.length > 0
                   ? availableDays
                       .map((slot) => {
                         const code = slot.day.toUpperCase();
-
-                        return (
-                          DAY_NAMES[code] ?? slot.day
-                        );
+                        return DAY_NAMES[code] ?? slot.day;
                       })
                       .join(", ")
                   : "No availability set"}
@@ -327,16 +313,13 @@ export default function NewBookingPage() {
             </div>
 
             <div className="rounded-2xl bg-myna-charcoal/5 p-4">
-              <Clock
-                size={18}
-                className="text-myna-orange"
-              />
+              <Clock size={18} className="text-myna-orange" />
 
-              <p className="text-xs text-myna-charcoal/50 mt-2">
+              <p className="mt-2 text-xs text-myna-charcoal/50">
                 Hourly rate
               </p>
 
-              <p className="text-sm font-semibold text-myna-charcoal mt-1">
+              <p className="mt-1 text-sm font-semibold text-myna-charcoal">
                 {teacher.requestedHourlyRateDA
                   ? `${teacher.requestedHourlyRateDA} DA / hour`
                   : "Rate on request"}
@@ -344,12 +327,9 @@ export default function NewBookingPage() {
             </div>
           </div>
 
-          <form
-            onSubmit={submitBooking}
-            className="mt-8 space-y-5"
-          >
+          <form onSubmit={submitBooking} className="mt-8 space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-myna-charcoal mb-2">
+              <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Date
               </label>
 
@@ -357,17 +337,14 @@ export default function NewBookingPage() {
                 type="date"
                 min={getMinimumDate()}
                 value={date}
-                onChange={(e) =>
-                  handleDateChange(e.target.value)
-                }
-                className="w-full rounded-2xl border border-myna-charcoal/10 px-4 py-3 bg-white outline-none focus:border-myna-orange"
+                onChange={(e) => handleDateChange(e.target.value)}
+                className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
                 required
               />
 
               {date && selectedDayAvailability.length > 0 && (
-                <p className="text-xs text-green-700 mt-2">
-                  Available:
-                  {" "}
+                <p className="mt-2 text-xs text-green-700">
+                  Available:{" "}
                   {selectedDayAvailability
                     .map(
                       (slot) =>
@@ -378,50 +355,42 @@ export default function NewBookingPage() {
               )}
 
               {date && selectedDayAvailability.length === 0 && (
-                <p className="text-xs text-red-600 mt-2">
+                <p className="mt-2 text-xs text-red-600">
                   Teacher is not available on this day.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-myna-charcoal mb-2">
+              <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Time
               </label>
 
               <input
                 type="time"
                 value={time}
-                onChange={(e) =>
-                  setTime(e.target.value)
-                }
-                disabled={
-                  !date ||
-                  selectedDayAvailability.length === 0
-                }
-                className="w-full rounded-2xl border border-myna-charcoal/10 px-4 py-3 bg-white outline-none focus:border-myna-orange disabled:bg-gray-100 disabled:cursor-not-allowed"
+                onChange={(e) => setTime(e.target.value)}
+                disabled={!date || selectedDayAvailability.length === 0}
+                className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange disabled:cursor-not-allowed disabled:bg-gray-100"
                 required
               />
 
               {selectedDayAvailability.length > 0 && (
-                <p className="text-xs text-myna-charcoal/50 mt-2">
-                  Choose a time inside the teacher's
-                  availability window.
+                <p className="mt-2 text-xs text-myna-charcoal/50">
+                  Choose a time inside the teacher's availability window.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-myna-charcoal mb-2">
+              <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Duration
               </label>
 
               <select
                 value={duration}
-                onChange={(e) =>
-                  setDuration(e.target.value)
-                }
-                className="w-full rounded-2xl border border-myna-charcoal/10 px-4 py-3 bg-white outline-none focus:border-myna-orange"
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
               >
                 <option value="15">15 minutes</option>
                 <option value="30">30 minutes</option>
@@ -433,26 +402,23 @@ export default function NewBookingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-myna-charcoal mb-2">
+              <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Lesson type
               </label>
 
               <select
                 value={serviceType}
-                onChange={(e) =>
-                  setServiceType(e.target.value)
-                }
-                className="w-full rounded-2xl border border-myna-charcoal/10 px-4 py-3 bg-white outline-none focus:border-myna-orange"
+                onChange={(e) => setServiceType(e.target.value)}
+                className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
                 required
               >
-                {teacher.teacherLanguages.map((tl) => (
+                {teacher.teacherLanguages.map((teacherLanguage) => (
                   <option
-                    key={tl.id}
-                    value={tl.serviceType}
+                    key={teacherLanguage.id}
+                    value={teacherLanguage.serviceType}
                   >
-                    {tl.language.name} —{" "}
-                    {tl.serviceType ===
-                    "CONVERSATION_PARTNER"
+                    {teacherLanguage.language.name} —{" "}
+                    {teacherLanguage.serviceType === "CONVERSATION_PARTNER"
                       ? "Conversation"
                       : "Professional Teacher"}
                   </option>
@@ -461,7 +427,7 @@ export default function NewBookingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-myna-charcoal mb-2">
+              <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Note
                 <span className="font-normal text-myna-charcoal/40">
                   {" "}
@@ -471,18 +437,16 @@ export default function NewBookingPage() {
 
               <textarea
                 value={notes}
-                onChange={(e) =>
-                  setNotes(e.target.value)
-                }
+                onChange={(e) => setNotes(e.target.value)}
                 rows={4}
                 maxLength={500}
                 placeholder="Tell the teacher what you would like to work on..."
-                className="w-full rounded-2xl border border-myna-charcoal/10 px-4 py-3 bg-white outline-none focus:border-myna-orange resize-none"
+                className="w-full resize-none rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
               />
             </div>
 
             {error && (
-              <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -496,7 +460,7 @@ export default function NewBookingPage() {
                 !serviceType ||
                 selectedDayAvailability.length === 0
               }
-              className="w-full py-3.5 rounded-full bg-myna-orange text-white font-semibold hover:bg-myna-orange/90 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-myna-orange py-3.5 font-semibold text-white transition hover:bg-myna-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {submitting ? (
                 "Sending request..."
@@ -508,14 +472,27 @@ export default function NewBookingPage() {
               )}
             </button>
 
-            <p className="text-xs text-center text-myna-charcoal/50">
-              Your request will be sent to the teacher.
-              Your lesson becomes confirmed after the teacher
-              accepts it.
+            <p className="text-center text-xs text-myna-charcoal/50">
+              Your request will be sent to the teacher. Your lesson becomes
+              confirmed after the teacher accepts it.
             </p>
           </form>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function NewBookingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-cream">
+          <p className="text-myna-charcoal/60">Loading...</p>
+        </main>
+      }
+    >
+      <NewBookingContent />
+    </Suspense>
   );
 }

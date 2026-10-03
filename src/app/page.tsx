@@ -69,7 +69,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <a href="/" className="flex items-center gap-3 group" onClick={spinLogo}>
             <div className={`w-11 h-11 bg-myna-yellow rounded-xl border-2 border-myna-brown flex items-center justify-center overflow-hidden shadow-myna-bold transition-transform ${logoSpinning ? "logo-spin" : "group-hover:rotate-6"}`}>
-              <Image src="/myna-logo.png" alt="Myna Lingo" width={44} height={44} className="object-cover" />
+              <Image src="/myna-logo.png" alt="Myna Lingo" width={44} height={44} className="object-cover w-full h-full" />
             </div>
             <div className="flex flex-col">
               <span className="font-display font-extrabold text-xl lg:text-2xl tracking-wider text-myna-brown leading-none">
@@ -678,7 +678,7 @@ export default function Home() {
       <section className="py-20 px-4 lg:px-8 bg-myna-yellow border-y-2 border-myna-brown text-center">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="w-16 h-16 bg-myna-cream rounded-2xl border-2 border-myna-brown mx-auto flex items-center justify-center shadow-myna-bold rotate-3 overflow-hidden">
-            <Image src="/myna-logo.png" alt="" width={64} height={64} className="object-cover" />
+            <Image src="/myna-logo.png" alt="" width={64} height={64} className="object-cover w-full h-full" />
           </div>
           <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-myna-brown leading-tight">
             Your Language Journey Starts Here.
@@ -703,7 +703,7 @@ export default function Home() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-myna-yellow flex items-center justify-center overflow-hidden">
-                <Image src="/myna-logo.png" alt="" width={36} height={36} className="object-cover" />
+                <Image src="/myna-logo.png" alt="" width={36} height={36} className="object-cover w-full h-full" />
               </div>
               <span className="font-display font-extrabold text-xl text-myna-yellow">MYNA LINGO</span>
             </div>

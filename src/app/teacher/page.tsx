@@ -285,29 +285,16 @@ import {
   TrendingUp,
   Award,
   AlertTriangle,
-  Wifi,
-  WifiOff,
   Loader2,
-  Check,
-  X,
 } from "lucide-react";
 import { api, getUser, logout } from "@/lib/api";
 import { useLanguage } from "@/app/language-provider";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-
-interface Booking {
-  id: string;
-  scheduledAt: string;
-  durationMin: number;
-  serviceType: string;
-  studentName: string;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
-}
+import OnlineToggle from "@/components/OnlineToggle";
 
 interface Dashboard {
   isOnline: boolean;
   applicationStatus: string;
-
   stats: {
     totalCalls: number;
     weekCalls: number;
@@ -316,9 +303,13 @@ interface Dashboard {
     weekTeachingSec: number;
     monthTeachingSec: number;
   };
-
-  upcomingBookings: Booking[];
-
+  upcomingBookings: {
+    id: string;
+    scheduledAt: string;
+    durationMin: number;
+    serviceType: string;
+    studentName: string;
+  }[];
   recentCalls: {
     id: string;
     startTime: string;
@@ -354,8 +345,6 @@ export default function TeacherDashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [toggling, setToggling] = useState(false);
-  const [bookingAction, setBookingAction] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -389,68 +378,12 @@ export default function TeacherDashboardPage() {
       setData(d);
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Could not load dashboard"
+        err instanceof Error
+          ? err.message
+          : "Could not load dashboard",
       );
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function toggleOnline() {
-    if (!data) return;
-
-    const next = !data.isOnline;
-
-    setData({
-      ...data,
-      isOnline: next,
-    });
-
-    setToggling(true);
-
-    try {
-      await api("/teachers/me/online", {
-        method: "PATCH",
-        auth: true,
-        body: {
-          isOnline: next,
-        },
-      });
-    } catch (err: any) {
-      setData({
-        ...data,
-        isOnline: !next,
-      });
-
-      setError(err.message || "Could not update status");
-    } finally {
-      setToggling(false);
-    }
-  }
-
-  async function handleBookingAction(
-    bookingId: string,
-    action: "accept" | "reject"
-  ) {
-    if (bookingAction) return;
-
-    setBookingAction(bookingId);
-    setError("");
-
-    try {
-      await api(`/bookings/${bookingId}/${action}`, {
-        method: "PATCH",
-        auth: true,
-      });
-
-      await load();
-    } catch (err: any) {
-      setError(
-        err.message ||
-          `Could not ${action === "accept" ? "accept" : "reject"} booking`
-      );
-    } finally {
-      setBookingAction(null);
     }
   }
 
@@ -486,7 +419,6 @@ export default function TeacherDashboardPage() {
   return (
     <main className="min-h-screen bg-cream">
       <div className="max-w-5xl mx-auto px-6 py-10">
-
         {/* Header */}
         <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
           <div>
@@ -509,7 +441,22 @@ export default function TeacherDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <OnlineToggle
+              isOnline={data.isOnline}
+              disabled={pending}
+              onChange={(value) => {
+                setData((current) =>
+                  current
+                    ? {
+                        ...current,
+                        isOnline: value,
+                      }
+                    : current,
+                );
+              }}
+            />
+
             <LanguageSwitcher />
 
             <button
@@ -521,7 +468,7 @@ export default function TeacherDashboardPage() {
           </div>
         </div>
 
-        {/* Pending application banner */}
+        {/* Pending banner */}
         {pending && (
           <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
             <AlertTriangle
@@ -553,70 +500,13 @@ export default function TeacherDashboardPage() {
           </div>
         )}
 
-        {/* Online toggle */}
-        <div className="bg-white rounded-3xl shadow-sm p-6 mb-6 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4">
-            <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center transition ${
-                data.isOnline
-                  ? "bg-green-100 text-green-700"
-                  : "bg-myna-charcoal/5 text-myna-charcoal/40"
-              }`}
-            >
-              {data.isOnline ? (
-                <Wifi size={26} />
-              ) : (
-                <WifiOff size={26} />
-              )}
-            </div>
-
-            <div>
-              <p className="font-display font-bold text-lg text-myna-charcoal">
-                {data.isOnline
-                  ? "You're online"
-                  : "You're offline"}
-              </p>
-
-              <p className="text-sm text-myna-charcoal/60">
-                {data.isOnline
-                  ? "Students can start a live call with you."
-                  : "Turn on to accept live calls."}
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={toggleOnline}
-            disabled={pending || toggling}
-            className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-              data.isOnline
-                ? "bg-green-500"
-                : "bg-myna-charcoal/20"
-            }`}
-            aria-pressed={data.isOnline}
-          >
-            <span
-              className={`inline-block h-8 w-8 transform rounded-full bg-white shadow transition-transform ${
-                data.isOnline
-                  ? "translate-x-11"
-                  : "translate-x-1"
-              }`}
-            />
-
-            <span className="sr-only">
-              Toggle online status
-            </span>
-          </button>
-        </div>
-
-        {/* Error */}
         {error && data && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
             {error}
           </div>
         )}
 
-        {/* Call stats */}
+        {/* Stats — calls */}
         <div className="grid gap-4 md:grid-cols-3 mb-6">
           <StatCard
             icon={<Phone size={20} />}
@@ -637,39 +527,32 @@ export default function TeacherDashboardPage() {
           />
         </div>
 
-        {/* Teaching time stats */}
+        {/* Stats — teaching time */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           <StatCard
             icon={<Clock size={20} />}
             label="Total teaching time"
-            value={formatDuration(
-              data.stats.totalTeachingSec
-            )}
+            value={formatDuration(data.stats.totalTeachingSec)}
             accent
           />
 
           <StatCard
             icon={<Clock size={20} />}
             label="Teaching this week"
-            value={formatDuration(
-              data.stats.weekTeachingSec
-            )}
+            value={formatDuration(data.stats.weekTeachingSec)}
             accent
           />
 
           <StatCard
             icon={<Clock size={20} />}
             label="Teaching this month"
-            value={formatDuration(
-              data.stats.monthTeachingSec
-            )}
+            value={formatDuration(data.stats.monthTeachingSec)}
             accent
           />
         </div>
 
         {/* Two-column lists */}
         <div className="grid gap-6 md:grid-cols-2">
-
           {/* Upcoming bookings */}
           <section className="bg-white rounded-3xl shadow-sm p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -688,82 +571,29 @@ export default function TeacherDashboardPage() {
                 No upcoming lessons yet.
               </p>
             ) : (
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {data.upcomingBookings.map((b) => (
                   <li
                     key={b.id}
-                    className="pb-4 border-b border-myna-charcoal/5 last:border-0 last:pb-0"
+                    className="flex items-center justify-between gap-3 pb-3 border-b border-myna-charcoal/5 last:border-0 last:pb-0"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-myna-charcoal truncate">
-                          {b.studentName}
-                        </p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-myna-charcoal truncate">
+                        {b.studentName}
+                      </p>
 
-                        <p className="text-xs text-myna-charcoal/60 mt-1">
-                          {formatDate(b.scheduledAt)}
-                        </p>
-
-                        <p className="text-xs text-myna-charcoal/50 mt-1">
-                          {b.durationMin} minutes
-                        </p>
-                      </div>
-
-                      <span
-                        className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full shrink-0 ${
-                          b.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : b.status === "CONFIRMED"
-                            ? "bg-green-100 text-green-700"
-                            : b.status === "CANCELLED"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-blue-100 text-blue-700"
-                        }`}
-                      >
-                        {b.status}
-                      </span>
+                      <p className="text-xs text-myna-charcoal/60 mt-0.5">
+                        {formatDate(b.scheduledAt)} ·{" "}
+                        {b.durationMin}min
+                      </p>
                     </div>
 
-                    {/* Booking actions */}
-                    {b.status === "PENDING" && (
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          onClick={() =>
-                            handleBookingAction(
-                              b.id,
-                              "accept"
-                            )
-                          }
-                          disabled={bookingAction === b.id}
-                          className="flex-1 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                          {bookingAction === b.id ? (
-                            <Loader2
-                              size={15}
-                              className="animate-spin"
-                            />
-                          ) : (
-                            <Check size={15} />
-                          )}
-
-                          Accept
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleBookingAction(
-                              b.id,
-                              "reject"
-                            )
-                          }
-                          disabled={bookingAction === b.id}
-                          className="flex-1 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-sm font-semibold hover:bg-red-100 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                          <X size={15} />
-                          Reject
-                        </button>
-                      </div>
-                    )}
+                    <span className="text-[10px] font-bold uppercase tracking-wide bg-myna-orange/10 text-myna-orange px-2 py-1 rounded-full shrink-0">
+                      {b.serviceType ===
+                      "PROFESSIONAL_TEACHER"
+                        ? "Pro"
+                        : "Chat"}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -830,7 +660,7 @@ export default function TeacherDashboardPage() {
           </Link>
 
           <Link
-            href="/teachers/me"
+            href={`/teachers/${"me"}`}
             className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition opacity-50 pointer-events-none"
             aria-disabled
           >
