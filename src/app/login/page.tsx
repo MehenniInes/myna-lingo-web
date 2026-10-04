@@ -2,18 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
-    useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      router.push("/");
-    }
-  }, [router]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+      const stored = localStorage.getItem("user");
+      const u = stored ? JSON.parse(stored) : null;
+      if (u?.role === "STUDENT") router.push("/student");
+      else if (u?.role === "PARENT") router.push("/parent");
+      else if (u?.role === "TEACHER") router.push("/teacher");
+      else if (u?.role === "ADMIN") router.push("/admin");
+      else router.push("/");
+    } else {
+      setChecking(false);
+    }
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,37 +32,45 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/auth/login", {
+      const data = await api<{ accessToken: string; user: any }>("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: { email, password },
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Login failed");
-        setLoading(false);
-        return;
-      }
 
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/");
-    } catch {
-      setError("Could not connect to the server");
+
+      if (data.user.role === "STUDENT") router.push("/student");
+      else if (data.user.role === "PARENT") router.push("/parent");
+      else if (data.user.role === "TEACHER") router.push("/teacher");
+      else if (data.user.role === "ADMIN") router.push("/admin");
+      else router.push("/");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
       setLoading(false);
     }
   }
 
+  if (checking) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md bg-myna-white rounded-3xl shadow-sm p-8">
-        <h1 className="font-display text-3xl font-bold text-myna-charcoal text-center">Welcome back</h1>
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-sm p-8">
+        <h1 className="font-display text-3xl font-bold text-myna-charcoal text-center">
+          Welcome back
+        </h1>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-myna-charcoal mb-1">Email</label>
+            <label className="block text-sm font-medium text-myna-charcoal mb-1">
+              Email
+            </label>
             <input
               type="email"
               required
@@ -62,7 +81,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-myna-charcoal mb-1">Password</label>
+            <label className="block text-sm font-medium text-myna-charcoal mb-1">
+              Password
+            </label>
             <input
               type="password"
               required
@@ -84,7 +105,10 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-myna-charcoal/70">
-          Don&apos;t have an account? <a href="/register" className="text-myna-orange font-medium">Sign up</a>
+          Don&apos;t have an account?{" "}
+          <a href="/register" className="text-myna-orange font-medium">
+            Sign up
+          </a>
         </p>
       </div>
     </main>
