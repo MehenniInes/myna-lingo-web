@@ -357,22 +357,18 @@ const SPECIALIZATION_OPTIONS = [
   "Education",
   "Other",
 ];
-
-/* =========================================================
-   AVAILABILITY
-========================================================= */
-
-const DAYS = [
-  "SUNDAY",
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-] as const;
-
+const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 type Day = (typeof DAYS)[number];
+
+const DAY_LABELS: Record<Day, string> = {
+  MON: "Monday",
+  TUE: "Tuesday",
+  WED: "Wednesday",
+  THU: "Thursday",
+  FRI: "Friday",
+  SAT: "Saturday",
+  SUN: "Sunday",
+};
 
 const HOURS = Array.from(
   { length: 16 },
@@ -384,7 +380,6 @@ interface TimeSlot {
   startTime: string;
   endTime: string;
 }
-
 /* =========================================================
    COUNTRY SELECT
 ========================================================= */
@@ -1807,7 +1802,7 @@ export default function BecomeATeacherPage() {
     setSlots((s) => [
       ...s,
       {
-        day: "MONDAY",
+        day: "MON",
         startTime: "09:00",
         endTime: "10:00",
       },
