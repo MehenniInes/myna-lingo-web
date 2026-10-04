@@ -3,7 +3,12 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CalendarDays, Clock, ArrowLeft, Send } from "lucide-react";
+import {
+  CalendarDays,
+  Clock,
+  ArrowLeft,
+  Send,
+} from "lucide-react";
 import { api, getUser } from "@/lib/api";
 
 interface Teacher {
@@ -13,14 +18,17 @@ interface Teacher {
   bio: string | null;
   profileTitle: string | null;
   requestedHourlyRateDA: number | null;
+
   availability: {
     day: string;
     startTime: string;
     endTime: string;
   }[] | null;
+
   user: {
     fullName: string;
   };
+
   teacherLanguages: {
     id: string;
     serviceType: string;
@@ -42,7 +50,71 @@ const DAY_NAMES: Record<string, string> = {
   SUN: "Sunday",
 };
 
-const DAY_ORDER = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const DAY_ORDER = [
+  "MON",
+  "TUE",
+  "WED",
+  "THU",
+  "FRI",
+  "SAT",
+  "SUN",
+];
+
+function normalizeDay(day: string) {
+  const value = day.trim().toUpperCase();
+
+  if (DAY_NAMES[value]) {
+    return value;
+  }
+
+  const fullDay = Object.entries(DAY_NAMES).find(
+    ([, name]) => name.toUpperCase() === value,
+  );
+
+  return fullDay?.[0] ?? value;
+}
+
+function getDayCode(date: string) {
+  const selectedDate = new Date(`${date}T12:00:00`);
+  const jsDay = selectedDate.getDay();
+
+  return [
+    "SUN",
+    "MON",
+    "TUE",
+    "WED",
+    "THU",
+    "FRI",
+    "SAT",
+  ][jsDay];
+}
+
+function timeToMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+
+  if (
+    Number.isNaN(hours) ||
+    Number.isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return NaN;
+  }
+
+  return hours * 60 + minutes;
+}
+
+function formatMinutes(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(
+    2,
+    "0",
+  )}`;
+}
 
 function NewBookingContent() {
   const router = useRouter();
@@ -84,91 +156,123 @@ function NewBookingContent() {
       setError("");
 
       const data = await api<Teacher>(`/teachers/${id}`);
+
       setTeacher(data);
 
       if (data.teacherLanguages.length > 0) {
-        setServiceType(data.teacherLanguages[0].serviceType);
+        setServiceType(
+          data.teacherLanguages[0].serviceType,
+        );
       }
     } catch (err: any) {
-      setError(err.message || "Could not load teacher.");
+      setError(
+        err.message || "Could not load teacher.",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   const availableDays = useMemo(() => {
-    if (!teacher?.availability) return [];
+    if (!teacher?.availability) {
+      return [];
+    }
 
     return [...teacher.availability].sort(
-      (a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day),
+      (a, b) =>
+        DAY_ORDER.indexOf(normalizeDay(a.day)) -
+        DAY_ORDER.indexOf(normalizeDay(b.day)),
     );
   }, [teacher]);
 
   const selectedDayAvailability = useMemo(() => {
-    if (!teacher?.availability || !date) return [];
+    if (!teacher?.availability || !date) {
+      return [];
+    }
 
-    const selectedDate = new Date(`${date}T12:00:00`);
-    const jsDay = selectedDate.getDay();
-
-    const dayCode =
-      jsDay === 0
-        ? "SUN"
-        : jsDay === 1
-          ? "MON"
-          : jsDay === 2
-            ? "TUE"
-            : jsDay === 3
-              ? "WED"
-              : jsDay === 4
-                ? "THU"
-                : jsDay === 5
-                  ? "FRI"
-                  : "SAT";
+    const dayCode = getDayCode(date);
 
     return teacher.availability.filter(
-      (slot) =>
-        slot.day === dayCode ||
-        slot.day.toLowerCase() === DAY_NAMES[dayCode].toLowerCase(),
+      (slot) => normalizeDay(slot.day) === dayCode,
     );
   }, [teacher, date]);
+
+  const selectedDuration = Number(duration);
+
+  const validTimeRange = useMemo(() => {
+    if (
+      !time ||
+      selectedDayAvailability.length === 0 ||
+      Number.isNaN(selectedDuration)
+    ) {
+      return null;
+    }
+
+    const startMinutes = timeToMinutes(time);
+
+    if (Number.isNaN(startMinutes)) {
+      return null;
+    }
+
+    const endMinutes =
+      startMinutes + selectedDuration;
+
+    const matchingSlot =
+      selectedDayAvailability.find((slot) => {
+        const availabilityStart =
+          timeToMinutes(slot.startTime);
+
+        const availabilityEnd =
+          timeToMinutes(slot.endTime);
+
+        return (
+          startMinutes >= availabilityStart &&
+          endMinutes <= availabilityEnd
+        );
+      });
+
+    if (!matchingSlot) {
+      return null;
+    }
+
+    return {
+      startMinutes,
+      endMinutes,
+      endTime: formatMinutes(endMinutes),
+    };
+  }, [
+    time,
+    selectedDayAvailability,
+    selectedDuration,
+  ]);
 
   function getMinimumDate() {
     const today = new Date();
 
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(
+      today.getMonth() + 1,
+    ).padStart(2, "0");
+    const day = String(today.getDate()).padStart(
+      2,
+      "0",
+    );
 
     return `${year}-${month}-${day}`;
   }
 
   function isDateAvailable(selectedDate: string) {
-    if (!teacher?.availability || teacher.availability.length === 0) {
+    if (
+      !teacher?.availability ||
+      teacher.availability.length === 0
+    ) {
       return false;
     }
 
-    const dateObject = new Date(`${selectedDate}T12:00:00`);
-    const jsDay = dateObject.getDay();
-
-    const dayCode =
-      jsDay === 0
-        ? "SUN"
-        : jsDay === 1
-          ? "MON"
-          : jsDay === 2
-            ? "TUE"
-            : jsDay === 3
-              ? "WED"
-              : jsDay === 4
-                ? "THU"
-                : jsDay === 5
-                  ? "FRI"
-                  : "SAT";
+    const dayCode = getDayCode(selectedDate);
 
     return teacher.availability.some(
-      (slot) =>
-        slot.day === dayCode ||
-        slot.day.toLowerCase() === DAY_NAMES[dayCode].toLowerCase(),
+      (slot) => normalizeDay(slot.day) === dayCode,
     );
   }
 
@@ -176,7 +280,10 @@ function NewBookingContent() {
     setDate(value);
     setTime("");
 
-    if (value && !isDateAvailable(value)) {
+    if (
+      value &&
+      !isDateAvailable(value)
+    ) {
       setError(
         "This teacher is not available on the selected day. Please choose another day.",
       );
@@ -185,7 +292,102 @@ function NewBookingContent() {
     }
   }
 
-  async function submitBooking(e: React.FormEvent) {
+  function handleTimeChange(value: string) {
+    setTime(value);
+
+    if (!value) {
+      setError("");
+      return;
+    }
+
+    const startMinutes = timeToMinutes(value);
+
+    if (Number.isNaN(startMinutes)) {
+      setError("Please choose a valid time.");
+      return;
+    }
+
+    const endMinutes =
+      startMinutes + selectedDuration;
+
+    const fitsAvailability =
+      selectedDayAvailability.some((slot) => {
+        const availabilityStart =
+          timeToMinutes(slot.startTime);
+
+        const availabilityEnd =
+          timeToMinutes(slot.endTime);
+
+        return (
+          startMinutes >= availabilityStart &&
+          endMinutes <= availabilityEnd
+        );
+      });
+
+    if (!fitsAvailability) {
+      setError(
+        `This lesson does not fit inside the teacher's availability. Please choose a time between ${selectedDayAvailability
+          .map(
+            (slot) =>
+              `${slot.startTime} – ${slot.endTime}`,
+          )
+          .join(", ")}.`,
+      );
+    } else {
+      setError("");
+    }
+  }
+
+  function handleDurationChange(value: string) {
+    setDuration(value);
+
+    if (
+      !time ||
+      selectedDayAvailability.length === 0
+    ) {
+      setError("");
+      return;
+    }
+
+    const newDuration = Number(value);
+    const startMinutes = timeToMinutes(time);
+
+    if (
+      Number.isNaN(startMinutes) ||
+      Number.isNaN(newDuration)
+    ) {
+      return;
+    }
+
+    const endMinutes =
+      startMinutes + newDuration;
+
+    const fitsAvailability =
+      selectedDayAvailability.some((slot) => {
+        const availabilityStart =
+          timeToMinutes(slot.startTime);
+
+        const availabilityEnd =
+          timeToMinutes(slot.endTime);
+
+        return (
+          startMinutes >= availabilityStart &&
+          endMinutes <= availabilityEnd
+        );
+      });
+
+    if (!fitsAvailability) {
+      setError(
+        `A ${newDuration}-minute lesson starting at ${time} does not fit inside the teacher's availability.`,
+      );
+    } else {
+      setError("");
+    }
+  }
+
+  async function submitBooking(
+    e: React.FormEvent,
+  ) {
     e.preventDefault();
 
     if (!teacherId) {
@@ -193,8 +395,13 @@ function NewBookingContent() {
       return;
     }
 
-    if (!date || !time) {
-      setError("Please select a date and time.");
+    if (!date) {
+      setError("Please select a date.");
+      return;
+    }
+
+    if (!time) {
+      setError("Please select a time.");
       return;
     }
 
@@ -204,11 +411,29 @@ function NewBookingContent() {
     }
 
     if (!isDateAvailable(date)) {
-      setError("The teacher is not available on the selected day.");
+      setError(
+        "The teacher is not available on the selected day.",
+      );
       return;
     }
 
-    const scheduledAt = `${date}T${time}:00`;
+    if (!validTimeRange) {
+      setError(
+        "This lesson does not fit inside the teacher's availability. Please choose another time or a shorter duration.",
+      );
+      return;
+    }
+
+    const scheduledAt =
+      `${date}T${time}:00`;
+
+    console.log("BOOKING REQUEST:", {
+      teacherId,
+      serviceType,
+      scheduledAt,
+      durationMin: Number(duration),
+      notes: notes.trim() || undefined,
+    });
 
     try {
       setSubmitting(true);
@@ -222,13 +447,17 @@ function NewBookingContent() {
           serviceType,
           scheduledAt,
           durationMin: Number(duration),
-          notes: notes.trim() || undefined,
+          notes:
+            notes.trim() || undefined,
         },
       });
 
       router.push("/student/bookings");
     } catch (err: any) {
-      setError(err.message || "Could not create booking.");
+      setError(
+        err.message ||
+          "Could not create booking.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -237,7 +466,9 @@ function NewBookingContent() {
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-cream">
-        <p className="text-myna-charcoal/60">Loading teacher...</p>
+        <p className="text-myna-charcoal/60">
+          Loading teacher...
+        </p>
       </main>
     );
   }
@@ -246,7 +477,9 @@ function NewBookingContent() {
     return (
       <main className="min-h-screen bg-cream px-6 py-12">
         <div className="mx-auto max-w-xl rounded-3xl bg-white p-8 text-center shadow-sm">
-          <p className="text-red-600">{error || "Teacher not found."}</p>
+          <p className="text-red-600">
+            {error || "Teacher not found."}
+          </p>
 
           <Link
             href="/find-teacher"
@@ -261,7 +494,9 @@ function NewBookingContent() {
   }
 
   const teacherName =
-    [teacher.firstName, teacher.lastName].filter(Boolean).join(" ") ||
+    [teacher.firstName, teacher.lastName]
+      .filter(Boolean)
+      .join(" ") ||
     teacher.user.fullName;
 
   return (
@@ -294,7 +529,10 @@ function NewBookingContent() {
 
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-myna-orange/10 bg-myna-orange/5 p-4">
-              <CalendarDays size={18} className="text-myna-orange" />
+              <CalendarDays
+                size={18}
+                className="text-myna-orange"
+              />
 
               <p className="mt-2 text-xs text-myna-charcoal/50">
                 Available days
@@ -304,8 +542,13 @@ function NewBookingContent() {
                 {availableDays.length > 0
                   ? availableDays
                       .map((slot) => {
-                        const code = slot.day.toUpperCase();
-                        return DAY_NAMES[code] ?? slot.day;
+                        const code =
+                          normalizeDay(slot.day);
+
+                        return (
+                          DAY_NAMES[code] ??
+                          slot.day
+                        );
                       })
                       .join(", ")
                   : "No availability set"}
@@ -313,7 +556,10 @@ function NewBookingContent() {
             </div>
 
             <div className="rounded-2xl bg-myna-charcoal/5 p-4">
-              <Clock size={18} className="text-myna-orange" />
+              <Clock
+                size={18}
+                className="text-myna-orange"
+              />
 
               <p className="mt-2 text-xs text-myna-charcoal/50">
                 Hourly rate
@@ -327,7 +573,11 @@ function NewBookingContent() {
             </div>
           </div>
 
-          <form onSubmit={submitBooking} className="mt-8 space-y-5">
+          <form
+            onSubmit={submitBooking}
+            className="mt-8 space-y-5"
+          >
+            {/* Date */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Date
@@ -337,30 +587,40 @@ function NewBookingContent() {
                 type="date"
                 min={getMinimumDate()}
                 value={date}
-                onChange={(e) => handleDateChange(e.target.value)}
+                onChange={(e) =>
+                  handleDateChange(
+                    e.target.value,
+                  )
+                }
                 className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
                 required
               />
 
-              {date && selectedDayAvailability.length > 0 && (
-                <p className="mt-2 text-xs text-green-700">
-                  Available:{" "}
-                  {selectedDayAvailability
-                    .map(
-                      (slot) =>
-                        `${slot.startTime} – ${slot.endTime}`,
-                    )
-                    .join(", ")}
-                </p>
-              )}
+              {date &&
+                selectedDayAvailability.length >
+                  0 && (
+                  <p className="mt-2 text-xs text-green-700">
+                    Available:{" "}
+                    {selectedDayAvailability
+                      .map(
+                        (slot) =>
+                          `${slot.startTime} – ${slot.endTime}`,
+                      )
+                      .join(", ")}
+                  </p>
+                )}
 
-              {date && selectedDayAvailability.length === 0 && (
-                <p className="mt-2 text-xs text-red-600">
-                  Teacher is not available on this day.
-                </p>
-              )}
+              {date &&
+                selectedDayAvailability.length ===
+                  0 && (
+                  <p className="mt-2 text-xs text-red-600">
+                    Teacher is not available on
+                    this day.
+                  </p>
+                )}
             </div>
 
+            {/* Time */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Time
@@ -369,19 +629,54 @@ function NewBookingContent() {
               <input
                 type="time"
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
-                disabled={!date || selectedDayAvailability.length === 0}
+                min={
+                  selectedDayAvailability.length >
+                  0
+                    ? selectedDayAvailability[0]
+                        .startTime
+                    : undefined
+                }
+                max={
+                  selectedDayAvailability.length >
+                  0
+                    ? selectedDayAvailability[
+                        selectedDayAvailability.length -
+                          1
+                      ].endTime
+                    : undefined
+                }
+                onChange={(e) =>
+                  handleTimeChange(
+                    e.target.value,
+                  )
+                }
+                disabled={
+                  !date ||
+                  selectedDayAvailability.length ===
+                    0
+                }
                 className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange disabled:cursor-not-allowed disabled:bg-gray-100"
                 required
               />
 
-              {selectedDayAvailability.length > 0 && (
+              {selectedDayAvailability.length >
+                0 && (
                 <p className="mt-2 text-xs text-myna-charcoal/50">
-                  Choose a time inside the teacher's availability window.
+                  Choose a start time inside the
+                  teacher&apos;s availability
+                  window.
+                </p>
+              )}
+
+              {validTimeRange && (
+                <p className="mt-2 text-xs font-medium text-green-700">
+                  Lesson: {time} –{" "}
+                  {validTimeRange.endTime}
                 </p>
               )}
             </div>
 
+            {/* Duration */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Duration
@@ -389,18 +684,35 @@ function NewBookingContent() {
 
               <select
                 value={duration}
-                onChange={(e) => setDuration(e.target.value)}
+                onChange={(e) =>
+                  handleDurationChange(
+                    e.target.value,
+                  )
+                }
                 className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
               >
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="45">45 minutes</option>
-                <option value="60">60 minutes</option>
-                <option value="75">75 minutes</option>
-                <option value="90">90 minutes</option>
+                <option value="15">
+                  15 minutes
+                </option>
+                <option value="30">
+                  30 minutes
+                </option>
+                <option value="45">
+                  45 minutes
+                </option>
+                <option value="60">
+                  60 minutes
+                </option>
+                <option value="75">
+                  75 minutes
+                </option>
+                <option value="90">
+                  90 minutes
+                </option>
               </select>
             </div>
 
+            {/* Lesson type */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Lesson type
@@ -408,24 +720,35 @@ function NewBookingContent() {
 
               <select
                 value={serviceType}
-                onChange={(e) => setServiceType(e.target.value)}
+                onChange={(e) =>
+                  setServiceType(
+                    e.target.value,
+                  )
+                }
                 className="w-full rounded-2xl border border-myna-charcoal/10 bg-white px-4 py-3 outline-none focus:border-myna-orange"
                 required
               >
-                {teacher.teacherLanguages.map((teacherLanguage) => (
-                  <option
-                    key={teacherLanguage.id}
-                    value={teacherLanguage.serviceType}
-                  >
-                    {teacherLanguage.language.name} —{" "}
-                    {teacherLanguage.serviceType === "CONVERSATION_PARTNER"
-                      ? "Conversation"
-                      : "Professional Teacher"}
-                  </option>
-                ))}
+                {teacher.teacherLanguages.map(
+                  (teacherLanguage) => (
+                    <option
+                      key={teacherLanguage.id}
+                      value={
+                        teacherLanguage.serviceType
+                      }
+                    >
+                      {teacherLanguage.language.name}{" "}
+                      —{" "}
+                      {teacherLanguage.serviceType ===
+                      "CONVERSATION_PARTNER"
+                        ? "Conversation"
+                        : "Professional Teacher"}
+                    </option>
+                  ),
+                )}
               </select>
             </div>
 
+            {/* Note */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-myna-charcoal">
                 Note
@@ -437,7 +760,9 @@ function NewBookingContent() {
 
               <textarea
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) =>
+                  setNotes(e.target.value)
+                }
                 rows={4}
                 maxLength={500}
                 placeholder="Tell the teacher what you would like to work on..."
@@ -445,12 +770,14 @@ function NewBookingContent() {
               />
             </div>
 
+            {/* Error */}
             {error && (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={
@@ -458,7 +785,9 @@ function NewBookingContent() {
                 !date ||
                 !time ||
                 !serviceType ||
-                selectedDayAvailability.length === 0
+                selectedDayAvailability.length ===
+                  0 ||
+                !validTimeRange
               }
               className="flex w-full items-center justify-center gap-2 rounded-full bg-myna-orange py-3.5 font-semibold text-white transition hover:bg-myna-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -473,8 +802,9 @@ function NewBookingContent() {
             </button>
 
             <p className="text-center text-xs text-myna-charcoal/50">
-              Your request will be sent to the teacher. Your lesson becomes
-              confirmed after the teacher accepts it.
+              Your request will be sent to the
+              teacher. Your lesson becomes confirmed
+              after the teacher accepts it.
             </p>
           </form>
         </div>
@@ -488,7 +818,9 @@ export default function NewBookingPage() {
     <Suspense
       fallback={
         <main className="flex min-h-screen items-center justify-center bg-cream">
-          <p className="text-myna-charcoal/60">Loading...</p>
+          <p className="text-myna-charcoal/60">
+            Loading...
+          </p>
         </main>
       }
     >
