@@ -1,6 +1,6 @@
 
 "use client";
-
+import { api, getUser, logout } from "@/lib/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -72,6 +72,7 @@ export default function TeacherDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [incomingCall, setIncomingCall] = useState<any>(null);
 
   useEffect(() => {
     const u = getUser();
@@ -90,6 +91,19 @@ export default function TeacherDashboardPage() {
     load();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+    useEffect(() => {
+    const check = async () => {
+      try {
+        const c = await api<any>("/calls/active-for-teacher", { auth: true });
+        setIncomingCall(c ?? null);
+      } catch {
+        // silent
+      }
+    };
+    check();
+    const id = setInterval(check, 5000);
+    return () => clearInterval(id);
   }, []);
 
   async function load() {
@@ -193,7 +207,23 @@ export default function TeacherDashboardPage() {
             </button>
           </div>
         </div>
-
+        {incomingCall && (
+          <a
+            href={`/teacher/call/${incomingCall.id}`}
+            className="block mb-6 rounded-2xl bg-myna-orange text-white p-5 shadow-md hover:bg-myna-orange/90 transition"
+          >
+            <div className="flex items-center gap-4">
+              <span className="w-3 h-3 rounded-full bg-white animate-pulse" />
+              <div className="flex-1">
+                <p className="font-bold">📞 Incoming call from {incomingCall.student?.user?.fullName ?? "a student"}</p>
+                <p className="text-xs text-white/80 mt-0.5">Click to join the video call now.</p>
+              </div>
+              <span className="font-bold text-sm bg-white text-myna-orange px-4 py-2 rounded-full">
+                Join now
+              </span>
+            </div>
+          </a>
+        )}
         {/* Pending banner */}
         {pending && (
           <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
