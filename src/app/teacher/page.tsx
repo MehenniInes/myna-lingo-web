@@ -1,9 +1,10 @@
 
 "use client";
-import { api, getUser, logout } from "@/lib/api";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import {
   Phone,
   Calendar,
