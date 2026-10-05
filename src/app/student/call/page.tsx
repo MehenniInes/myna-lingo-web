@@ -1,13 +1,11 @@
 "use client";
-
+export const dynamic = "force-dynamic";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Phone, PhoneOff, Mic, MicOff, Video, VideoOff, Loader2,
 } from "lucide-react";
-import AgoraRTC, {
-  IAgoraRTCClient, ICameraVideoTrack, IMicrophoneAudioTrack, IAgoraRTCRemoteUser,
-} from "agora-rtc-sdk-ng";
+
 import { api, getUser } from "@/lib/api";
 
 interface Teacher {
@@ -47,6 +45,15 @@ export default function CallPage() {
 function CallPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+   // Load Agora SDK client-side only — it touches `window` at import time.
+  const [agoraSdk, setAgoraSdk] = useState<typeof import("agora-rtc-sdk-ng") | null>(null);
+  useEffect(() => {
+    let alive = true;
+    import("agora-rtc-sdk-ng").then((mod) => {
+      if (alive) setAgoraSdk(mod);
+    });
+    return () => { alive = false; };
+  }, []);
 
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,9 +67,9 @@ function CallPageContent() {
   const [ending, setEnding] = useState(false);
   const [summary, setSummary] = useState<EndSummary | null>(null);
 
-  const clientRef = useRef<IAgoraRTCClient | null>(null);
-  const audioRef = useRef<IMicrophoneAudioTrack | null>(null);
-  const videoRef = useRef<ICameraVideoTrack | null>(null);
+   const clientRef = useRef<any>(null);
+  const audioRef = useRef<any>(null);
+  const videoRef = useRef<any>(null);
   const localDivRef = useRef<HTMLDivElement>(null);
   const remoteDivRef = useRef<HTMLDivElement>(null);
   const tickRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,10 +121,15 @@ function CallPageContent() {
   }
 
   async function joinAgora(data: StartCallResponse) {
+     if (!agoraSdk) {
+      setError("Video SDK is still loading — please try again in a second");
+      return;
+    }
+    const AgoraRTC = agoraSdk.default;
     const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
     clientRef.current = client;
 
-    client.on("user-published", async (user: IAgoraRTCRemoteUser, mediaType) => {
+        client.on("user-published", async (user: any, mediaType: any) => {
       await client.subscribe(user, mediaType);
       if (mediaType === "video" && remoteDivRef.current) {
         user.videoTrack?.play(remoteDivRef.current);
@@ -127,7 +139,7 @@ function CallPageContent() {
       }
     });
 
-    client.on("user-unpublished", (user) => {
+        client.on("user-unpublished", (user: any) => {
       user.videoTrack?.stop();
       user.audioTrack?.stop();
     });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "./language-provider";
+import ActiveSessionBanner from "@/components/ActiveSessionBanner";
 
 export const metadata: Metadata = {
   title: "Myna Lingo",
@@ -21,7 +22,10 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>
+          {children}
+          <ActiveSessionBanner />
+        </LanguageProvider>
       </body>
     </html>
   );

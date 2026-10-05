@@ -6,10 +6,9 @@ import { useParams, useRouter } from "next/navigation";
 import {
   PhoneOff, Mic, MicOff, Video, VideoOff, Loader2,
 } from "lucide-react";
-import AgoraRTC, {
-  IAgoraRTCClient, ICameraVideoTrack, IMicrophoneAudioTrack, IAgoraRTCRemoteUser,
-} from "agora-rtc-sdk-ng";
+
 import { api, getUser } from "@/lib/api";
+import type AgoraRTCType from "agora-rtc-sdk-ng";
 
 interface TeacherCallInfo {
   callId: string;
@@ -23,6 +22,10 @@ interface TeacherCallInfo {
 }
 
 export default function TeacherCallPage() {
+    const [agoraSdk, setAgoraSdk] = useState<typeof import("agora-rtc-sdk-ng") | null>(null);
+  useEffect(() => {
+    import("agora-rtc-sdk-ng").then((mod) => setAgoraSdk(mod));
+  }, []);
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -35,9 +38,9 @@ export default function TeacherCallPage() {
   const [cameraOff, setCameraOff] = useState(false);
   const [ending, setEnding] = useState(false);
 
-  const clientRef = useRef<IAgoraRTCClient | null>(null);
-  const audioRef = useRef<IMicrophoneAudioTrack | null>(null);
-  const videoRef = useRef<ICameraVideoTrack | null>(null);
+    const clientRef = useRef<any>(null);
+  const audioRef = useRef<any>(null);
+  const videoRef = useRef<any>(null);
   const localDivRef = useRef<HTMLDivElement>(null);
   const remoteDivRef = useRef<HTMLDivElement>(null);
   const tickRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,10 +76,12 @@ export default function TeacherCallPage() {
     if (!info) return;
     setError("");
 
+        if (!agoraSdk) return;
+    const AgoraRTC = agoraSdk.default;
     const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
     clientRef.current = client;
 
-    client.on("user-published", async (user: IAgoraRTCRemoteUser, mediaType) => {
+       client.on("user-published", async (user: any, mediaType: any) => {
       await client.subscribe(user, mediaType);
       if (mediaType === "video" && remoteDivRef.current) {
         user.videoTrack?.play(remoteDivRef.current);
@@ -86,7 +91,7 @@ export default function TeacherCallPage() {
       }
     });
 
-    client.on("user-unpublished", (user) => {
+       client.on("user-unpublished", (user: any) => {
       user.videoTrack?.stop();
       user.audioTrack?.stop();
     });
