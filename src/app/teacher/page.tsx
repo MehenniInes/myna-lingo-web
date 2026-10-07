@@ -443,6 +443,13 @@ export default function TeacherDashboardPage() {
               Coming soon
             </p>
           </Link>
+                    <Link
+            href="/teacher/teaching-time"
+            className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition"
+          >
+            <p className="font-bold text-myna-charcoal">⏱ Teaching time</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Weekly / monthly breakdown</p>
+          </Link>
         </div>
       </div>
     </main>
