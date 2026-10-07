@@ -40,13 +40,16 @@ export default function ActiveSessionBanner() {
     let active = true;
 
     async function check() {
-      try {
-        const data = await api<ActivePresence | null>("/group-sessions/active", { auth: true });
-        if (active) setPresence(data);
-      } catch {
-        if (active) setPresence(null);
-      }
-    }
+  try {
+   const data = await api<ActivePresence | null>("/group-sessions/active", {
+  auth: true,
+  silent: true,
+});
+    if (active) setPresence(data);
+  } catch {
+    if (active) setPresence(null);
+  }
+}
 
     check();
     const interval = setInterval(check, 15000);

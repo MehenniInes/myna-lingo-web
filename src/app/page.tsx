@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "./language-provider";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Language {
   id: string;
@@ -13,12 +13,17 @@ interface Language {
 
 export default function Home() {
   const { locale, setLocale, t } = useLanguage();
-  const [user, setUser] = useState<{ fullName: string; role: string } | null>(() => {
-    if (typeof window === "undefined") return null;
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState<{ fullName: string; role: string } | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [languages, setLanguages] = useState<Language[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try { setUser(JSON.parse(stored)); } catch {}
+    }
+  }, []);
 
   useEffect(() => {
     fetch(`${API_URL}/languages`)
@@ -45,7 +50,10 @@ export default function Home() {
           >
             {locale === "en" ? "AR" : locale === "ar" ? "FR" : "EN"}
           </button>
-          {user ? (
+
+          {!mounted ? (
+            <div className="w-40 h-8" />
+          ) : user ? (
             <>
               <a href="/become-a-teacher" className="px-5 py-2 rounded-full font-medium text-myna-charcoal hover:bg-myna-yellow/20 transition">{t("home.becomeTeacher")}</a>
               <span className="text-myna-charcoal font-medium">{t("home.hi")}, {user.fullName}</span>
@@ -70,7 +78,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* POPULAR LANGUAGES — real data from /languages */}
+      {/* POPULAR LANGUAGES */}
       {languages.length > 0 && (
         <section className="px-6 py-16 bg-myna-white">
           <div className="max-w-5xl mx-auto text-center">

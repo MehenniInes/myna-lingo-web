@@ -26,6 +26,12 @@ export default function GroupsPage() {
   const [starting, setStarting] = useState<string | null>(null);
   const [expandedSessions, setExpandedSessions] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Record<string, any[]>>({});
+  const [userRole, setUserRole] = useState<string>("");
+
+useEffect(() => {
+  const user = getUser();
+  if (user) setUserRole(user.role);
+}, []);
 
   useEffect(() => {
     const user = getUser();
@@ -58,22 +64,7 @@ export default function GroupsPage() {
     }
   }
 
-  async function startGroupSession(groupClassId: string) {
-    setStarting(groupClassId);
-    setError("");
-    setMessage("");
-    try {
-      const session = await api<{ id: string }>(
-        `/group-sessions/start/${groupClassId}`,
-        { method: "POST", auth: true }
-      );
-      router.push(`/student/groups/${session.id}`);
-    } catch (err: any) {
-      setError(err.message);
-      setStarting(null);
-    }
-  }
-
+  
   function ageLabel(cat: string) {
     if (cat === "AGE_6_11") return t("groups.age6_11");
     if (cat === "AGE_12_14") return t("groups.age12_14");
@@ -157,7 +148,6 @@ export default function GroupsPage() {
                     <p>📅 {formatShortDateTime(locale, g.startTime)}</p>
                     <p>👥 {t("groups.spots", { n: spotsLeft, cap: g.capacity })}</p>
                   </div>
-
                   <div className="mt-6 space-y-2 mt-auto pt-4">
                     <div className="flex items-center justify-between">
                       <span className="font-display text-2xl font-bold text-myna-charcoal">
@@ -172,18 +162,10 @@ export default function GroupsPage() {
                         {joining === g.id
                           ? t("groups.joining")
                           : spotsLeft <= 0
-                          ? t("groups.full")
-                          : t("groups.join")}
+                            ? t("groups.full")
+                            : t("groups.join")}
                       </button>
                     </div>
-
-                    <button
-                      onClick={() => startGroupSession(g.id)}
-                      disabled={starting === g.id}
-                      className="w-full py-2.5 rounded-full bg-myna-charcoal text-white font-semibold text-sm hover:bg-myna-charcoal/90 transition disabled:opacity-50"
-                    >
-                      {starting === g.id ? "Starting..." : "🎥 Start Live Session"}
-                    </button>
 
                     <button
                       onClick={() => loadSessions(g.id)}
@@ -212,8 +194,7 @@ export default function GroupsPage() {
                                     {formatSessionTime(s.startedAt)}
                                   </p>
                                   <p className="text-myna-charcoal/50 mt-0.5">
-                                    {s.status === "ACTIVE" ? "🟢 Live" : "✅ Completed"} ·{" "}
-                                    {s.participants.length} participants · {sessionDuration(s.startedAt, s.endedAt)}
+                                    {s.status === "ACTIVE" ? "🟢 Live" : "✅ Completed"} · {s.participants.length} participants · {sessionDuration(s.startedAt, s.endedAt)}
                                   </p>
                                 </div>
                                 {s.status === "ACTIVE" ? (
@@ -224,12 +205,9 @@ export default function GroupsPage() {
                                     Rejoin
                                   </button>
                                 ) : (
-                                  <button
-                                    onClick={() => startGroupSession(g.id)}
-                                    className="px-3 py-1.5 rounded-full bg-myna-charcoal text-white font-semibold"
-                                  >
-                                    Restart
-                                  </button>
+                                  <span className="text-myna-charcoal/40 text-[10px] uppercase tracking-wide">
+                                    Completed
+                                  </span>
                                 )}
                               </div>
                             ))}

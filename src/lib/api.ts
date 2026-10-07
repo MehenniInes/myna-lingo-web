@@ -1,5 +1,5 @@
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -8,7 +8,6 @@ export function getToken(): string | null {
 
 export function getUser() {
   if (typeof window === "undefined") return null;
-
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
 }
@@ -23,13 +22,15 @@ type FetchOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: any;
   auth?: boolean;
+  silent?: boolean;
 };
 
 export async function api<T = any>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, auth = false } = options;
+  // ✅ Destructure options with defaults
+  const { method = "GET", body, auth = false, silent = false } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -37,7 +38,6 @@ export async function api<T = any>(
 
   if (auth) {
     const token = getToken();
-
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -52,23 +52,20 @@ export async function api<T = any>(
   if (!res.ok) {
     const error = await res
       .json()
-      .catch(() => ({
-        message: "Request failed",
-      }));
+      .catch(() => ({ message: "Request failed" }));
 
-    console.error("API ERROR:", {
-      endpoint,
-      method,
-      status: res.status,
-      statusText: res.statusText,
-      response: error,
-      requestBody: body,
-    });
+    if (!silent) {
+      console.error("API ERROR:", {
+        endpoint,
+        method,
+        status: res.status,
+        statusText: res.statusText,
+        response: error,
+        requestBody: body,
+      });
+    }
 
-    throw new Error(
-      error.message ||
-        `HTTP ${res.status}`
-    );
+    throw new Error(error.message || `HTTP ${res.status}`);
   }
 
   if (res.status === 204) {

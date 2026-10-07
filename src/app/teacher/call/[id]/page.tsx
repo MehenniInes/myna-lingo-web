@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 
 import { api, getUser } from "@/lib/api";
-import type AgoraRTCType from "agora-rtc-sdk-ng";
 
 interface TeacherCallInfo {
   callId: string;
@@ -22,10 +21,13 @@ interface TeacherCallInfo {
 }
 
 export default function TeacherCallPage() {
-    const [agoraSdk, setAgoraSdk] = useState<typeof import("agora-rtc-sdk-ng") | null>(null);
+  const [agoraSdk, setAgoraSdk] =
+    useState<typeof import("agora-rtc-sdk-ng") | null>(null);
+
   useEffect(() => {
     import("agora-rtc-sdk-ng").then((mod) => setAgoraSdk(mod));
   }, []);
+
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -38,7 +40,7 @@ export default function TeacherCallPage() {
   const [cameraOff, setCameraOff] = useState(false);
   const [ending, setEnding] = useState(false);
 
-    const clientRef = useRef<any>(null);
+  const clientRef = useRef<any>(null);
   const audioRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
   const localDivRef = useRef<HTMLDivElement>(null);
@@ -63,7 +65,10 @@ export default function TeacherCallPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await api<TeacherCallInfo>(`/calls/${callId}/teacher-token`, { auth: true });
+      const data = await api<TeacherCallInfo>(
+        `/calls/${callId}/teacher-token`,
+        { auth: true },
+      );
       setInfo(data);
     } catch (err: any) {
       setError(err.message || "Could not load this call");
@@ -72,16 +77,44 @@ export default function TeacherCallPage() {
     }
   }
 
+  // Helper: subscribe to any user who was ALREADY publishing before we joined
+  async function subscribeToExistingUsers(client: any) {
+    const existingUsers = client.remoteUsers || [];
+    console.log("[Teacher] Existing remote users:", existingUsers.length);
+
+    for (const user of existingUsers) {
+      try {
+        if (user.hasVideo && remoteDivRef.current) {
+          await client.subscribe(user, "video");
+          user.videoTrack?.play(remoteDivRef.current);
+          console.log("[Teacher] Subscribed to video of user", user.uid);
+        }
+        if (user.hasAudio) {
+          await client.subscribe(user, "audio");
+          user.audioTrack?.play();
+          console.log("[Teacher] Subscribed to audio of user", user.uid);
+        }
+      } catch (err) {
+        console.error("[Teacher] Failed to subscribe to existing user:", err);
+      }
+    }
+  }
+
   async function join() {
     if (!info) return;
     setError("");
 
-        if (!agoraSdk) return;
+    if (!agoraSdk) {
+      setError("Video SDK is still loading — try again in a second");
+      return;
+    }
     const AgoraRTC = agoraSdk.default;
     const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
     clientRef.current = client;
 
-       client.on("user-published", async (user: any, mediaType: any) => {
+    // Listen for users who publish AFTER we join
+    client.on("user-published", async (user: any, mediaType: any) => {
+      console.log("[Teacher] user-published", user.uid, mediaType);
       await client.subscribe(user, mediaType);
       if (mediaType === "video" && remoteDivRef.current) {
         user.videoTrack?.play(remoteDivRef.current);
@@ -91,24 +124,45 @@ export default function TeacherCallPage() {
       }
     });
 
-       client.on("user-unpublished", (user: any) => {
+    client.on("user-unpublished", (user: any) => {
       user.videoTrack?.stop();
       user.audioTrack?.stop();
     });
 
-    try {
-      await client.join(info.appId, info.channelName, info.teacherToken, info.teacherUid);
+    client.on("user-joined", (user: any) => {
+      console.log("[Teacher] user-joined", user.uid);
+    });
 
-      const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+    client.on("user-left", (user: any) => {
+      console.log("[Teacher] user-left", user.uid);
+    });
+
+    try {
+      await client.join(
+        info.appId,
+        info.channelName,
+        info.teacherToken,
+        info.teacherUid,
+      );
+      console.log("[Teacher] Joined channel", info.channelName);
+
+      // ⚠️ CRITICAL: subscribe to anyone already in the channel
+      await subscribeToExistingUsers(client);
+
+      // Now create our own tracks + publish
+      const [audioTrack, videoTrack] =
+        await AgoraRTC.createMicrophoneAndCameraTracks();
       audioRef.current = audioTrack;
       videoRef.current = videoTrack;
 
       if (localDivRef.current) videoTrack.play(localDivRef.current);
       await client.publish([audioTrack, videoTrack]);
+      console.log("[Teacher] Local tracks published");
 
       setJoined(true);
       tickRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
     } catch (err: any) {
+      console.error("[Teacher] Join error:", err);
       setError(err.message || "Could not join the call");
       await cleanup();
     }
@@ -129,9 +183,8 @@ export default function TeacherCallPage() {
   async function endCall() {
     if (!info) return;
     setEnding(true);
-    // The student's backend call /calls/:id/end is the authoritative end-call.
-    // The teacher just leaves the channel; the student's end-trigger writes
-    // the ledger entries.
+    // The student's backend /calls/:id/end is the authoritative end-call.
+    // The teacher just leaves the channel.
     await cleanup();
     setEnding(false);
     router.push("/teacher");
@@ -156,7 +209,11 @@ export default function TeacherCallPage() {
   }
 
   if (loading) {
-    return <main className="min-h-screen flex items-center justify-center text-myna-charcoal/60"><Loader2 size={20} className="animate-spin" /></main>;
+    return (
+      <main className="min-h-screen flex items-center justify-center text-myna-charcoal/60">
+        <Loader2 size={20} className="animate-spin" />
+      </main>
+    );
   }
 
   if (error && !info) {
@@ -164,7 +221,10 @@ export default function TeacherCallPage() {
       <main className="min-h-screen bg-cream flex items-center justify-center px-6">
         <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-3xl p-8 text-center">
           <p className="text-red-700 text-sm">{error}</p>
-          <Link href="/teacher" className="inline-block mt-4 px-5 py-2.5 rounded-full bg-myna-orange text-white font-semibold text-sm">
+          <Link
+            href="/teacher"
+            className="inline-block mt-4 px-5 py-2.5 rounded-full bg-myna-orange text-white font-semibold text-sm"
+          >
             Back to dashboard
           </Link>
         </div>
@@ -178,11 +238,16 @@ export default function TeacherCallPage() {
     return (
       <main className="min-h-screen bg-cream flex items-center justify-center px-6">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-sm p-8 text-center">
-          <p className="font-display text-2xl font-bold text-myna-charcoal">This call is not active</p>
+          <p className="font-display text-2xl font-bold text-myna-charcoal">
+            This call is not active
+          </p>
           <p className="text-myna-charcoal/60 text-sm mt-2">
             The student may have already ended it or the call hasn&apos;t been accepted.
           </p>
-          <Link href="/teacher" className="inline-block mt-6 px-5 py-3 rounded-full bg-myna-orange text-white font-semibold text-sm">
+          <Link
+            href="/teacher"
+            className="inline-block mt-6 px-5 py-3 rounded-full bg-myna-orange text-white font-semibold text-sm"
+          >
             Back to dashboard
           </Link>
         </div>
@@ -197,8 +262,12 @@ export default function TeacherCallPage() {
           <div className="w-20 h-20 rounded-full bg-myna-orange text-white flex items-center justify-center text-3xl font-bold mx-auto">
             {info.studentName.charAt(0)}
           </div>
-          <h1 className="font-display text-2xl font-bold text-myna-charcoal mt-4">{info.studentName}</h1>
-          <p className="text-myna-charcoal/60 text-sm mt-1">is waiting in a live call</p>
+          <h1 className="font-display text-2xl font-bold text-myna-charcoal mt-4">
+            {info.studentName}
+          </h1>
+          <p className="text-myna-charcoal/60 text-sm mt-1">
+            is waiting in a live call
+          </p>
 
           {error && <p className="mt-4 text-red-600 text-sm">{error}</p>}
 
@@ -208,7 +277,10 @@ export default function TeacherCallPage() {
           >
             Join the call
           </button>
-          <Link href="/teacher" className="mt-3 inline-block text-sm text-myna-charcoal/60 hover:underline">
+          <Link
+            href="/teacher"
+            className="mt-3 inline-block text-sm text-myna-charcoal/60 hover:underline"
+          >
             Not now
           </Link>
         </div>
@@ -229,12 +301,16 @@ export default function TeacherCallPage() {
 
         <div className="mt-6 flex items-center justify-between text-sm">
           <div>
-            <p className="text-white/60 text-xs uppercase tracking-wider">In call with</p>
+            <p className="text-white/60 text-xs uppercase tracking-wider">
+              In call with
+            </p>
             <p className="font-display text-2xl font-bold">{info.studentName}</p>
           </div>
           <div className="text-end">
             <p className="text-white/60 text-xs uppercase tracking-wider">Elapsed</p>
-            <p className="font-display text-2xl font-bold tabular-nums">{fmt(elapsed)}</p>
+            <p className="font-display text-2xl font-bold tabular-nums">
+              {fmt(elapsed)}
+            </p>
           </div>
         </div>
 
@@ -262,7 +338,8 @@ export default function TeacherCallPage() {
         </div>
 
         <p className="text-center text-xs text-white/40 mt-6">
-          Billing is tracked server-side. The call will end automatically when the student&apos;s balance reaches zero.
+          Billing is tracked server-side. The call will end automatically when
+          the student&apos;s balance reaches zero.
         </p>
       </div>
     </main>

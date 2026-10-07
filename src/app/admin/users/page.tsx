@@ -5,10 +5,17 @@ import { useRouter } from "next/navigation";
 import { api, getUser } from "@/lib/api";
 import { useLanguage } from "@/app/language-provider";
 import { formatShortDateTime } from "@/lib/i18n";
+import UserTierBadge from "@/components/UserTierBadge";
 
 type User = {
-  id: string; email: string; fullName: string; role: string;
-  isActive: boolean; createdAt: string;
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  isActive: boolean;
+  tier: string;
+  paymentStatus: string;
+  createdAt: string;
 };
 
 export default function AdminUsersPage() {
@@ -111,10 +118,13 @@ export default function AdminUsersPage() {
                   <div className="w-10 h-10 rounded-full bg-myna-orange text-white flex items-center justify-center font-bold">
                     {u.fullName.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="font-semibold text-myna-charcoal">{u.fullName}</p>
-                    <p className="text-xs text-myna-charcoal/60">{u.email}</p>
-                  </div>
+                 <div>
+  <div className="flex items-center gap-2 flex-wrap">
+    <p className="font-semibold text-myna-charcoal">{u.fullName}</p>
+    <UserTierBadge tier={u.tier} paymentStatus={u.paymentStatus} size="sm" />
+  </div>
+  <p className="text-xs text-myna-charcoal/60">{u.email}</p>
+</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${roleBadge(u.role)}`}>

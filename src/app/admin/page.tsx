@@ -93,6 +93,10 @@ export default function AdminDashboard() {
             <p className="font-bold">📝 Teacher Applications</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">Approve or reject new teachers</p>
           </a>
+          <a href="/admin/support" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+  <p className="font-bold">🎧 Support</p>
+  <p className="text-xs text-myna-charcoal/60 mt-1">Pending payments</p>
+</a>
         </div>
       </div>
     </main>

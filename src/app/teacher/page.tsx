@@ -93,19 +93,22 @@ export default function TeacherDashboardPage() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-    useEffect(() => {
-    const check = async () => {
-      try {
-        const c = await api<any>("/calls/active-for-teacher", { auth: true });
-        setIncomingCall(c ?? null);
-      } catch {
-        // silent
-      }
-    };
-    check();
-    const id = setInterval(check, 5000);
-    return () => clearInterval(id);
-  }, []);
+   useEffect(() => {
+  const check = async () => {
+    try {
+      const c = await api<any>("/calls/active-for-teacher", {
+        auth: true,
+        silent: true,  // ← don't spam console
+      });
+      setIncomingCall(c ?? null);
+    } catch {
+      setIncomingCall(null);
+    }
+  };
+  check();
+  const id = setInterval(check, 5000);
+  return () => clearInterval(id);
+}, []);
 
   async function load() {
     setLoading(true);
