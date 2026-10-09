@@ -147,6 +147,10 @@ export default function StudentDashboard() {
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("student.bookingsSub")}</p>
           </a>
         </div>
+        <a href="/student/referrals" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition">
+  <p className="font-bold text-myna-charcoal">🎁 Invite Friends</p>
+  <p className="text-xs text-myna-charcoal/60 mt-1">Earn free minutes</p>
+</a>
       </div>
     </main>
   );
