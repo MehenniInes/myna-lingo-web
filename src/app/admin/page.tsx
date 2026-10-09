@@ -73,6 +73,10 @@ export default function AdminDashboard() {
             <p className="font-bold">📦 {t("admin.packages")}</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("admin.editPrices")}</p>
           </a>
+          <a href="/admin/pricing" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+            <p className="font-bold">💵 Pricing</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Student-facing prices per service type</p>
+          </a>
           <a href="/admin/podcasts" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
             <p className="font-bold">🎧 {t("admin.podcasts")}</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("admin.managePodcasts")}</p>
@@ -89,14 +93,26 @@ export default function AdminDashboard() {
             <p className="font-bold">📚 {t("admin.content")}</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("admin.manageActivities")}</p>
           </a>
-           <a href="/admin/applications" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+          <a href="/admin/applications" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
             <p className="font-bold">📝 Teacher Applications</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">Approve or reject new teachers</p>
           </a>
+          <a href="/admin/teachers" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+            <p className="font-bold">👨‍🏫 Teachers</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">View, suspend, and manage teacher accounts</p>
+          </a>
+          <a href="/admin/teacher-rates" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+            <p className="font-bold">🔒 Teacher Rates</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Internal hourly compensation (private)</p>
+          </a>
+          <a href="/admin/agora" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+            <p className="font-bold">📞 Agora Calls</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Monitor call usage and durations</p>
+          </a>
           <a href="/admin/support" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
-  <p className="font-bold">🎧 Support</p>
-  <p className="text-xs text-myna-charcoal/60 mt-1">Pending payments</p>
-</a>
+            <p className="font-bold">🎧 Support</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Pending payments</p>
+          </a>
         </div>
       </div>
     </main>
