@@ -1,13 +1,16 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   PhoneOff, Mic, MicOff, Video, VideoOff, Loader2,
+  Pause, Play, Plus, VolumeX, AlertCircle,
 } from "lucide-react";
-
 import { api, getUser } from "@/lib/api";
+import { getCallSocket } from "@/lib/callSocket";
 
 interface TeacherCallInfo {
   callId: string;
@@ -21,15 +24,18 @@ interface TeacherCallInfo {
 }
 
 export default function TeacherCallPage() {
-  const [agoraSdk, setAgoraSdk] =
-    useState<typeof import("agora-rtc-sdk-ng") | null>(null);
-
-  useEffect(() => {
-    import("agora-rtc-sdk-ng").then((mod) => setAgoraSdk(mod));
-  }, []);
-
   const params = useParams<{ id: string }>();
   const router = useRouter();
+
+  // ---- Dynamic Agora SDK ----
+  const [agoraSdk, setAgoraSdk] = useState<typeof import("agora-rtc-sdk-ng") | null>(null);
+  useEffect(() => {
+    let alive = true;
+    import("agora-rtc-sdk-ng").then((mod) => {
+      if (alive) setAgoraSdk(mod);
+    });
+    return () => { alive = false; };
+  }, []);
 
   const [info, setInfo] = useState<TeacherCallInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +46,16 @@ export default function TeacherCallPage() {
   const [cameraOff, setCameraOff] = useState(false);
   const [ending, setEnding] = useState(false);
 
+  const [serverState, setServerState] = useState<{
+    isPaused: boolean;
+    elapsedSeconds: number;
+    remainingSeconds: number;
+    initialBalanceSeconds: number;
+  } | null>(null);
+  const [pausedByOther, setPausedByOther] = useState(false);
+  const [timeAddedToast, setTimeAddedToast] = useState<string | null>(null);
+
+  const socketRef = useRef<any>(null);
   const clientRef = useRef<any>(null);
   const audioRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
@@ -51,7 +67,8 @@ export default function TeacherCallPage() {
   useEffect(() => {
     const user = getUser();
     if (!user) { router.push("/login"); return; }
-    if (user.role !== "TEACHER") { router.push("/"); return; }
+    if (user.role !== "TEACHER" && user.role !== "ADMIN") { router.push("/"); return; }
+    (window as any).__currentUserId = user.id;
     if (!params?.id) return;
     load(params.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,10 +82,7 @@ export default function TeacherCallPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await api<TeacherCallInfo>(
-        `/calls/${callId}/teacher-token`,
-        { auth: true },
-      );
+      const data = await api<TeacherCallInfo>(`/calls/${callId}/teacher-token`, { auth: true });
       setInfo(data);
     } catch (err: any) {
       setError(err.message || "Could not load this call");
@@ -77,44 +91,19 @@ export default function TeacherCallPage() {
     }
   }
 
-  // Helper: subscribe to any user who was ALREADY publishing before we joined
-  async function subscribeToExistingUsers(client: any) {
-    const existingUsers = client.remoteUsers || [];
-    console.log("[Teacher] Existing remote users:", existingUsers.length);
-
-    for (const user of existingUsers) {
-      try {
-        if (user.hasVideo && remoteDivRef.current) {
-          await client.subscribe(user, "video");
-          user.videoTrack?.play(remoteDivRef.current);
-          console.log("[Teacher] Subscribed to video of user", user.uid);
-        }
-        if (user.hasAudio) {
-          await client.subscribe(user, "audio");
-          user.audioTrack?.play();
-          console.log("[Teacher] Subscribed to audio of user", user.uid);
-        }
-      } catch (err) {
-        console.error("[Teacher] Failed to subscribe to existing user:", err);
-      }
-    }
-  }
-
   async function join() {
     if (!info) return;
-    setError("");
-
     if (!agoraSdk) {
-      setError("Video SDK is still loading — try again in a second");
+      setError("Video SDK is still loading — try again in a moment");
       return;
     }
     const AgoraRTC = agoraSdk.default;
+    setError("");
+
     const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
     clientRef.current = client;
 
-    // Listen for users who publish AFTER we join
     client.on("user-published", async (user: any, mediaType: any) => {
-      console.log("[Teacher] user-published", user.uid, mediaType);
       await client.subscribe(user, mediaType);
       if (mediaType === "video" && remoteDivRef.current) {
         user.videoTrack?.play(remoteDivRef.current);
@@ -129,46 +118,72 @@ export default function TeacherCallPage() {
       user.audioTrack?.stop();
     });
 
-    client.on("user-joined", (user: any) => {
-      console.log("[Teacher] user-joined", user.uid);
-    });
-
-    client.on("user-left", (user: any) => {
-      console.log("[Teacher] user-left", user.uid);
-    });
-
     try {
-      await client.join(
-        info.appId,
-        info.channelName,
-        info.teacherToken,
-        info.teacherUid,
-      );
-      console.log("[Teacher] Joined channel", info.channelName);
+      await client.join(info.appId, info.channelName, info.teacherToken, info.teacherUid);
 
-      // ⚠️ CRITICAL: subscribe to anyone already in the channel
-      await subscribeToExistingUsers(client);
-
-      // Now create our own tracks + publish
-      const [audioTrack, videoTrack] =
-        await AgoraRTC.createMicrophoneAndCameraTracks();
+      const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
       audioRef.current = audioTrack;
       videoRef.current = videoTrack;
 
       if (localDivRef.current) videoTrack.play(localDivRef.current);
       await client.publish([audioTrack, videoTrack]);
-      console.log("[Teacher] Local tracks published");
 
       setJoined(true);
       tickRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+
+      // WebSocket: join server-authoritative timer
+      const sock = getCallSocket();
+      socketRef.current = sock;
+
+      const emitJoin = () => sock.emit("join_room", { callId: info.callId });
+
+      sock.on("connect", emitJoin);
+      sock.on("connect_error", (err: any) => {
+        setError(`Socket connection error: ${err.message}`);
+      });
+
+      sock.on("timer_sync", (s: any) => {
+        setServerState(s);
+        setElapsed(s.elapsedSeconds);
+      });
+
+      sock.on("paused_by", (p: any) => {
+        if (p.byUserId !== (window as any).__currentUserId) setPausedByOther(true);
+      });
+      sock.on("resumed_by", (p: any) => {
+        if (p.byUserId !== (window as any).__currentUserId) setPausedByOther(false);
+      });
+
+      sock.on("time_added", (p: any) => {
+        setTimeAddedToast(`+${p.seconds}s added`);
+        setTimeout(() => setTimeAddedToast(null), 2500);
+      });
+
+      sock.on("session_ended", async () => {
+        await cleanup();
+        router.push("/teacher");
+      });
+
+      sock.on("participant_left", () => {
+        // Student disconnected — server settles if both sides leave
+      });
+
+      if (sock.connected) emitJoin();
     } catch (err: any) {
-      console.error("[Teacher] Join error:", err);
       setError(err.message || "Could not join the call");
       await cleanup();
     }
   }
 
   async function cleanup() {
+    if (socketRef.current) {
+      try {
+        socketRef.current.emit("leave_room", { callId: info?.callId });
+      } catch { /* silent */ }
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect?.();
+      socketRef.current = null;
+    }
     if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
     audioRef.current?.close();
     videoRef.current?.close();
@@ -183,11 +198,34 @@ export default function TeacherCallPage() {
   async function endCall() {
     if (!info) return;
     setEnding(true);
-    // The student's backend /calls/:id/end is the authoritative end-call.
-    // The teacher just leaves the channel.
-    await cleanup();
-    setEnding(false);
-    router.push("/teacher");
+    if (socketRef.current) {
+      socketRef.current.emit("end_session", { callId: info.callId });
+    }
+    setTimeout(async () => {
+      await cleanup();
+      setEnding(false);
+      router.push("/teacher");
+    }, 3000);
+  }
+
+  function pauseAll() {
+    if (!info || !socketRef.current) return;
+    socketRef.current.emit("pause_all", { callId: info.callId });
+  }
+
+  function resumeAll() {
+    if (!info || !socketRef.current) return;
+    socketRef.current.emit("resume_all", { callId: info.callId });
+  }
+
+  function addTime() {
+    if (!info || !socketRef.current) return;
+    socketRef.current.emit("add_time", { callId: info.callId, seconds: 60 });
+  }
+
+  function muteStudent() {
+    if (!info || !socketRef.current) return;
+    socketRef.current.emit("mute_student", { callId: info.callId, muted: true });
   }
 
   function toggleMic() {
@@ -209,22 +247,16 @@ export default function TeacherCallPage() {
   }
 
   if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center text-myna-charcoal/60">
-        <Loader2 size={20} className="animate-spin" />
-      </main>
-    );
+    return <main className="min-h-screen flex items-center justify-center text-myna-charcoal/60"><Loader2 size={20} className="animate-spin" /></main>;
   }
 
   if (error && !info) {
     return (
       <main className="min-h-screen bg-cream flex items-center justify-center px-6">
         <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-3xl p-8 text-center">
-          <p className="text-red-700 text-sm">{error}</p>
-          <Link
-            href="/teacher"
-            className="inline-block mt-4 px-5 py-2.5 rounded-full bg-myna-orange text-white font-semibold text-sm"
-          >
+          <AlertCircle size={24} className="mx-auto text-red-600" />
+          <p className="text-red-700 text-sm mt-3">{error}</p>
+          <Link href="/teacher" className="inline-block mt-4 px-5 py-2.5 rounded-full bg-myna-orange text-white font-semibold text-sm">
             Back to dashboard
           </Link>
         </div>
@@ -238,16 +270,11 @@ export default function TeacherCallPage() {
     return (
       <main className="min-h-screen bg-cream flex items-center justify-center px-6">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-sm p-8 text-center">
-          <p className="font-display text-2xl font-bold text-myna-charcoal">
-            This call is not active
-          </p>
+          <p className="font-display text-2xl font-bold text-myna-charcoal">This call is not active</p>
           <p className="text-myna-charcoal/60 text-sm mt-2">
             The student may have already ended it or the call hasn&apos;t been accepted.
           </p>
-          <Link
-            href="/teacher"
-            className="inline-block mt-6 px-5 py-3 rounded-full bg-myna-orange text-white font-semibold text-sm"
-          >
+          <Link href="/teacher" className="inline-block mt-6 px-5 py-3 rounded-full bg-myna-orange text-white font-semibold text-sm">
             Back to dashboard
           </Link>
         </div>
@@ -262,12 +289,8 @@ export default function TeacherCallPage() {
           <div className="w-20 h-20 rounded-full bg-myna-orange text-white flex items-center justify-center text-3xl font-bold mx-auto">
             {info.studentName.charAt(0)}
           </div>
-          <h1 className="font-display text-2xl font-bold text-myna-charcoal mt-4">
-            {info.studentName}
-          </h1>
-          <p className="text-myna-charcoal/60 text-sm mt-1">
-            is waiting in a live call
-          </p>
+          <h1 className="font-display text-2xl font-bold text-myna-charcoal mt-4">{info.studentName}</h1>
+          <p className="text-myna-charcoal/60 text-sm mt-1">is waiting in a live call</p>
 
           {error && <p className="mt-4 text-red-600 text-sm">{error}</p>}
 
@@ -277,16 +300,15 @@ export default function TeacherCallPage() {
           >
             Join the call
           </button>
-          <Link
-            href="/teacher"
-            className="mt-3 inline-block text-sm text-myna-charcoal/60 hover:underline"
-          >
+          <Link href="/teacher" className="mt-3 inline-block text-sm text-myna-charcoal/60 hover:underline">
             Not now
           </Link>
         </div>
       </main>
     );
   }
+
+  const isPaused = !!serverState?.isPaused;
 
   return (
     <main className="min-h-screen bg-[#0d0d0d] text-white px-6 py-8 flex items-center justify-center">
@@ -297,49 +319,88 @@ export default function TeacherCallPage() {
             ref={localDivRef}
             className="absolute bottom-4 end-4 w-40 h-28 rounded-xl overflow-hidden border-2 border-myna-yellow bg-stone-800"
           />
+          {isPaused && (
+            <div className="absolute top-4 start-4 bg-amber-500/90 text-black font-bold text-xs px-3 py-1.5 rounded-full">
+              ⏸ Paused {pausedByOther ? "by admin" : "by you"}
+            </div>
+          )}
+          {timeAddedToast && (
+            <div className="absolute top-4 end-4 bg-green-500/90 text-white font-bold text-xs px-3 py-1.5 rounded-full">
+              {timeAddedToast}
+            </div>
+          )}
         </div>
 
         <div className="mt-6 flex items-center justify-between text-sm">
           <div>
-            <p className="text-white/60 text-xs uppercase tracking-wider">
-              In call with
-            </p>
+            <p className="text-white/60 text-xs uppercase tracking-wider">In call with</p>
             <p className="font-display text-2xl font-bold">{info.studentName}</p>
           </div>
           <div className="text-end">
-            <p className="text-white/60 text-xs uppercase tracking-wider">Elapsed</p>
-            <p className="font-display text-2xl font-bold tabular-nums">
-              {fmt(elapsed)}
+            <p className="text-white/60 text-xs uppercase tracking-wider">Remaining</p>
+            <p className={`font-display text-2xl font-bold tabular-nums ${isPaused ? "text-amber-400" : ""}`}>
+              {serverState ? fmt(serverState.remainingSeconds) : "00:00"}
             </p>
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-center gap-4">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {isPaused ? (
+            <button
+              onClick={resumeAll}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-semibold text-sm"
+            >
+              <Play size={14} /> Resume
+            </button>
+          ) : (
+            <button
+              onClick={pauseAll}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-sm"
+            >
+              <Pause size={14} /> Pause
+            </button>
+          )}
           <button
-            onClick={toggleMic}
-            className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center"
+            onClick={addTime}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-sm"
           >
-            {muted ? <MicOff size={20} /> : <Mic size={20} />}
+            <Plus size={14} /> +60s
+          </button>
+          <button
+            onClick={muteStudent}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-sm"
+          >
+            <VolumeX size={14} /> Mute student
           </button>
           <button
             onClick={endCall}
             disabled={ending}
-            className="px-8 py-4 rounded-full bg-red-500 hover:bg-red-600 font-bold flex items-center gap-2 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 font-bold text-sm disabled:opacity-50"
           >
-            {ending ? <Loader2 size={18} className="animate-spin" /> : <PhoneOff size={18} />}
-            Leave call
+            {ending ? <Loader2 size={14} className="animate-spin" /> : <PhoneOff size={14} />}
+            End session
+          </button>
+        </div>
+
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <button
+            onClick={toggleMic}
+            className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center"
+            aria-label={muted ? "Unmute" : "Mute"}
+          >
+            {muted ? <MicOff size={18} /> : <Mic size={18} />}
           </button>
           <button
             onClick={toggleCamera}
-            className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center"
+            className="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center"
+            aria-label={cameraOff ? "Turn camera on" : "Turn camera off"}
           >
-            {cameraOff ? <VideoOff size={20} /> : <Video size={20} />}
+            {cameraOff ? <VideoOff size={18} /> : <Video size={18} />}
           </button>
         </div>
 
         <p className="text-center text-xs text-white/40 mt-6">
-          Billing is tracked server-side. The call will end automatically when
-          the student&apos;s balance reaches zero.
+          Billing is tracked server-side. The call ends automatically when the student&apos;s balance reaches zero.
         </p>
       </div>
     </main>

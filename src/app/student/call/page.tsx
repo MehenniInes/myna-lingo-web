@@ -1,20 +1,19 @@
 "use client";
+
 export const dynamic = "force-dynamic";
+
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Phone, PhoneOff, Mic, MicOff, Video, VideoOff, Loader2,
-  Volume2, VolumeX, Maximize, MessageCircle, Sparkles,
-  AlertTriangle, X, ChevronRight,
 } from "lucide-react";
-import UserTierBadge from "@/components/UserTierBadge";
-
 import { api, getUser } from "@/lib/api";
+import { getCallSocket } from "@/lib/callSocket";
 
 interface Teacher {
   id: string;
   isOnline: boolean;
-  user: { fullName: string; tier?: string };
+  user: { fullName: string };
 }
 
 interface StartCallResponse {
@@ -35,14 +34,7 @@ interface EndSummary {
   studentBalanceAfter: number;
   teacherEarnedSec: number;
   auto?: boolean;
-}
-
-interface Activity {
-  id: string;
-  type: string;
-  title: string;
-  description: string | null;
-  xpReward: number;
+  reason?: string;
 }
 
 export default function CallPage() {
@@ -55,7 +47,9 @@ export default function CallPage() {
 
 function CallPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  // ---- Dynamic Agora SDK (loaded client-side only) ----
   const [agoraSdk, setAgoraSdk] = useState<typeof import("agora-rtc-sdk-ng") | null>(null);
   useEffect(() => {
     let alive = true;
@@ -74,84 +68,42 @@ function CallPageContent() {
   const [elapsed, setElapsed] = useState(0);
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
-  const [speakerOff, setSpeakerOff] = useState(false);
   const [ending, setEnding] = useState(false);
   const [summary, setSummary] = useState<EndSummary | null>(null);
 
-  const [confirmEnd, setConfirmEnd] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [teacherInfo, setTeacherInfo] = useState<Teacher | null>(null);
+  // ---- Socket / server-authoritative timer state ----
+  const socketRef = useRef<any>(null);
+  const [serverState, setServerState] = useState<{
+    isPaused: boolean;
+    elapsedSeconds: number;
+    remainingSeconds: number;
+    initialBalanceSeconds: number;
+  } | null>(null);
+  const [confirmEndOpen, setConfirmEndOpen] = useState(false);
+  const lastSyncRef = useRef<{ t: number; remaining: number } | null>(null);
+  const [pausedByOther, setPausedByOther] = useState(false);
 
+  // ---- Agora refs (typed as any because SDK is loaded dynamically) ----
   const clientRef = useRef<any>(null);
   const audioRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
   const localDivRef = useRef<HTMLDivElement>(null);
   const remoteDivRef = useRef<HTMLDivElement>(null);
-  const remoteAudioTrackRef = useRef<any>(null);
   const tickRef = useRef<NodeJS.Timeout | null>(null);
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
   const cleanupRef = useRef<() => Promise<void>>(async () => {});
 
-  // ============ On mount ============
   useEffect(() => {
     const user = getUser();
     if (!user) { router.push("/login"); return; }
     if (user.role !== "STUDENT") { router.push("/"); return; }
-    initPage();
+    (window as any).__currentUserId = user.id;
+    loadTeachers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function initPage() {
-    // 1. End any stuck call from a previous session (refresh, crash, etc.)
-    await cleanupStuckCall();
-    // 2. Then load teachers and activities
-    await loadTeachers();
-    await loadActivities();
-  }
-
-  async function cleanupStuckCall() {
-    try {
-      const activeCall = await api<{ id: string } | null>("/calls/active", {
-  auth: true,
-  silent: true,
-});
-      if (activeCall?.id) {
-        await api(`/calls/${activeCall.id}/end`, { method: "POST", auth: true });
-      }
-    } catch {
-      /* silent — no stuck call */
-    }
-  }
-
-  // Cleanup on unmount
   useEffect(() => {
     return () => { void cleanupRef.current(); };
   }, []);
-
-  // End call if user closes the tab mid-call
-  useEffect(() => {
-    if (!active) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-    const token = localStorage.getItem("accessToken");
-
-    function handleUnload() {
-      if (!token) return;
-      try {
-        fetch(`${apiUrl}/calls/${active!.callId}/end`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          keepalive: true,
-        }).catch(() => {});
-      } catch { /* silent */ }
-    }
-
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
-  }, [active]);
 
   async function loadTeachers() {
     setLoading(true);
@@ -165,23 +117,12 @@ function CallPageContent() {
     }
   }
 
-  async function loadActivities() {
-    try {
-      const data = await api<Activity[]>("/activities");
-      setActivities(data.slice(0, 5));
-    } catch {
-      /* silent */
-    }
-  }
-
   async function startCall(teacherId: string) {
     setError("");
     setSummary(null);
-    setConfirmEnd(false);
+    setServerState(null);
+    setPausedByOther(false);
     try {
-      // Safety: end any leftover call before starting new one
-      await cleanupStuckCall();
-
       const data = await api<StartCallResponse>("/calls/start", {
         method: "POST",
         auth: true,
@@ -190,7 +131,6 @@ function CallPageContent() {
       setActive(data);
       setBalance(data.balanceSeconds);
       setElapsed(0);
-      setTeacherInfo(teachers.find((t) => t.id === teacherId) || null);
       await joinAgora(data);
     } catch (err: any) {
       setError(err.message || "Could not start the call");
@@ -200,10 +140,11 @@ function CallPageContent() {
 
   async function joinAgora(data: StartCallResponse) {
     if (!agoraSdk) {
-      setError("Video SDK is still loading — please try again in a second");
+      setError("Video SDK is still loading — try again in a moment");
       return;
     }
     const AgoraRTC = agoraSdk.default;
+
     const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
     clientRef.current = client;
 
@@ -213,7 +154,6 @@ function CallPageContent() {
         user.videoTrack?.play(remoteDivRef.current);
       }
       if (mediaType === "audio") {
-        remoteAudioTrackRef.current = user.audioTrack;
         user.audioTrack?.play();
       }
     });
@@ -233,20 +173,66 @@ function CallPageContent() {
       if (localDivRef.current) videoTrack.play(localDivRef.current);
       await client.publish([audioTrack, videoTrack]);
 
-      tickRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+      // Local UI ticker: interpolate between server syncs
+      tickRef.current = setInterval(() => {
+        setElapsed((e) => e + 1);
+        const sync = lastSyncRef.current;
+        if (sync && !serverState?.isPaused) {
+          const drift = Math.floor((Date.now() - sync.t) / 1000);
+          setBalance(Math.max(0, sync.remaining - drift));
+        }
+      }, 1000);
 
-      pollRef.current = setInterval(async () => {
-        try {
-          const b = await api<{ balanceSeconds: number }>("/minutes/balance", {
-  auth: true,
-  silent: true,
-});
-          setBalance(b.balanceSeconds);
-          if (b.balanceSeconds <= 0) {
-            await endCall(true);
-          }
-        } catch { /* silent */ }
-      }, 5000);
+      // WebSocket: join server-authoritative timer
+      const sock = getCallSocket();
+      socketRef.current = sock;
+
+      const emitJoin = () => sock.emit("join_room", { callId: data.callId });
+
+      sock.on("connect", emitJoin);
+      sock.on("connect_error", (err: any) => {
+        setError(`Socket connection error: ${err.message}`);
+      });
+
+      sock.on("timer_sync", (s: any) => {
+        setServerState(s);
+        lastSyncRef.current = { t: Date.now(), remaining: s.remainingSeconds };
+        setBalance(s.remainingSeconds);
+        setElapsed(s.elapsedSeconds);
+      });
+
+      sock.on("time_added", (p: any) => {
+        setBalance((b) => b + p.seconds);
+        lastSyncRef.current = lastSyncRef.current
+          ? { t: Date.now(), remaining: lastSyncRef.current.remaining + p.seconds }
+          : null;
+      });
+
+      sock.on("paused_by", () => setPausedByOther(true));
+      sock.on("resumed_by", () => setPausedByOther(false));
+      sock.on("student_timer_paused", () => setPausedByOther(true));
+      sock.on("student_timer_resumed", () => setPausedByOther(false));
+
+      sock.on("student_mute", (p: any) => {
+        if (p.targetUserId !== (window as any).__currentUserId) return;
+        audioRef.current?.setEnabled(!p.muted);
+        setMuted(!!p.muted);
+      });
+
+      sock.on("session_ended", async (p: any) => {
+        await cleanup();
+        setActive(null);
+        setSummary({
+          callId: data.callId,
+          durationSec: p.effectiveDurationSec,
+          studentBalanceAfter: Math.max(0, balance - p.effectiveDurationSec),
+          teacherEarnedSec: p.effectiveDurationSec,
+          auto: p.reason === "balance_zero",
+          reason: p.reason,
+        });
+      });
+
+      if (sock.connected) emitJoin();
     } catch (err: any) {
       setError(err.message || "Could not join the call");
       await cleanup();
@@ -255,38 +241,44 @@ function CallPageContent() {
   }
 
   async function cleanup() {
+    if (socketRef.current) {
+      try {
+        const callId = active?.callId;
+        if (callId) socketRef.current.emit("leave_room", { callId });
+      } catch { /* silent */ }
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect?.();
+      socketRef.current = null;
+    }
+
     if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
 
     audioRef.current?.close();
     videoRef.current?.close();
     audioRef.current = null;
     videoRef.current = null;
-    remoteAudioTrackRef.current = null;
 
     try { await clientRef.current?.leave(); } catch { /* silent */ }
     clientRef.current = null;
+
+    lastSyncRef.current = null;
+    setPausedByOther(false);
   }
   cleanupRef.current = cleanup;
 
   async function endCall(auto = false) {
     if (!active) return;
     setEnding(true);
-    setConfirmEnd(false);
-    try {
-      const result = await api<EndSummary>(`/calls/${active.callId}/end`, {
-        method: "POST",
-        auth: true,
-      });
-      setSummary({ ...result, auto });
-    } catch (err: any) {
-      setError(err.message || "Could not end the call");
-    } finally {
-      await cleanup();
-      setActive(null);
-      setElapsed(0);
-      setEnding(false);
+    if (socketRef.current) {
+      socketRef.current.emit("end_session", { callId: active.callId });
     }
+    setTimeout(async () => {
+      if (active) {
+        await cleanup();
+        setActive(null);
+        setEnding(false);
+      }
+    }, 3000);
   }
 
   function toggleMic() {
@@ -299,22 +291,6 @@ function CallPageContent() {
     if (!videoRef.current) return;
     videoRef.current.setEnabled(cameraOff);
     setCameraOff(!cameraOff);
-  }
-
-  function toggleSpeaker() {
-    if (!remoteAudioTrackRef.current) return;
-    remoteAudioTrackRef.current.setVolume(speakerOff ? 100 : 0);
-    setSpeakerOff(!speakerOff);
-  }
-
-  function toggleFullscreen() {
-    const el = remoteDivRef.current?.parentElement;
-    if (!el) return;
-    if (!document.fullscreenElement) {
-      el.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
-    }
   }
 
   function fmt(s: number) {
@@ -355,201 +331,83 @@ function CallPageContent() {
 
   // ---------- In call ----------
   if (active) {
-    const lowBalance = balance < 120;
-
+    const isPaused = !!serverState?.isPaused || pausedByOther;
     return (
-      <main className="min-h-screen bg-[#0d0d0d] text-white flex flex-col">
-        {lowBalance && (
-          <div className="bg-red-500 text-white text-center py-2 px-4 text-sm font-bold flex items-center justify-center gap-2">
-            <AlertTriangle size={16} />
-            Only {fmt(balance)} left — call will end automatically
-          </div>
-        )}
-
-        <div className="flex-1 flex flex-col lg:flex-row">
-          <div className="flex-1 relative p-4 lg:p-6">
-            <div className="relative bg-black rounded-3xl overflow-hidden aspect-video shadow-2xl">
-              <div ref={remoteDivRef} className="w-full h-full" />
-
-              {teacherInfo && (
-                <div className="absolute top-3 start-3 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2">
-                  <span className="text-xs font-semibold text-white">{teacherInfo.user.fullName}</span>
-                  <UserTierBadge tier={teacherInfo.user.tier || "NORMAL"} size="sm" />
-                </div>
-              )}
-
-              <div
-                ref={localDivRef}
-                className="absolute bottom-4 end-4 w-40 h-28 rounded-xl overflow-hidden border-2 border-myna-yellow bg-stone-800 shadow-lg"
-              />
-
-              <button
-                onClick={toggleFullscreen}
-                className="absolute top-3 end-3 w-9 h-9 rounded-lg bg-black/60 backdrop-blur-md hover:bg-black/80 flex items-center justify-center"
-                title="Fullscreen"
-              >
-                <Maximize size={16} />
-              </button>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-              <div className="bg-white/5 rounded-2xl p-4">
-                <p className="text-white/50 text-xs uppercase tracking-wider">In call</p>
-                <p className="font-display text-3xl font-bold tabular-nums mt-1">{fmt(elapsed)}</p>
+      <main className="min-h-screen bg-[#0d0d0d] text-white px-6 py-8 flex items-center justify-center">
+        <div className="max-w-3xl w-full">
+          <div className="relative bg-black rounded-3xl overflow-hidden aspect-video">
+            <div ref={remoteDivRef} className="w-full h-full" />
+            <div
+              ref={localDivRef}
+              className="absolute bottom-4 end-4 w-40 h-28 rounded-xl overflow-hidden border-2 border-myna-yellow bg-stone-800"
+            />
+            {isPaused && (
+              <div className="absolute top-4 start-4 bg-amber-500/90 text-black font-bold text-xs px-3 py-1.5 rounded-full">
+                ⏸ Paused {pausedByOther ? "by teacher" : ""}
               </div>
-              <div className={`bg-white/5 rounded-2xl p-4 ${lowBalance ? "ring-2 ring-red-500" : ""}`}>
-                <p className="text-white/50 text-xs uppercase tracking-wider">Balance</p>
-                <p className={`font-display text-3xl font-bold tabular-nums mt-1 ${lowBalance ? "text-red-400" : ""}`}>
-                  {fmt(balance)}
-                </p>
-              </div>
-            </div>
-
-            {error && (
-              <p className="mt-4 text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-xl">
-                {error}
-              </p>
             )}
+          </div>
 
-            <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-              <button
-                onClick={toggleMic}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition ${
-                  muted ? "bg-red-500 hover:bg-red-600" : "bg-white/10 hover:bg-white/20"
-                }`}
-                title={muted ? "Unmute" : "Mute"}
-              >
-                {muted ? <MicOff size={20} /> : <Mic size={20} />}
-              </button>
-
-              <button
-                onClick={toggleCamera}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition ${
-                  cameraOff ? "bg-red-500 hover:bg-red-600" : "bg-white/10 hover:bg-white/20"
-                }`}
-                title={cameraOff ? "Camera on" : "Camera off"}
-              >
-                {cameraOff ? <VideoOff size={20} /> : <Video size={20} />}
-              </button>
-
-              <button
-                onClick={() => setConfirmEnd(true)}
-                disabled={ending}
-                className="px-8 py-4 rounded-full bg-red-500 hover:bg-red-600 font-bold flex items-center gap-2 disabled:opacity-50 shadow-lg"
-              >
-                {ending ? <Loader2 size={18} className="animate-spin" /> : <PhoneOff size={18} />}
-                End Call
-              </button>
-
-              <button
-                onClick={toggleSpeaker}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition ${
-                  speakerOff ? "bg-red-500 hover:bg-red-600" : "bg-white/10 hover:bg-white/20"
-                }`}
-                title={speakerOff ? "Speaker on" : "Speaker off"}
-              >
-                {speakerOff ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              </button>
-
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center lg:hidden"
-                title="Activities"
-              >
-                <Sparkles size={20} />
-              </button>
+          <div className="mt-6 flex items-center justify-between text-sm">
+            <div>
+              <p className="text-white/60 text-xs uppercase tracking-wider">Elapsed</p>
+              <p className="font-display text-2xl font-bold tabular-nums">{fmt(elapsed)}</p>
+            </div>
+            <div className="text-end">
+              <p className="text-white/60 text-xs uppercase tracking-wider">Balance remaining</p>
+              <p className={`font-display text-2xl font-bold tabular-nums ${balance < 60 ? "text-myna-rose" : ""}`}>
+                {fmt(balance)}
+              </p>
             </div>
           </div>
 
-          {sidebarOpen && (
-            <aside className="w-full lg:w-80 bg-white/5 border-t lg:border-t-0 lg:border-s border-white/10 p-4 max-h-[40vh] lg:max-h-none overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-lg font-bold flex items-center gap-2">
-                  <Sparkles size={16} className="text-myna-yellow" />
-                  Lesson Activities
-                </h2>
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="lg:hidden w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+          {error && <p className="mt-4 text-red-400 text-sm text-center">{error}</p>}
 
-              {activities.length === 0 ? (
-                <p className="text-white/40 text-sm text-center py-8">
-                  No activities available
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {activities.map((a) => (
-                    <div
-                      key={a.id}
-                      className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-myna-yellow font-bold uppercase tracking-wider">
-                            {a.type.replace("_", " ")}
-                          </p>
-                          <p className="font-semibold text-sm mt-1 truncate">{a.title}</p>
-                          {a.description && (
-                            <p className="text-xs text-white/60 mt-1 line-clamp-2">
-                              {a.description}
-                            </p>
-                          )}
-                          <p className="text-xs text-white/40 mt-2">⭐ {a.xpReward} XP</p>
-                        </div>
-                        <ChevronRight size={16} className="text-white/40 shrink-0 mt-1" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-6 p-4 bg-myna-yellow/10 border border-myna-yellow/30 rounded-xl">
-                <p className="text-xs text-myna-yellow font-bold flex items-center gap-2">
-                  <MessageCircle size={14} />
-                  Tip
-                </p>
-                <p className="text-xs text-white/70 mt-2">
-                  Ask your teacher to start an activity from the list above.
-                </p>
-              </div>
-            </aside>
-          )}
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <button
+              onClick={toggleMic}
+              className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+              aria-label={muted ? "Unmute" : "Mute"}
+            >
+              {muted ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
+            <button
+              onClick={() => setConfirmEndOpen(true)}
+              disabled={ending}
+              className="px-8 py-4 rounded-full bg-red-500 hover:bg-red-600 font-bold flex items-center gap-2 disabled:opacity-50"
+            >
+              {ending ? <Loader2 size={18} className="animate-spin" /> : <PhoneOff size={18} />}
+              End call
+            </button>
+            <button
+              onClick={toggleCamera}
+              className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+              aria-label={cameraOff ? "Turn camera on" : "Turn camera off"}
+            >
+              {cameraOff ? <VideoOff size={20} /> : <Video size={20} />}
+            </button>
+          </div>
         </div>
 
-        {confirmEnd && (
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setConfirmEnd(false)}
-          >
-            <div
-              className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-8 max-w-sm w-full text-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4">
-                <PhoneOff size={28} className="text-red-400" />
-              </div>
-              <h3 className="font-display text-2xl font-bold text-white">End this call?</h3>
-              <p className="text-white/60 text-sm mt-2">
-                Your minutes will be deducted for the time used so far.
+        {confirmEndOpen && (
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center text-myna-charcoal">
+              <h2 className="font-display text-xl font-bold">End this call?</h2>
+              <p className="text-sm text-myna-charcoal/60 mt-2">
+                Your remaining minutes will stop being billed.
               </p>
               <div className="mt-6 flex gap-3">
                 <button
-                  onClick={() => setConfirmEnd(false)}
-                  className="flex-1 py-3 rounded-full bg-white/10 hover:bg-white/20 font-semibold"
+                  onClick={() => setConfirmEndOpen(false)}
+                  className="flex-1 py-2.5 rounded-full border border-myna-charcoal/15 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => endCall(false)}
-                  disabled={ending}
-                  className="flex-1 py-3 rounded-full bg-red-500 hover:bg-red-600 font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+                  onClick={() => { setConfirmEndOpen(false); endCall(false); }}
+                  className="flex-1 py-2.5 rounded-full bg-red-500 text-white font-semibold"
                 >
-                  {ending ? <Loader2 size={16} className="animate-spin" /> : <PhoneOff size={16} />}
-                  End
+                  End call
                 </button>
               </div>
             </div>
@@ -574,9 +432,6 @@ function CallPageContent() {
       <div className="max-w-4xl mx-auto">
         <a href="/student" className="text-myna-orange font-semibold text-sm">← Back to dashboard</a>
         <h1 className="font-display text-4xl font-bold text-myna-charcoal mt-4">Call a teacher</h1>
-        <p className="text-myna-charcoal/60 mt-2">
-          Choose an online teacher to start a live lesson
-        </p>
 
         {error && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
@@ -599,13 +454,8 @@ function CallPageContent() {
                     {tc.user.fullName.charAt(0)}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-myna-charcoal">{tc.user.fullName}</p>
-                      {tc.user.tier && (
-                        <UserTierBadge tier={tc.user.tier} size="sm" />
-                      )}
-                    </div>
-                    <p className="text-xs text-green-600 font-semibold mt-0.5">🟢 Online</p>
+                    <p className="font-bold text-myna-charcoal">{tc.user.fullName}</p>
+                    <p className="text-xs text-green-600 font-semibold">🟢 Online</p>
                   </div>
                 </div>
                 <button
