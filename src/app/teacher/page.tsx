@@ -448,6 +448,13 @@ export default function TeacherDashboardPage() {
             <p className="font-bold text-myna-charcoal">⏱ Teaching time</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">Weekly / monthly breakdown</p>
           </Link>
+                    <Link
+            href="/teacher/videos"
+            className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition"
+          >
+            <p className="font-bold text-myna-charcoal">🎬 Intro videos</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Upload videos students will see</p>
+          </Link>
         </div>
       </div>
     </main>
