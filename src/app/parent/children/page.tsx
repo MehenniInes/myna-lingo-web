@@ -44,21 +44,33 @@ export default function ChildrenPage() {
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(""); setSubmitting(true);
-    try {
-      const newChild = await api<Child>("/children", {
-        method: "POST", auth: true,
-        body: { fullName, dateOfBirth },
-      });
-      setChildren([...children, newChild]);
-      setFullName(""); setDateOfBirth(""); setShowForm(false);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
+  e.preventDefault();
+  setError("");
+
+  const age = calculateAge(dateOfBirth);
+  if (isNaN(age)) {
+    setError("Please enter a valid date of birth");
+    return;
   }
+  if (age < 6 || age > 14) {
+    setError(`Child must be between 6 and 14 years old. Current age: ${age}`);
+    return;
+  }
+
+  setSubmitting(true);
+  try {
+    const newChild = await api<Child>("/children", {
+      method: "POST", auth: true,
+      body: { fullName, dateOfBirth },
+    });
+    setChildren([...children, newChild]);
+    setFullName(""); setDateOfBirth(""); setShowForm(false);
+  } catch (err: any) {
+    setError(err.message || "Something went wrong");
+  } finally {
+    setSubmitting(false);
+  }
+}
 
   async function deleteChild(id: string) {
     if (!confirm(t("children.deleteConfirm"))) return;
