@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api, getUser } from "@/lib/api";
+import { PodcastCover } from "@/components/PodcastCover";
+
+// 🆕 API URL للفيديو والصوت
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 type Podcast = {
   id: string;
@@ -10,6 +14,7 @@ type Podcast = {
   description: string;
   coverUrl: string;
   audioUrl: string;
+  videoUrl?: string | null;   // 🆕
   level: string;
   category: string;
   durationSec: number;
@@ -26,7 +31,7 @@ export default function PodcastDetailPage() {
   const router = useRouter();
   const podcastId = params.id as string;
 
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
   const [podcast, setPodcast] = useState<Podcast | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,23 +63,23 @@ export default function PodcastDetailPage() {
   }
 
   function togglePlay() {
-    if (!audioRef.current) return;
+    if (!mediaRef.current) return;
     if (isPlaying) {
-      audioRef.current.pause();
+      mediaRef.current.pause();
     } else {
-      audioRef.current.play();
+      mediaRef.current.play();
     }
     setIsPlaying(!isPlaying);
   }
 
   function skip(seconds: number) {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime += seconds;
+    if (!mediaRef.current) return;
+    mediaRef.current.currentTime += seconds;
   }
 
   function changeSpeed(newSpeed: number) {
-    if (!audioRef.current) return;
-    audioRef.current.playbackRate = newSpeed;
+    if (!mediaRef.current) return;
+    mediaRef.current.playbackRate = newSpeed;
     setSpeed(newSpeed);
   }
 
@@ -106,6 +111,15 @@ export default function PodcastDetailPage() {
     return `${min}:${s.toString().padStart(2, "0")}`;
   }
 
+  // 🆕 Helper: يبني URL كامل للملف (audio ولا video)
+  function buildMediaUrl(url: string | null | undefined): string {
+    if (!url) return "";
+    // إلا كان URL خارجي (http:// ولا https://) خليه كيفما هو
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    // وإلا، زيد API_URL قبل المسار النسبي
+    return `${API_URL}${url}`;
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -127,6 +141,11 @@ export default function PodcastDetailPage() {
     );
   }
 
+  const hasVideo = !!podcast.videoUrl;
+  const mediaUrl = hasVideo
+    ? buildMediaUrl(podcast.videoUrl)
+    : buildMediaUrl(podcast.audioUrl);
+
   return (
     <main className="min-h-screen bg-cream px-6 py-12">
       <div className="max-w-4xl mx-auto">
@@ -136,9 +155,9 @@ export default function PodcastDetailPage() {
 
         {/* Header */}
         <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">
-          <img
-            src={podcast.coverUrl}
-            alt={podcast.title}
+          <PodcastCover
+            coverUrl={podcast.coverUrl}
+            title={podcast.title}
             className="w-full md:w-48 h-48 object-cover rounded-3xl shadow-sm"
           />
           <div className="flex-1">
@@ -155,15 +174,32 @@ export default function PodcastDetailPage() {
           </div>
         </div>
 
-        {/* Audio Player */}
+        {/* 🆕 Media Player: Video أو Audio */}
         <div className="mt-8 bg-white rounded-3xl shadow-sm p-6">
-          <audio
-            ref={audioRef}
-            src={podcast.audioUrl}
-            onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-            onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-            onEnded={() => setIsPlaying(false)}
-          />
+          {hasVideo ? (
+            // 🎥 Video Player
+            <video
+              ref={mediaRef as React.RefObject<HTMLVideoElement>}
+              src={mediaUrl}
+              poster={podcast.coverUrl || undefined}
+              className="w-full rounded-2xl mb-4 bg-black"
+              controls
+              onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+              onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+              onEnded={() => setIsPlaying(false)}
+            >
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            // 🎵 Audio Player (بحال قبل)
+            <audio
+              ref={mediaRef as React.RefObject<HTMLAudioElement>}
+              src={mediaUrl}
+              onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+              onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+              onEnded={() => setIsPlaying(false)}
+            />
+          )}
 
           {/* Progress Bar */}
           <div className="mb-4">
@@ -173,8 +209,8 @@ export default function PodcastDetailPage() {
               max={duration || 0}
               value={currentTime}
               onChange={(e) => {
-                if (audioRef.current) {
-                  audioRef.current.currentTime = Number(e.target.value);
+                if (mediaRef.current) {
+                  mediaRef.current.currentTime = Number(e.target.value);
                 }
               }}
               className="w-full accent-myna-orange"

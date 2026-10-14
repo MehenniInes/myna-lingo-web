@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, getUser } from "@/lib/api";
 import { useLanguage } from "@/app/language-provider";
-
 type MyPodcast = {
   id: string; podcastId: string; priceDA: number; createdAt: string;
   podcast: {
@@ -13,6 +12,20 @@ type MyPodcast = {
     language: { name: string };
   };
 };
+
+// 🆕 Component باش نعرضو الغلاف (بـ fallback)
+function PodcastCover({ coverUrl, title }: { coverUrl?: string; title: string }) {
+  if (!coverUrl) {
+    return (
+      <div className="w-full h-48 bg-gradient-to-br from-myna-orange/20 to-myna-orange/5 flex items-center justify-center text-6xl">
+        🎙️
+      </div>
+    );
+  }
+  return (
+    <img src={coverUrl} alt={title} className="w-full h-48 object-cover" />
+  );
+}
 
 export default function MyPodcastsPage() {
   const router = useRouter();
@@ -78,7 +91,8 @@ export default function MyPodcastsPage() {
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {myPodcasts.map((item) => (
               <div key={item.id} className="bg-white rounded-3xl shadow-sm overflow-hidden hover:shadow-md transition">
-                <img src={item.podcast.coverUrl} alt={item.podcast.title} className="w-full h-48 object-cover" />
+                {/* 🆕 استعملنا PodcastCover بدل img مباشرة */}
+                <PodcastCover coverUrl={item.podcast.coverUrl} title={item.podcast.title} />
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-wider text-myna-orange">
                     {item.podcast.language?.name} · {item.podcast.level}
