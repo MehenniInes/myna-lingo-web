@@ -116,7 +116,6 @@ export default function PodcastDetailPage() {
     if (!url) return "";
     // إلا كان URL خارجي (http:// ولا https://) خليه كيفما هو
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    // وإلا، زيد API_URL قبل المسار النسبي
     return `${API_URL}${url}`;
   }
 

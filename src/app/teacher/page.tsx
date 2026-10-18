@@ -406,6 +406,10 @@ export default function TeacherDashboardPage() {
         </div>
 
         {/* Quick links */}
+        <Link href="/chat" className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition">
+  <p className="font-bold text-myna-charcoal">💬 Messages</p>
+  <p className="text-xs text-myna-charcoal/60 mt-1">Chat with your students</p>
+</Link>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <Link
             href="/become-a-teacher"

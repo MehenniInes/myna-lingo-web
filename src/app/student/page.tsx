@@ -96,7 +96,10 @@ export default function StudentDashboard() {
               {t("student.buyMoreMinutes")}
             </a>
           </div>
-
+<a href="/chat" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition">
+  <p className="font-bold text-myna-charcoal">💬 Messages</p>
+  <p className="text-xs text-myna-charcoal/60 mt-1">Chat with your teachers</p>
+</a>
           <div className="bg-white rounded-3xl shadow-sm p-8">
             <p className="text-xs font-bold uppercase tracking-wider text-myna-orange mb-2">
               {t("student.levelProgress")}
