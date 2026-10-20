@@ -428,18 +428,12 @@ export default function TeacherDashboardPage() {
   <p className="text-xs text-myna-charcoal/60 mt-1">See what students see</p>
 </Link>
 
-          <Link
+                   <Link
             href="/teacher/payments"
-            className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition opacity-50 pointer-events-none"
-            aria-disabled
+            className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition"
           >
-            <p className="font-bold text-myna-charcoal">
-              💳 Payments
-            </p>
-
-            <p className="text-xs text-myna-charcoal/60 mt-1">
-              Coming soon
-            </p>
+            <p className="font-bold text-myna-charcoal">💳 Payments</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Track earnings and request payout</p>
           </Link>
           <Link
             href="/teacher/teaching-time"

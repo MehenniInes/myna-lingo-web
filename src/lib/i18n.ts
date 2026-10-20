@@ -12,59 +12,11 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   ar: "AR",
 };
 
-// Flat dictionary — add keys as you translate each page.
 export const translations = {
+  // ============================================================
+  // ENGLISH
+  // ============================================================
   en: {
-        "home.logIn": "Log In",
-    "home.signUp": "Sign Up",
-    "home.logOut": "Log Out",
-    "home.hi": "Hi",
-    "home.becomeTeacher": "Become a Teacher",
-    "home.heroTitle": "Start Your Language Learning Journey Today",
-    "home.heroSubtitle": "Learn languages by actually speaking, with real teachers, real conversations, real progress.",
-    "home.registerStudent": "Register as a Student",
-    "home.registerTeacher": "Register as a Teacher",
-        "login.welcomeBack": "Welcome back",
-    "login.email": "Email",
-    "login.password": "Password",
-    "login.loggingIn": "Logging in...",
-    "login.logIn": "Log In",
-    "login.noAccount": "Don't have an account?",
-    "login.signUp": "Sign up",
-    "login.failed": "Login failed",
-    "login.connectError": "Could not connect to the server",
-
-    "register.createAccount": "Create your account",
-    "register.fullName": "Full Name",
-    "register.email": "Email",
-    "register.password": "Password",
-    "register.iAm": "I am a",
-    "register.student": "Student",
-    "register.parent": "Parent",
-    "register.teacher": "Teacher",
-    "register.creatingAccount": "Creating account...",
-    "register.signUp": "Sign Up",
-    "register.haveAccount": "Already have an account?",
-    "register.logIn": "Log in",
-    "register.failed": "Registration failed",
-    "register.connectError": "Could not connect to the server",
-        "home.popularLangTitle": "Popular Languages",
-    "home.popularLangSubtitle": "Learn any of these languages with a real teacher",
-    "home.howItWorksTitle": "How It Works",
-    "home.step1Title": "Create your account",
-    "home.step1Desc": "Sign up in seconds as a student, parent, or teacher.",
-    "home.step2Title": "Find your teacher",
-    "home.step2Desc": "Browse teachers by language, specialty, and availability.",
-    "home.step3Title": "Start speaking",
-    "home.step3Desc": "Join live lessons and track your progress as you go.",
-    "home.teachersTitle": "Share Your Language",
-    "home.teachersSubtitle": "Become a teacher on Myna Lingo and connect with students from around the world.",
-    "home.teachersCta": "Apply to Teach",
-    "home.ctaTitle": "Ready to start speaking a new language?",
-    "home.ctaSubtitle": "Join Myna Lingo today and take your first lesson.",
-    "home.ctaButton": "Get Started",
-    "home.footerTagline": "Learn languages by actually speaking.",
-    "home.footerRights": "All rights reserved.",
     // ---- common ----
     "common.loading": "Loading...",
     "common.back": "Back",
@@ -75,17 +27,91 @@ export const translations = {
     "common.remove": "Remove",
     "common.select": "Select",
     "common.optional": "optional",
+    "common.tryAgain": "Try Again",
+    "common.failedToLoad": "Failed to load",
+    "common.backToDashboard": "← Back to Dashboard",
 
     // ---- language toggle ----
     "lang.switchTo": "Switch language",
 
-    // ---- wizard: submitted ----
-    "wizard.submitted.title": "Application Submitted",
-    "wizard.submitted.body":
-      "Thank you! Your application is now under review. We'll notify you once it's been processed.",
-    "wizard.submitted.backHome": "Back to Home",
+    // ---- home ----
+    "home.logIn": "Log In",
+    "home.signUp": "Sign Up",
+    "home.logOut": "Log Out",
+    "home.hi": "Hi",
+    "home.becomeTeacher": "Become a Teacher",
+    "home.heroTitle": "Start Your Language Learning Journey Today",
+    "home.heroSubtitle": "Learn languages by actually speaking, with real teachers, real conversations, real progress.",
+    "home.registerStudent": "Register as a Student",
+    "home.registerTeacher": "Register as a Teacher",
+    "home.navHow": "How it works",
+    "home.navTeachers": "Teachers",
+    "home.heroBadge": "Real teachers, real conversations",
+    "home.fact1": "Live 1-on-1 video calls",
+    "home.fact2": "Algerian teachers + native speakers",
+    "home.fact3": "Pay per minute — no subscription",
+    "home.fact4": "Free trial minutes for new students",
+    "home.howTitle": "How it works",
+    "home.howSubtitle": "From sign-up to your first conversation in minutes.",
+    "home.step1Title": "Pick a teacher",
+    "home.step1Body": "Browse verified teachers by language, price, and availability.",
+    "home.step2Title": "Book or call now",
+    "home.step2Body": "Schedule a lesson or start a live call instantly with an online teacher.",
+    "home.step3Title": "Pay only for what you use",
+    "home.step3Body": "Your balance is deducted per minute — no monthly fee, no wasted credits.",
+    "home.teachersTitle": "Meet our teachers",
+    "home.teachersSubtitle": "Verified professionals, ready to help you speak.",
+    "home.teachersEmpty": "Teachers joining soon — check back in a moment.",
+    "home.viewProfile": "View profile",
+    "home.ctaBrowse": "Browse all teachers",
+    "home.teacherCtaTitle": "Are you a language teacher?",
+    "home.teacherCtaBody": "Set your own rate and schedule, teach from anywhere, get paid per minute.",
+    "home.teacherCtaButton": "Apply to teach",
+    "home.finalCtaTitle": "Start your first lesson today",
+    "home.finalCtaBody": "New students get free trial minutes — no card required.",
+    "home.footerTagline": "Learn languages by actually speaking.",
+    "home.footerRights": "© {year} Myna Lingo. All rights reserved.",
+    "home.perHour": "DA/hour",
+    "home.online": "Online",
+    "home.offline": "Offline",
 
-    // ---- wizard: step labels ----
+    // ---- login ----
+    "login.welcomeBack": "Welcome back",
+    "login.email": "Email",
+    "login.password": "Password",
+    "login.loggingIn": "Logging in...",
+    "login.logIn": "Log In",
+    "login.noAccount": "Don't have an account?",
+    "login.signUp": "Sign up",
+    "login.failed": "Login failed",
+    "login.connectError": "Could not connect to the server",
+
+    // ---- register ----
+    "register.createAccount": "Create your account",
+    "register.subtitle": "Start learning or teaching today — it's free.",
+    "register.fullName": "Full Name",
+    "register.email": "Email",
+    "register.password": "Password",
+    "register.iAm": "I am a",
+    "register.student": "Student",
+    "register.studentDesc": "I want to learn a language",
+    "register.parent": "Parent",
+    "register.parentDesc": "I manage my child's learning",
+    "register.teacher": "Teacher",
+    "register.teacherDesc": "I want to teach",
+    "register.creatingAccount": "Creating account...",
+    "register.signUp": "Sign Up",
+    "register.haveAccount": "Already have an account?",
+    "register.logIn": "Log in",
+    "register.failed": "Registration failed",
+    "register.errShortPassword": "Password must be at least 6 characters.",
+    "register.showPassword": "Show password",
+    "register.connectError": "Could not connect to the server",
+
+    // ---- wizard ----
+    "wizard.submitted.title": "Application Submitted",
+    "wizard.submitted.body": "Thank you! Your application is now under review. We'll notify you once it's been processed.",
+    "wizard.submitted.backHome": "Back to Home",
     "wizard.steps.about": "About",
     "wizard.steps.photo": "Photo",
     "wizard.steps.id": "ID",
@@ -95,10 +121,8 @@ export const translations = {
     "wizard.steps.availability": "Availability",
     "wizard.steps.pricing": "Pricing",
 
-    // ---- wizard: about ----
     "wizard.about.title": "About",
-    "wizard.about.subtitle":
-      "Start creating your public tutor profile. Your progress is saved automatically.",
+    "wizard.about.subtitle": "Start creating your public tutor profile. Your progress is saved automatically.",
     "wizard.about.firstName": "First name",
     "wizard.about.lastName": "Last name",
     "wizard.about.country": "Country of birth",
@@ -115,17 +139,13 @@ export const translations = {
     "wizard.about.confirmOver18": "I confirm I'm over 18",
     "wizard.about.errRequired": "Please fill in all required fields.",
     "wizard.about.errOver18": "Please confirm you are over 18.",
-    "wizard.about.errPhoneDz":
-      "Algerian phone must be 9 digits starting with 5, 6, or 7.",
+    "wizard.about.errPhoneDz": "Algerian phone must be 9 digits starting with 5, 6, or 7.",
     "wizard.about.errPhoneGeneric": "Please enter a valid phone number.",
-    "wizard.about.errPhoneDzHint":
-      "Algerian numbers are 9 digits starting with 5, 6, or 7.",
+    "wizard.about.errPhoneDzHint": "Algerian numbers are 9 digits starting with 5, 6, or 7.",
     "wizard.about.errPhoneHint": "Enter a valid phone number.",
 
-    // ---- wizard: photo ----
     "wizard.photo.title": "Profile Photo",
-    "wizard.photo.subtitle":
-      "Choose a photo that will help learners get to know you.",
+    "wizard.photo.subtitle": "Choose a photo that will help learners get to know you.",
     "wizard.photo.rulesTitle": "What your photo needs:",
     "wizard.photo.rule1": "Face clearly visible, looking at the camera",
     "wizard.photo.rule2": "Plain, neutral background (no clutter)",
@@ -137,49 +157,34 @@ export const translations = {
     "wizard.photo.capture": "Capture",
     "wizard.photo.cancel": "Cancel",
     "wizard.photo.remove": "Remove and choose again",
-    "wizard.photo.errNoPhoto":
-      "Please upload or take a profile photo.",
-    "wizard.photo.errCamera":
-      "Could not access camera. Please check permissions or use file upload instead.",
+    "wizard.photo.errNoPhoto": "Please upload or take a profile photo.",
+    "wizard.photo.errCamera": "Could not access camera. Please check permissions or use file upload instead.",
     "wizard.photo.errSave": "Could not save photo. Please try again.",
 
-    // ---- wizard: id ----
     "wizard.id.title": "ID Document",
-    "wizard.id.subtitle":
-      "We need this to verify your identity. It's kept private and never shown publicly.",
-    "wizard.id.errNoFile":
-      "Please upload or take a photo of your ID document.",
-    "wizard.id.errCamera":
-      "Could not access camera. Please check permissions or use file upload instead.",
+    "wizard.id.subtitle": "We need this to verify your identity. It's kept private and never shown publicly.",
+    "wizard.id.errNoFile": "Please upload or take a photo of your ID document.",
+    "wizard.id.errCamera": "Could not access camera. Please check permissions or use file upload instead.",
     "wizard.id.errSave": "Could not save ID document. Please try again.",
 
-    // ---- wizard: certification ----
     "wizard.cert.title": "Teaching Certification",
-    "wizard.cert.subtitle":
-      "Add a certificate for the language you teach. This is required before you can submit.",
-    "wizard.cert.submitted":
-      "Certificate submitted. Our team will review it.",
+    "wizard.cert.subtitle": "Add a certificate for the language you teach. This is required before you can submit.",
+    "wizard.cert.submitted": "Certificate submitted. Our team will review it.",
     "wizard.cert.description": "Description",
     "wizard.cert.descriptionPlaceholder": "e.g. TEFL Certificate, CELTA...",
     "wizard.cert.issuedBy": "Issued by",
-    "wizard.cert.issuedByPlaceholder":
-      "e.g. Cambridge, British Council...",
+    "wizard.cert.issuedByPlaceholder": "e.g. Cambridge, British Council...",
     "wizard.cert.yearFrom": "Year from",
     "wizard.cert.yearTo": "Year to",
-    "wizard.cert.upload":
-      "Upload your certificate (JPG or PNG, max 20MB)",
+    "wizard.cert.upload": "Upload your certificate (JPG or PNG, max 20MB)",
     "wizard.cert.submit": "Submit Certificate",
-    "wizard.cert.errMissingLang":
-      "Something went wrong — please go back to the About step.",
-    "wizard.cert.errRequired":
-      "Please fill in all fields and upload your certificate.",
+    "wizard.cert.errMissingLang": "Something went wrong — please go back to the About step.",
+    "wizard.cert.errRequired": "Please fill in all fields and upload your certificate.",
     "wizard.cert.errYearOrder": "End year cannot be before start year.",
     "wizard.cert.errSave": "Could not save certificate. Please try again.",
 
-    // ---- wizard: education ----
     "wizard.edu.title": "Education",
-    "wizard.edu.subtitle":
-      "Tell us about your university studies. Adding a diploma is optional but helps your application.",
+    "wizard.edu.subtitle": "Tell us about your university studies. Adding a diploma is optional but helps your application.",
     "wizard.edu.university": "University",
     "wizard.edu.universityPlaceholder": "e.g. University of Algiers",
     "wizard.edu.degree": "Degree",
@@ -190,54 +195,39 @@ export const translations = {
     "wizard.edu.specializationPlaceholder": "e.g. English Literature",
     "wizard.edu.yearFrom": "Year from",
     "wizard.edu.yearTo": "Year to",
-    "wizard.edu.uploadDiploma":
-      "Upload diploma (optional, JPG or PNG)",
-    "wizard.edu.errRequired":
-      "Please fill in university, degree, and years.",
+    "wizard.edu.uploadDiploma": "Upload diploma (optional, JPG or PNG)",
+    "wizard.edu.errRequired": "Please fill in university, degree, and years.",
     "wizard.edu.errYearOrder": "End year cannot be before start year.",
     "wizard.edu.errSave": "Could not save education. Please try again.",
 
-    // ---- wizard: description ----
     "wizard.desc.title": "Profile Description",
-    "wizard.desc.subtitle":
-      "Write a short bio in the language you teach. This is what learners will see on your profile.",
+    "wizard.desc.subtitle": "Write a short bio in the language you teach. This is what learners will see on your profile.",
     "wizard.desc.label": "About you ({count}/20 min)",
-    "wizard.desc.placeholder":
-      "Introduce yourself, your teaching style, and what makes your lessons enjoyable...",
+    "wizard.desc.placeholder": "Introduce yourself, your teaching style, and what makes your lessons enjoyable...",
     "wizard.desc.errShort": "Please write at least 20 characters.",
     "wizard.desc.errSave": "Could not save description.",
 
-    // ---- wizard: availability ----
     "wizard.avail.title": "Availability",
-    "wizard.avail.subtitle":
-      "Set the weekly time slots when you're available to teach.",
-    "wizard.avail.empty":
-      "No slots yet. Add your first one below.",
+    "wizard.avail.subtitle": "Set the weekly time slots when you're available to teach.",
+    "wizard.avail.empty": "No slots yet. Add your first one below.",
     "wizard.avail.addSlot": "+ Add slot",
     "wizard.avail.errEmpty": "Please add at least one availability slot.",
-    "wizard.avail.errOrder":
-      "Each slot's end time must be after its start time.",
+    "wizard.avail.errOrder": "Each slot's end time must be after its start time.",
     "wizard.avail.errSave": "Could not save availability.",
 
-    // ---- wizard: pricing ----
     "wizard.pricing.title": "Pricing",
-    "wizard.pricing.subtitle":
-      "Enter your requested hourly rate in Algerian Dinars (DA). Our team reviews this before approving your application.",
+    "wizard.pricing.subtitle": "Enter your requested hourly rate in Algerian Dinars (DA). Our team reviews this before approving your application.",
     "wizard.pricing.rate": "Hourly rate (DA)",
     "wizard.pricing.ratePlaceholder": "e.g. 1500",
     "wizard.pricing.errRate": "Please enter a valid hourly rate in DA.",
     "wizard.pricing.errSave": "Could not save pricing.",
     "wizard.pricing.finish": "Finish Application",
 
-    // ---- generic wizard errors ----
-    "wizard.errLoad":
-      "Could not load your application. Please try again.",
+    "wizard.errLoad": "Could not load your application. Please try again.",
     "wizard.errGenericSave": "Could not save. Please try again.",
     "wizard.errSubmit": "Could not submit application. Please try again.",
-        "common.tryAgain": "Try Again",
-    "common.failedToLoad": "Failed to load",
-    "common.backToDashboard": "← Back to Dashboard",
 
+    // ---- student ----
     "student.welcome": "Welcome",
     "student.subtitle": "Your learning dashboard",
     "student.logout": "Logout",
@@ -262,6 +252,7 @@ export const translations = {
     "student.bookings": "My Bookings",
     "student.bookingsSub": "Scheduled lessons",
 
+    // ---- bookings ----
     "bookings.title": "My Bookings",
     "bookings.upcoming": "Upcoming",
     "bookings.completed": "Completed",
@@ -277,6 +268,7 @@ export const translations = {
     "bookings.statusCancelled": "Cancelled",
     "bookings.statusCompleted": "Completed",
 
+    // ---- packages ----
     "packages.title": "Buy Minutes",
     "packages.subtitle": "Choose a package to start learning",
     "packages.package": "Package",
@@ -288,6 +280,7 @@ export const translations = {
     "packages.purchased": "✅ Purchased {minutes} minutes! New balance: {balance}",
     "packages.failed": "Purchase failed",
 
+    // ---- progress ----
     "progress.title": "My Progress",
     "progress.subtitle": "Track your XP and level up",
     "progress.currentLevel": "Current Level",
@@ -300,7 +293,9 @@ export const translations = {
     "progress.srcLesson": "📚 Lesson",
     "progress.srcAdmin": "⚙️ Admin",
     "progress.srcStreak": "🔥 Streak",
-        "vocab.title": "My Vocabulary",
+
+    // ---- vocabulary ----
+    "vocab.title": "My Vocabulary",
     "vocab.subtitle": "Words you've learned from podcasts",
     "vocab.searchPh": "Search words...",
     "vocab.empty": "No words yet",
@@ -309,6 +304,7 @@ export const translations = {
     "vocab.noMatch": "No words match \"{q}\"",
     "vocab.from": "From: {title}",
 
+    // ---- notifications ----
     "notif.title": "Notifications",
     "notif.unreadOne": "You have {n} unread notification",
     "notif.unreadMany": "You have {n} unread notifications",
@@ -317,6 +313,7 @@ export const translations = {
     "notif.empty": "No notifications yet",
     "notif.emptySub": "We'll let you know when something happens",
 
+    // ---- groups ----
     "groups.title": "Group Classes",
     "groups.subtitle": "Fun classes for children in a group setting",
     "groups.empty": "No group classes available",
@@ -330,6 +327,7 @@ export const translations = {
     "groups.age6_11": "6-11 years",
     "groups.age12_14": "12-14 years",
 
+    // ---- my podcasts ----
     "mypod.title": "My Podcasts",
     "mypod.subtitle": "All the podcasts you've purchased",
     "mypod.empty": "No podcasts yet",
@@ -337,6 +335,7 @@ export const translations = {
     "mypod.browse": "Browse Podcasts",
     "mypod.listen": "▶ Listen Now",
 
+    // ---- call ----
     "call.backToDashboard": "← Back to Dashboard",
     "call.title": "Call a Teacher",
     "call.balance": "Your balance: {balance}",
@@ -357,7 +356,9 @@ export const translations = {
     "call.studentBal": "Student balance",
     "call.teacherEarned": "Teacher earned",
     "call.backToTeachers": "Back to Teachers",
-        "parent.welcome": "Welcome",
+
+    // ---- parent ----
+    "parent.welcome": "Welcome",
     "parent.dashboard": "Parent Dashboard",
     "parent.logout": "Logout",
     "parent.totalChildren": "Total Children",
@@ -369,6 +370,7 @@ export const translations = {
     "parent.payments": "💳 Payments",
     "parent.paymentsSub": "View payment history",
 
+    // ---- children ----
     "children.title": "My Children",
     "children.subtitle": "Manage your children's accounts",
     "children.addBtn": "+ Add Child",
@@ -388,6 +390,7 @@ export const translations = {
     "children.cat12_14": "12-14 years",
     "children.catUnknown": "Unknown",
 
+    // ---- parent payments ----
     "ppay.title": "Payments",
     "ppay.subtitle": "Your payment history",
     "ppay.totalSpent": "Total Spent",
@@ -397,7 +400,9 @@ export const translations = {
     "ppay.noPodcasts": "No podcast purchases yet",
     "ppay.minutesPkg": "{n} minutes package",
     "ppay.backToDashboard": "← Back to Dashboard",
-        "admin.title": "Admin Panel",
+
+    // ---- admin ----
+    "admin.title": "Admin Panel",
     "admin.subtitle": "Manage your platform",
     "admin.manage": "Manage",
     "admin.students": "Students",
@@ -415,6 +420,7 @@ export const translations = {
     "admin.manageActivities": "Manage learning activities",
     "admin.backToAdmin": "← Back to Admin",
 
+    // ---- admin users ----
     "aUsers.title": "Users",
     "aUsers.subtitle": "Manage all platform users",
     "aUsers.all": "All",
@@ -426,6 +432,7 @@ export const translations = {
     "aUsers.suspend": "Suspend",
     "aUsers.reactivate": "Reactivate",
 
+    // ---- admin packages ----
     "aPkg.title": "Packages",
     "aPkg.updated": "✅ Package updated",
     "aPkg.minutes": "{n} minutes",
@@ -439,6 +446,7 @@ export const translations = {
     "aPkg.minutesPh": "Minutes",
     "aPkg.sortPh": "Sort order",
 
+    // ---- admin content ----
     "aContent.title": "Content",
     "aContent.subtitle": "Learning activities",
     "aContent.newBtn": "+ New Activity",
@@ -465,6 +473,7 @@ export const translations = {
     "aContent.typeStory": "📖 Story",
     "aContent.typeVocab": "📚 Vocabulary",
 
+    // ---- admin podcasts ----
     "aPod.title": "Podcasts",
     "aPod.updated": "✅ Podcast updated",
     "aPod.edit": "Edit",
@@ -477,6 +486,7 @@ export const translations = {
     "aPod.meta": "{lang} · {level} · {price} DA · {xp} XP",
     "aPod.inactive": " · INACTIVE",
 
+    // ---- admin analytics ----
     "aAnalytics.title": "Analytics",
     "aAnalytics.subtitle": "Platform overview",
     "aAnalytics.totalRevenue": "Total Revenue",
@@ -497,60 +507,66 @@ export const translations = {
     "aAnalytics.recent": "Recent Package Purchases",
     "aAnalytics.noRecent": "No recent purchases",
     "aAnalytics.minLine": "{minutes} minutes · {date}",
+        "legal.privacyTitle": "Privacy Policy",
+    "legal.termsTitle": "Terms of Service",
+    "legal.lastUpdated": "Last updated: {date}",
+    "legal.draftNotice": "This is a working draft. A final version reviewed by legal counsel will replace it before public launch.",
+    "legal.backHome": "← Back to home",
+    "register.agreePre": "I agree to the",
+    "register.agreeTerms": "Terms of Service",
+    "register.agreeAnd": "and",
+    "register.agreePrivacy": "Privacy Policy",
+    "register.agreeErr": "You must accept the Terms and Privacy Policy to continue.",
+        "tpay.title": "Payments",
+    "tpay.subtitle": "Track your teaching earnings and request payouts.",
+    "tpay.available": "Available",
+    "tpay.pending": "Pending",
+    "tpay.approved": "Approved",
+    "tpay.paid": "Paid",
+    "tpay.totalPaid": "Total paid out",
+    "tpay.estimatedPayout": "Estimated value",
+    "tpay.rate": "Internal rate",
+    "tpay.perHour": "DA/hour",
+    "tpay.requestBtn": "Request payment",
+    "tpay.requesting": "Requesting...",
+    "tpay.requestHint": "Freezes all available time into a new payment request.",
+    "tpay.noRateHint": "Your internal rate hasn't been set yet. Contact support.",
+    "tpay.history": "Payment history",
+    "tpay.noHistory": "No payment requests yet.",
+    "tpay.frozen": "frozen",
+    "tpay.seconds": "seconds",
+    "tpay.statusPending": "Pending",
+    "tpay.statusApproved": "Approved",
+    "tpay.statusPaid": "Paid",
+    "tpay.statusRejected": "Rejected",
+    "tpay.statusCancelled": "Cancelled",
+    "tpay.alreadyActive": "You already have an active request. Wait for it to be paid.",
+
+    "atp.title": "Teacher payments",
+    "atp.subtitle": "Review and approve teacher payout requests.",
+    "atp.all": "All",
+    "atp.pending": "Pending",
+    "atp.approved": "Approved",
+    "atp.paid": "Paid",
+    "atp.rejected": "Rejected",
+    "atp.teacher": "Teacher",
+    "atp.frozen": "Frozen",
+    "atp.payout": "Payout",
+    "atp.status": "Status",
+    "atp.requested": "Requested",
+    "atp.actions": "Actions",
+    "atp.approve": "Approve",
+    "atp.markPaid": "Mark paid",
+    "atp.reject": "Reject",
+    "atp.none": "No payment requests",
+    "atp.notSet": "Not set",
   },
 
-
+  // ============================================================
+  // FRENCH
+  // ============================================================
   fr: {
-        "home.logIn": "Connexion",
-    "home.signUp": "S'inscrire",
-    "home.logOut": "Déconnexion",
-    "home.hi": "Salut",
-    "home.becomeTeacher": "Devenir professeur",
-    "home.heroTitle": "Commencez votre apprentissage des langues dès aujourd'hui",
-    "home.heroSubtitle": "Apprenez les langues en parlant vraiment, avec de vrais professeurs, de vraies conversations, de vrais progrès.",
-    "home.registerStudent": "S'inscrire comme étudiant",
-    "home.registerTeacher": "S'inscrire comme professeur",
-        "home.popularLangTitle": "Langues populaires",
-    "home.popularLangSubtitle": "Apprenez l'une de ces langues avec un vrai professeur",
-    "home.howItWorksTitle": "Comment ça marche",
-    "home.step1Title": "Créez votre compte",
-    "home.step1Desc": "Inscrivez-vous en quelques secondes en tant qu'étudiant, parent ou professeur.",
-    "home.step2Title": "Trouvez votre professeur",
-    "home.step2Desc": "Parcourez les professeurs par langue, spécialité et disponibilité.",
-    "home.step3Title": "Commencez à parler",
-    "home.step3Desc": "Rejoignez des cours en direct et suivez vos progrès.",
-    "home.teachersTitle": "Partagez votre langue",
-    "home.teachersSubtitle": "Devenez professeur sur Myna Lingo et connectez-vous avec des étudiants du monde entier.",
-    "home.teachersCta": "Postuler pour enseigner",
-    "home.ctaTitle": "Prêt à commencer à parler une nouvelle langue ?",
-    "home.ctaSubtitle": "Rejoignez Myna Lingo dès aujourd'hui et prenez votre premier cours.",
-    "home.ctaButton": "Commencer",
-    "home.footerTagline": "Apprenez les langues en parlant vraiment.",
-    "home.footerRights": "Tous droits réservés.",
-        "login.welcomeBack": "Bon retour",
-    "login.email": "E-mail",
-    "login.password": "Mot de passe",
-    "login.loggingIn": "Connexion...",
-    "login.logIn": "Se connecter",
-    "login.noAccount": "Vous n'avez pas de compte ?",
-    "login.signUp": "S'inscrire",
-    "login.failed": "Échec de la connexion",
-    "login.connectError": "Impossible de se connecter au serveur",
-
-    "register.createAccount": "Créez votre compte",
-    "register.fullName": "Nom complet",
-    "register.email": "E-mail",
-    "register.password": "Mot de passe",
-    "register.iAm": "Je suis",
-    "register.student": "Étudiant",
-    "register.parent": "Parent",
-    "register.teacher": "Professeur",
-    "register.creatingAccount": "Création du compte...",
-    "register.signUp": "S'inscrire",
-    "register.haveAccount": "Vous avez déjà un compte ?",
-    "register.logIn": "Se connecter",
-    "register.failed": "Échec de l'inscription",
-    "register.connectError": "Impossible de se connecter au serveur",
+    // ---- common ----
     "common.loading": "Chargement...",
     "common.back": "Retour",
     "common.continue": "Continuer",
@@ -560,14 +576,92 @@ export const translations = {
     "common.remove": "Supprimer",
     "common.select": "Sélectionner",
     "common.optional": "facultatif",
+    "common.tryAgain": "Réessayer",
+    "common.failedToLoad": "Échec du chargement",
+    "common.backToDashboard": "← Retour au tableau de bord",
 
+
+    // ---- language toggle ----
     "lang.switchTo": "Changer de langue",
 
-    "wizard.submitted.title": "Candidature envoyée",
-    "wizard.submitted.body":
-      "Merci ! Votre candidature est en cours d'examen. Nous vous préviendrons une fois traitée.",
-    "wizard.submitted.backHome": "Retour à l'accueil",
+    // ---- home ----
+    "home.logIn": "Connexion",
+    "home.signUp": "S'inscrire",
+    "home.logOut": "Déconnexion",
+    "home.hi": "Salut",
+    "home.becomeTeacher": "Devenir professeur",
+    "home.heroTitle": "Commencez votre apprentissage des langues dès aujourd'hui",
+    "home.heroSubtitle": "Apprenez les langues en parlant vraiment, avec de vrais professeurs, de vraies conversations, de vrais progrès.",
+    "home.registerStudent": "S'inscrire comme étudiant",
+    "home.registerTeacher": "S'inscrire comme professeur",
+    "home.navHow": "Comment ça marche",
+    "home.navTeachers": "Professeurs",
+    "home.heroBadge": "De vrais professeurs, de vraies conversations",
+    "home.fact1": "Appels vidéo en direct 1-à-1",
+    "home.fact2": "Professeurs algériens + natifs",
+    "home.fact3": "Payez à la minute — sans abonnement",
+    "home.fact4": "Minutes d'essai gratuites pour les nouveaux",
+    "home.howTitle": "Comment ça marche",
+    "home.howSubtitle": "De l'inscription à votre première conversation en quelques minutes.",
+    "home.step1Title": "Choisissez un professeur",
+    "home.step1Body": "Parcourez des professeurs vérifiés par langue, prix et disponibilité.",
+    "home.step2Title": "Réservez ou appelez",
+    "home.step2Body": "Planifiez un cours ou démarrez un appel en direct avec un professeur en ligne.",
+    "home.step3Title": "Payez seulement ce que vous utilisez",
+    "home.step3Body": "Votre solde est déduit à la minute — pas de frais mensuels, pas de crédits perdus.",
+    "home.teachersTitle": "Rencontrez nos professeurs",
+    "home.teachersSubtitle": "Des professionnels vérifiés, prêts à vous faire parler.",
+    "home.teachersEmpty": "Professeurs bientôt disponibles — revenez dans un instant.",
+    "home.viewProfile": "Voir le profil",
+    "home.ctaBrowse": "Voir tous les professeurs",
+    "home.teacherCtaTitle": "Vous êtes professeur de langue ?",
+    "home.teacherCtaBody": "Fixez votre tarif et vos horaires, enseignez de partout, payé à la minute.",
+    "home.teacherCtaButton": "Postuler pour enseigner",
+    "home.finalCtaTitle": "Commencez votre premier cours aujourd'hui",
+    "home.finalCtaBody": "Les nouveaux étudiants reçoivent des minutes d'essai — sans carte.",
+    "home.footerTagline": "Apprenez les langues en parlant vraiment.",
+    "home.footerRights": "© {year} Myna Lingo. Tous droits réservés.",
+    "home.perHour": "DA/heure",
+    "home.online": "En ligne",
+    "home.offline": "Hors ligne",
 
+    // ---- login ----
+    "login.welcomeBack": "Bon retour",
+    "login.email": "E-mail",
+    "login.password": "Mot de passe",
+    "login.loggingIn": "Connexion...",
+    "login.logIn": "Se connecter",
+    "login.noAccount": "Vous n'avez pas de compte ?",
+    "login.signUp": "S'inscrire",
+    "login.failed": "Échec de la connexion",
+    "login.connectError": "Impossible de se connecter au serveur",
+
+    // ---- register ----
+    "register.createAccount": "Créez votre compte",
+    "register.subtitle": "Commencez à apprendre ou à enseigner aujourd'hui — c'est gratuit.",
+    "register.fullName": "Nom complet",
+    "register.email": "E-mail",
+    "register.password": "Mot de passe",
+    "register.iAm": "Je suis",
+    "register.student": "Étudiant",
+    "register.studentDesc": "Je veux apprendre une langue",
+    "register.parent": "Parent",
+    "register.parentDesc": "Je gère l'apprentissage de mon enfant",
+    "register.teacher": "Professeur",
+    "register.teacherDesc": "Je veux enseigner",
+    "register.creatingAccount": "Création du compte...",
+    "register.signUp": "S'inscrire",
+    "register.haveAccount": "Vous avez déjà un compte ?",
+    "register.logIn": "Se connecter",
+    "register.failed": "Échec de l'inscription",
+    "register.errShortPassword": "Le mot de passe doit contenir au moins 6 caractères.",
+    "register.showPassword": "Afficher le mot de passe",
+    "register.connectError": "Impossible de se connecter au serveur",
+
+    // ---- wizard ----
+    "wizard.submitted.title": "Candidature envoyée",
+    "wizard.submitted.body": "Merci ! Votre candidature est en cours d'examen. Nous vous préviendrons une fois traitée.",
+    "wizard.submitted.backHome": "Retour à l'accueil",
     "wizard.steps.about": "À propos",
     "wizard.steps.photo": "Photo",
     "wizard.steps.id": "Pièce d'identité",
@@ -578,8 +672,7 @@ export const translations = {
     "wizard.steps.pricing": "Tarif",
 
     "wizard.about.title": "À propos",
-    "wizard.about.subtitle":
-      "Commencez à créer votre profil public de tuteur. Votre progression est enregistrée automatiquement.",
+    "wizard.about.subtitle": "Commencez à créer votre profil public de tuteur. Votre progression est enregistrée automatiquement.",
     "wizard.about.firstName": "Prénom",
     "wizard.about.lastName": "Nom",
     "wizard.about.country": "Pays de naissance",
@@ -596,74 +689,52 @@ export const translations = {
     "wizard.about.confirmOver18": "Je confirme avoir plus de 18 ans",
     "wizard.about.errRequired": "Veuillez remplir tous les champs obligatoires.",
     "wizard.about.errOver18": "Veuillez confirmer que vous avez plus de 18 ans.",
-    "wizard.about.errPhoneDz":
-      "Le numéro algérien doit comporter 9 chiffres commençant par 5, 6 ou 7.",
+    "wizard.about.errPhoneDz": "Le numéro algérien doit comporter 9 chiffres commençant par 5, 6 ou 7.",
     "wizard.about.errPhoneGeneric": "Veuillez saisir un numéro valide.",
-    "wizard.about.errPhoneDzHint":
-      "Les numéros algériens comportent 9 chiffres commençant par 5, 6 ou 7.",
+    "wizard.about.errPhoneDzHint": "Les numéros algériens comportent 9 chiffres commençant par 5, 6 ou 7.",
     "wizard.about.errPhoneHint": "Saisissez un numéro valide.",
 
     "wizard.photo.title": "Photo de profil",
-    "wizard.photo.subtitle":
-      "Choisissez une photo qui aidera les apprenants à vous connaître.",
+    "wizard.photo.subtitle": "Choisissez une photo qui aidera les apprenants à vous connaître.",
     "wizard.photo.rulesTitle": "Ce que votre photo doit respecter :",
     "wizard.photo.rule1": "Visage bien visible, regardant la caméra",
     "wizard.photo.rule2": "Fond neutre et simple (sans encombrement)",
     "wizard.photo.rule3": "Bon éclairage — pas d'ombres sur le visage",
-    "wizard.photo.rule4":
-      "Tête et épaules uniquement, sans chapeau ni lunettes de soleil",
-    "wizard.photo.rule5":
-      "Photo récente et naturelle — sans filtres excessifs",
+    "wizard.photo.rule4": "Tête et épaules uniquement, sans chapeau ni lunettes de soleil",
+    "wizard.photo.rule5": "Photo récente et naturelle — sans filtres excessifs",
     "wizard.photo.upload": "Téléverser un fichier",
     "wizard.photo.take": "Prendre une photo",
     "wizard.photo.capture": "Capturer",
     "wizard.photo.cancel": "Annuler",
     "wizard.photo.remove": "Supprimer et choisir à nouveau",
-    "wizard.photo.errNoPhoto":
-      "Veuillez téléverser ou prendre une photo de profil.",
-    "wizard.photo.errCamera":
-      "Impossible d'accéder à la caméra. Vérifiez les autorisations ou utilisez un fichier.",
-    "wizard.photo.errSave":
-      "Impossible d'enregistrer la photo. Veuillez réessayer.",
+    "wizard.photo.errNoPhoto": "Veuillez téléverser ou prendre une photo de profil.",
+    "wizard.photo.errCamera": "Impossible d'accéder à la caméra. Vérifiez les autorisations ou utilisez un fichier.",
+    "wizard.photo.errSave": "Impossible d'enregistrer la photo. Veuillez réessayer.",
 
     "wizard.id.title": "Pièce d'identité",
-    "wizard.id.subtitle":
-      "Nous en avons besoin pour vérifier votre identité. Elle reste privée et n'est jamais affichée publiquement.",
-    "wizard.id.errNoFile":
-      "Veuillez téléverser ou prendre une photo de votre pièce d'identité.",
-    "wizard.id.errCamera":
-      "Impossible d'accéder à la caméra. Vérifiez les autorisations ou utilisez un fichier.",
-    "wizard.id.errSave":
-      "Impossible d'enregistrer la pièce d'identité. Veuillez réessayer.",
+    "wizard.id.subtitle": "Nous en avons besoin pour vérifier votre identité. Elle reste privée et n'est jamais affichée publiquement.",
+    "wizard.id.errNoFile": "Veuillez téléverser ou prendre une photo de votre pièce d'identité.",
+    "wizard.id.errCamera": "Impossible d'accéder à la caméra. Vérifiez les autorisations ou utilisez un fichier.",
+    "wizard.id.errSave": "Impossible d'enregistrer la pièce d'identité. Veuillez réessayer.",
 
     "wizard.cert.title": "Certification d'enseignement",
-    "wizard.cert.subtitle":
-      "Ajoutez un certificat pour la langue que vous enseignez. Obligatoire avant de soumettre.",
-    "wizard.cert.submitted":
-      "Certificat soumis. Notre équipe va l'examiner.",
+    "wizard.cert.subtitle": "Ajoutez un certificat pour la langue que vous enseignez. Obligatoire avant de soumettre.",
+    "wizard.cert.submitted": "Certificat soumis. Notre équipe va l'examiner.",
     "wizard.cert.description": "Description",
-    "wizard.cert.descriptionPlaceholder":
-      "ex. Certificat TEFL, CELTA...",
+    "wizard.cert.descriptionPlaceholder": "ex. Certificat TEFL, CELTA...",
     "wizard.cert.issuedBy": "Délivré par",
-    "wizard.cert.issuedByPlaceholder":
-      "ex. Cambridge, British Council...",
+    "wizard.cert.issuedByPlaceholder": "ex. Cambridge, British Council...",
     "wizard.cert.yearFrom": "Année de début",
     "wizard.cert.yearTo": "Année de fin",
-    "wizard.cert.upload":
-      "Téléversez votre certificat (JPG ou PNG, max 20 Mo)",
+    "wizard.cert.upload": "Téléversez votre certificat (JPG ou PNG, max 20 Mo)",
     "wizard.cert.submit": "Soumettre le certificat",
-    "wizard.cert.errMissingLang":
-      "Une erreur est survenue — revenez à l'étape À propos.",
-    "wizard.cert.errRequired":
-      "Veuillez remplir tous les champs et téléverser votre certificat.",
-    "wizard.cert.errYearOrder":
-      "L'année de fin ne peut pas précéder l'année de début.",
-    "wizard.cert.errSave":
-      "Impossible d'enregistrer le certificat. Veuillez réessayer.",
+    "wizard.cert.errMissingLang": "Une erreur est survenue — revenez à l'étape À propos.",
+    "wizard.cert.errRequired": "Veuillez remplir tous les champs et téléverser votre certificat.",
+    "wizard.cert.errYearOrder": "L'année de fin ne peut pas précéder l'année de début.",
+    "wizard.cert.errSave": "Impossible d'enregistrer le certificat. Veuillez réessayer.",
 
     "wizard.edu.title": "Formation",
-    "wizard.edu.subtitle":
-      "Parlez-nous de vos études universitaires. Le diplôme est facultatif mais renforce votre candidature.",
+    "wizard.edu.subtitle": "Parlez-nous de vos études universitaires. Le diplôme est facultatif mais renforce votre candidature.",
     "wizard.edu.university": "Université",
     "wizard.edu.universityPlaceholder": "ex. Université d'Alger",
     "wizard.edu.degree": "Diplôme",
@@ -674,56 +745,39 @@ export const translations = {
     "wizard.edu.specializationPlaceholder": "ex. Littérature anglaise",
     "wizard.edu.yearFrom": "Année de début",
     "wizard.edu.yearTo": "Année de fin",
-    "wizard.edu.uploadDiploma":
-      "Téléverser le diplôme (facultatif, JPG ou PNG)",
-    "wizard.edu.errRequired":
-      "Veuillez remplir l'université, le diplôme et les années.",
-    "wizard.edu.errYearOrder":
-      "L'année de fin ne peut pas précéder l'année de début.",
-    "wizard.edu.errSave":
-      "Impossible d'enregistrer la formation. Veuillez réessayer.",
+    "wizard.edu.uploadDiploma": "Téléverser le diplôme (facultatif, JPG ou PNG)",
+    "wizard.edu.errRequired": "Veuillez remplir l'université, le diplôme et les années.",
+    "wizard.edu.errYearOrder": "L'année de fin ne peut pas précéder l'année de début.",
+    "wizard.edu.errSave": "Impossible d'enregistrer la formation. Veuillez réessayer.",
 
     "wizard.desc.title": "Description du profil",
-    "wizard.desc.subtitle":
-      "Rédigez une courte biographie dans la langue que vous enseignez. C'est ce que verront les apprenants.",
+    "wizard.desc.subtitle": "Rédigez une courte biographie dans la langue que vous enseignez. C'est ce que verront les apprenants.",
     "wizard.desc.label": "À propos de vous ({count}/20 min)",
-    "wizard.desc.placeholder":
-      "Présentez-vous, votre style d'enseignement et ce qui rend vos cours agréables...",
+    "wizard.desc.placeholder": "Présentez-vous, votre style d'enseignement et ce qui rend vos cours agréables...",
     "wizard.desc.errShort": "Veuillez écrire au moins 20 caractères.",
     "wizard.desc.errSave": "Impossible d'enregistrer la description.",
 
     "wizard.avail.title": "Disponibilités",
-    "wizard.avail.subtitle":
-      "Définissez vos créneaux hebdomadaires de disponibilité.",
-    "wizard.avail.empty":
-      "Aucun créneau. Ajoutez le premier ci-dessous.",
+    "wizard.avail.subtitle": "Définissez vos créneaux hebdomadaires de disponibilité.",
+    "wizard.avail.empty": "Aucun créneau. Ajoutez le premier ci-dessous.",
     "wizard.avail.addSlot": "+ Ajouter un créneau",
-    "wizard.avail.errEmpty":
-      "Veuillez ajouter au moins un créneau de disponibilité.",
-    "wizard.avail.errOrder":
-      "L'heure de fin doit être après l'heure de début.",
-    "wizard.avail.errSave":
-      "Impossible d'enregistrer les disponibilités.",
+    "wizard.avail.errEmpty": "Veuillez ajouter au moins un créneau de disponibilité.",
+    "wizard.avail.errOrder": "L'heure de fin doit être après l'heure de début.",
+    "wizard.avail.errSave": "Impossible d'enregistrer les disponibilités.",
 
     "wizard.pricing.title": "Tarif",
-    "wizard.pricing.subtitle":
-      "Indiquez votre tarif horaire souhaité en dinars algériens (DA). Notre équipe l'examine avant d'approuver votre candidature.",
+    "wizard.pricing.subtitle": "Indiquez votre tarif horaire souhaité en dinars algériens (DA). Notre équipe l'examine avant d'approuver votre candidature.",
     "wizard.pricing.rate": "Tarif horaire (DA)",
     "wizard.pricing.ratePlaceholder": "ex. 1500",
     "wizard.pricing.errRate": "Veuillez saisir un tarif horaire valide en DA.",
     "wizard.pricing.errSave": "Impossible d'enregistrer le tarif.",
     "wizard.pricing.finish": "Terminer la candidature",
 
-    "wizard.errLoad":
-      "Impossible de charger votre candidature. Veuillez réessayer.",
+    "wizard.errLoad": "Impossible de charger votre candidature. Veuillez réessayer.",
     "wizard.errGenericSave": "Impossible d'enregistrer. Veuillez réessayer.",
-    "wizard.errSubmit":
-      "Impossible d'envoyer la candidature. Veuillez réessayer.",
-    
-           "common.tryAgain": "Réessayer",
-    "common.failedToLoad": "Échec du chargement",
-    "common.backToDashboard": "← Retour au tableau de bord",
+    "wizard.errSubmit": "Impossible d'envoyer la candidature. Veuillez réessayer.",
 
+    // ---- student ----
     "student.welcome": "Bienvenue",
     "student.subtitle": "Votre tableau de bord",
     "student.logout": "Déconnexion",
@@ -748,6 +802,7 @@ export const translations = {
     "student.bookings": "Mes réservations",
     "student.bookingsSub": "Cours planifiés",
 
+    // ---- bookings ----
     "bookings.title": "Mes réservations",
     "bookings.upcoming": "À venir",
     "bookings.completed": "Terminés",
@@ -763,6 +818,7 @@ export const translations = {
     "bookings.statusCancelled": "Annulée",
     "bookings.statusCompleted": "Terminée",
 
+    // ---- packages ----
     "packages.title": "Acheter des minutes",
     "packages.subtitle": "Choisissez un forfait pour commencer",
     "packages.package": "Forfait",
@@ -774,6 +830,7 @@ export const translations = {
     "packages.purchased": "✅ {minutes} minutes achetées ! Nouveau solde : {balance}",
     "packages.failed": "Échec de l'achat",
 
+    // ---- progress ----
     "progress.title": "Ma progression",
     "progress.subtitle": "Suivez votre XP et montez de niveau",
     "progress.currentLevel": "Niveau actuel",
@@ -786,7 +843,9 @@ export const translations = {
     "progress.srcLesson": "📚 Cours",
     "progress.srcAdmin": "⚙️ Admin",
     "progress.srcStreak": "🔥 Série",
-        "vocab.title": "Mon vocabulaire",
+
+    // ---- vocabulary ----
+    "vocab.title": "Mon vocabulaire",
     "vocab.subtitle": "Mots appris grâce aux podcasts",
     "vocab.searchPh": "Rechercher des mots...",
     "vocab.empty": "Aucun mot pour l'instant",
@@ -795,6 +854,7 @@ export const translations = {
     "vocab.noMatch": "Aucun mot ne correspond à « {q} »",
     "vocab.from": "De : {title}",
 
+    // ---- notifications ----
     "notif.title": "Notifications",
     "notif.unreadOne": "Vous avez {n} notification non lue",
     "notif.unreadMany": "Vous avez {n} notifications non lues",
@@ -803,6 +863,7 @@ export const translations = {
     "notif.empty": "Aucune notification",
     "notif.emptySub": "Nous vous préviendrons quand quelque chose se passera",
 
+    // ---- groups ----
     "groups.title": "Cours en groupe",
     "groups.subtitle": "Cours ludiques pour enfants en petit groupe",
     "groups.empty": "Aucun cours en groupe disponible",
@@ -816,6 +877,7 @@ export const translations = {
     "groups.age6_11": "6-11 ans",
     "groups.age12_14": "12-14 ans",
 
+    // ---- my podcasts ----
     "mypod.title": "Mes podcasts",
     "mypod.subtitle": "Tous les podcasts que vous avez achetés",
     "mypod.empty": "Aucun podcast pour l'instant",
@@ -823,6 +885,7 @@ export const translations = {
     "mypod.browse": "Parcourir les podcasts",
     "mypod.listen": "▶ Écouter",
 
+    // ---- call ----
     "call.backToDashboard": "← Retour au tableau de bord",
     "call.title": "Appeler un professeur",
     "call.balance": "Votre solde : {balance}",
@@ -843,7 +906,9 @@ export const translations = {
     "call.studentBal": "Solde de l'étudiant",
     "call.teacherEarned": "Gains du professeur",
     "call.backToTeachers": "Retour aux professeurs",
-        "parent.welcome": "Bienvenue",
+
+    // ---- parent ----
+    "parent.welcome": "Bienvenue",
     "parent.dashboard": "Tableau de bord parent",
     "parent.logout": "Déconnexion",
     "parent.totalChildren": "Total enfants",
@@ -855,6 +920,7 @@ export const translations = {
     "parent.payments": "💳 Paiements",
     "parent.paymentsSub": "Voir l'historique des paiements",
 
+    // ---- children ----
     "children.title": "Mes enfants",
     "children.subtitle": "Gérez les comptes de vos enfants",
     "children.addBtn": "+ Ajouter un enfant",
@@ -874,6 +940,7 @@ export const translations = {
     "children.cat12_14": "12-14 ans",
     "children.catUnknown": "Inconnu",
 
+    // ---- parent payments ----
     "ppay.title": "Paiements",
     "ppay.subtitle": "Votre historique de paiements",
     "ppay.totalSpent": "Total dépensé",
@@ -883,7 +950,9 @@ export const translations = {
     "ppay.noPodcasts": "Aucun achat de podcast",
     "ppay.minutesPkg": "Forfait de {n} minutes",
     "ppay.backToDashboard": "← Retour au tableau de bord",
-        "admin.title": "Panneau d'administration",
+
+    // ---- admin ----
+    "admin.title": "Panneau d'administration",
     "admin.subtitle": "Gérez votre plateforme",
     "admin.manage": "Gérer",
     "admin.students": "Étudiants",
@@ -901,6 +970,7 @@ export const translations = {
     "admin.manageActivities": "Gérer les activités",
     "admin.backToAdmin": "← Retour à l'admin",
 
+    // ---- admin users ----
     "aUsers.title": "Utilisateurs",
     "aUsers.subtitle": "Gérer tous les utilisateurs",
     "aUsers.all": "Tous",
@@ -912,6 +982,7 @@ export const translations = {
     "aUsers.suspend": "Suspendre",
     "aUsers.reactivate": "Réactiver",
 
+    // ---- admin packages ----
     "aPkg.title": "Forfaits",
     "aPkg.updated": "✅ Forfait mis à jour",
     "aPkg.minutes": "{n} minutes",
@@ -925,6 +996,7 @@ export const translations = {
     "aPkg.minutesPh": "Minutes",
     "aPkg.sortPh": "Ordre",
 
+    // ---- admin content ----
     "aContent.title": "Contenu",
     "aContent.subtitle": "Activités d'apprentissage",
     "aContent.newBtn": "+ Nouvelle activité",
@@ -951,6 +1023,7 @@ export const translations = {
     "aContent.typeStory": "📖 Histoire",
     "aContent.typeVocab": "📚 Vocabulaire",
 
+    // ---- admin podcasts ----
     "aPod.title": "Podcasts",
     "aPod.updated": "✅ Podcast mis à jour",
     "aPod.edit": "Modifier",
@@ -963,6 +1036,7 @@ export const translations = {
     "aPod.meta": "{lang} · {level} · {price} DA · {xp} XP",
     "aPod.inactive": " · INACTIF",
 
+    // ---- admin analytics ----
     "aAnalytics.title": "Statistiques",
     "aAnalytics.subtitle": "Vue d'ensemble de la plateforme",
     "aAnalytics.totalRevenue": "Revenu total",
@@ -983,60 +1057,65 @@ export const translations = {
     "aAnalytics.recent": "Achats de forfaits récents",
     "aAnalytics.noRecent": "Aucun achat récent",
     "aAnalytics.minLine": "{minutes} minutes · {date}",
-  },
+        "legal.privacyTitle": "Politique de confidentialité",
+    "legal.termsTitle": "Conditions d'utilisation",
+    "legal.lastUpdated": "Dernière mise à jour : {date}",
+    "legal.draftNotice": "Ceci est un projet de travail. Une version finale examinée par un juriste la remplacera avant le lancement public.",
+    "legal.backHome": "← Retour à l'accueil",
+    "register.agreePre": "J'accepte les",
+    "register.agreeTerms": "Conditions d'utilisation",
+    "register.agreeAnd": "et la",
+    "register.agreePrivacy": "Politique de confidentialité",
+    "register.agreeErr": "Vous devez accepter les Conditions et la Politique de confidentialité pour continuer.",
+  },    "tpay.title": "Paiements",
+    "tpay.subtitle": "Suivez vos gains d'enseignement et demandez des versements.",
+    "tpay.available": "Disponible",
+    "tpay.pending": "En attente",
+    "tpay.approved": "Approuvé",
+    "tpay.paid": "Payé",
+    "tpay.totalPaid": "Total versé",
+    "tpay.estimatedPayout": "Valeur estimée",
+    "tpay.rate": "Taux interne",
+    "tpay.perHour": "DA/heure",
+    "tpay.requestBtn": "Demander un paiement",
+    "tpay.requesting": "Envoi...",
+    "tpay.requestHint": "Gèle tout le temps disponible dans une nouvelle demande.",
+    "tpay.noRateHint": "Votre taux interne n'est pas encore défini. Contactez le support.",
+    "tpay.history": "Historique des paiements",
+    "tpay.noHistory": "Aucune demande pour l'instant.",
+    "tpay.frozen": "gelé",
+    "tpay.seconds": "secondes",
+    "tpay.statusPending": "En attente",
+    "tpay.statusApproved": "Approuvée",
+    "tpay.statusPaid": "Payée",
+    "tpay.statusRejected": "Rejetée",
+    "tpay.statusCancelled": "Annulée",
+    "tpay.alreadyActive": "Vous avez déjà une demande active. Attendez son paiement.",
 
+    "atp.title": "Paiements des professeurs",
+    "atp.subtitle": "Examinez et approuvez les demandes de versement.",
+    "atp.all": "Toutes",
+    "atp.pending": "En attente",
+    "atp.approved": "Approuvées",
+    "atp.paid": "Payées",
+    "atp.rejected": "Rejetées",
+    "atp.teacher": "Professeur",
+    "atp.frozen": "Gelé",
+    "atp.payout": "Versement",
+    "atp.status": "Statut",
+    "atp.requested": "Demandée",
+    "atp.actions": "Actions",
+    "atp.approve": "Approuver",
+    "atp.markPaid": "Marquer payée",
+    "atp.reject": "Rejeter",
+    "atp.none": "Aucune demande",
+    "atp.notSet": "Non défini",
 
+  // ============================================================
+  // ARABIC
+  // ============================================================
   ar: {
-        "home.logIn": "تسجيل الدخول",
-    "home.signUp": "إنشاء حساب",
-    "home.logOut": "تسجيل الخروج",
-    "home.hi": "أهلاً",
-    "home.becomeTeacher": "كن أستاذاً",
-    "home.heroTitle": "ابدأ رحلة تعلم اللغات اليوم",
-    "home.heroSubtitle": "تعلّم اللغات من خلال التحدث الفعلي، مع أساتذة حقيقيين ومحادثات حقيقية وتقدّم حقيقي.",
-    "home.registerStudent": "التسجيل كطالب",
-    "home.registerTeacher": "التسجيل كأستاذ",
-        "home.popularLangTitle": "اللغات الأكثر طلباً",
-    "home.popularLangSubtitle": "تعلّم أياً من هذه اللغات مع أستاذ حقيقي",
-    "home.howItWorksTitle": "كيف يعمل التطبيق",
-    "home.step1Title": "أنشئ حسابك",
-    "home.step1Desc": "سجّل في ثوانٍ كطالب أو ولي أمر أو أستاذ.",
-    "home.step2Title": "ابحث عن أستاذك",
-    "home.step2Desc": "تصفّح الأساتذة حسب اللغة والتخصص والتوفر.",
-    "home.step3Title": "ابدأ بالتحدث",
-    "home.step3Desc": "انضم إلى الدروس المباشرة وتابع تقدّمك.",
-    "home.teachersTitle": "شارك لغتك",
-    "home.teachersSubtitle": "كن أستاذاً في Myna Lingo وتواصل مع طلاب من جميع أنحاء العالم.",
-    "home.teachersCta": "قدّم للتدريس",
-    "home.ctaTitle": "مستعد لتبدأ التحدث بلغة جديدة؟",
-    "home.ctaSubtitle": "انضم إلى Myna Lingo اليوم وخذ درسك الأول.",
-    "home.ctaButton": "ابدأ الآن",
-    "home.footerTagline": "تعلّم اللغات من خلال التحدث الفعلي.",
-    "home.footerRights": "جميع الحقوق محفوظة.",
-        "login.welcomeBack": "مرحبًا بعودتك",
-    "login.email": "البريد الإلكتروني",
-    "login.password": "كلمة المرور",
-    "login.loggingIn": "جارٍ تسجيل الدخول...",
-    "login.logIn": "تسجيل الدخول",
-    "login.noAccount": "ليس لديك حساب؟",
-    "login.signUp": "أنشئ حسابًا",
-    "login.failed": "فشل تسجيل الدخول",
-    "login.connectError": "تعذر الاتصال بالخادم",
-
-    "register.createAccount": "أنشئ حسابك",
-    "register.fullName": "الاسم الكامل",
-    "register.email": "البريد الإلكتروني",
-    "register.password": "كلمة المرور",
-    "register.iAm": "أنا",
-    "register.student": "طالب",
-    "register.parent": "ولي أمر",
-    "register.teacher": "أستاذ",
-    "register.creatingAccount": "جارٍ إنشاء الحساب...",
-    "register.signUp": "إنشاء حساب",
-    "register.haveAccount": "لديك حساب بالفعل؟",
-    "register.logIn": "تسجيل الدخول",
-    "register.failed": "فشل إنشاء الحساب",
-    "register.connectError": "تعذر الاتصال بالخادم",
+    // ---- common ----
     "common.loading": "جار التحميل...",
     "common.back": "رجوع",
     "common.continue": "متابعة",
@@ -1046,14 +1125,91 @@ export const translations = {
     "common.remove": "إزالة",
     "common.select": "اختر",
     "common.optional": "اختياري",
+    "common.tryAgain": "إعادة المحاولة",
+    "common.failedToLoad": "فشل التحميل",
+    "common.backToDashboard": "← العودة إلى لوحة التحكم",
 
+    // ---- language toggle ----
     "lang.switchTo": "تغيير اللغة",
 
-    "wizard.submitted.title": "تم إرسال الطلب",
-    "wizard.submitted.body":
-      "شكرًا! طلبك قيد المراجعة. سنُعلمك بمجرد معالجته.",
-    "wizard.submitted.backHome": "العودة إلى الرئيسية",
+    // ---- home ----
+    "home.logIn": "تسجيل الدخول",
+    "home.signUp": "إنشاء حساب",
+    "home.logOut": "تسجيل الخروج",
+    "home.hi": "أهلاً",
+    "home.becomeTeacher": "كن أستاذاً",
+    "home.heroTitle": "ابدأ رحلة تعلم اللغات اليوم",
+    "home.heroSubtitle": "تعلّم اللغات من خلال التحدث الفعلي، مع أساتذة حقيقيين ومحادثات حقيقية وتقدّم حقيقي.",
+    "home.registerStudent": "التسجيل كطالب",
+    "home.registerTeacher": "التسجيل كأستاذ",
+    "home.navHow": "كيف يعمل",
+    "home.navTeachers": "الأساتذة",
+    "home.heroBadge": "أساتذة حقيقيون، محادثات حقيقية",
+    "home.fact1": "مكالمات فيديو مباشرة فردية",
+    "home.fact2": "أساتذة جزائريون + ناطقون أصليون",
+    "home.fact3": "ادفع بالدقيقة — بدون اشتراك",
+    "home.fact4": "دقائق تجريبية مجانية للطلاب الجدد",
+    "home.howTitle": "كيف يعمل",
+    "home.howSubtitle": "من التسجيل إلى محادثتك الأولى في دقائق.",
+    "home.step1Title": "اختر أستاذًا",
+    "home.step1Body": "تصفّح أساتذة موثقين حسب اللغة والسعر والتوفر.",
+    "home.step2Title": "احجز أو اتصل الآن",
+    "home.step2Body": "جدول حصة أو ابدأ مكالمة مباشرة مع أستاذ متصل.",
+    "home.step3Title": "ادفع فقط ما تستخدمه",
+    "home.step3Body": "يُخصم رصيدك بالدقيقة — بدون رسوم شهرية أو رصيد ضائع.",
+    "home.teachersTitle": "تعرّف على أساتذتنا",
+    "home.teachersSubtitle": "محترفون موثقون، جاهزون لمساعدتك على التحدث.",
+    "home.teachersEmpty": "أساتذة سينضمون قريبًا — تحقق بعد قليل.",
+    "home.viewProfile": "عرض الملف",
+    "home.ctaBrowse": "تصفّح جميع الأساتذة",
+    "home.teacherCtaTitle": "هل أنت أستاذ لغة؟",
+    "home.teacherCtaBody": "حدد سعرك وجدولك، درّس من أي مكان، واحصل على أجرك بالدقيقة.",
+    "home.teacherCtaButton": "قدّم للتدريس",
+    "home.finalCtaTitle": "ابدأ حصتك الأولى اليوم",
+    "home.finalCtaBody": "الطلاب الجدد يحصلون على دقائق تجريبية — بدون بطاقة.",
+    "home.footerTagline": "تعلّم اللغات من خلال التحدث الفعلي.",
+    "home.footerRights": "© {year} Myna Lingo. جميع الحقوق محفوظة.",
+    "home.perHour": "دج/ساعة",
+    "home.online": "متصل",
+    "home.offline": "غير متصل",
 
+    // ---- login ----
+    "login.welcomeBack": "مرحبًا بعودتك",
+    "login.email": "البريد الإلكتروني",
+    "login.password": "كلمة المرور",
+    "login.loggingIn": "جارٍ تسجيل الدخول...",
+    "login.logIn": "تسجيل الدخول",
+    "login.noAccount": "ليس لديك حساب؟",
+    "login.signUp": "أنشئ حسابًا",
+    "login.failed": "فشل تسجيل الدخول",
+    "login.connectError": "تعذر الاتصال بالخادم",
+
+    // ---- register ----
+    "register.createAccount": "أنشئ حسابك",
+    "register.subtitle": "ابدأ التعلم أو التدريس اليوم — مجانًا.",
+    "register.fullName": "الاسم الكامل",
+    "register.email": "البريد الإلكتروني",
+    "register.password": "كلمة المرور",
+    "register.iAm": "أنا",
+    "register.student": "طالب",
+    "register.studentDesc": "أريد أن أتعلم لغة",
+    "register.parent": "ولي أمر",
+    "register.parentDesc": "أدير تعلم طفلي",
+    "register.teacher": "أستاذ",
+    "register.teacherDesc": "أريد أن أدرّس",
+    "register.creatingAccount": "جارٍ إنشاء الحساب...",
+    "register.signUp": "إنشاء حساب",
+    "register.haveAccount": "لديك حساب بالفعل؟",
+    "register.logIn": "تسجيل الدخول",
+    "register.failed": "فشل إنشاء الحساب",
+    "register.errShortPassword": "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
+    "register.showPassword": "إظهار كلمة المرور",
+    "register.connectError": "تعذر الاتصال بالخادم",
+
+    // ---- wizard ----
+    "wizard.submitted.title": "تم إرسال الطلب",
+    "wizard.submitted.body": "شكرًا! طلبك قيد المراجعة. سنُعلمك بمجرد معالجته.",
+    "wizard.submitted.backHome": "العودة إلى الرئيسية",
     "wizard.steps.about": "نبذة",
     "wizard.steps.photo": "الصورة",
     "wizard.steps.id": "الهوية",
@@ -1064,8 +1220,7 @@ export const translations = {
     "wizard.steps.pricing": "السعر",
 
     "wizard.about.title": "نبذة",
-    "wizard.about.subtitle":
-      "ابدأ بإنشاء ملفك العام كمعلم. يتم حفظ تقدمك تلقائيًا.",
+    "wizard.about.subtitle": "ابدأ بإنشاء ملفك العام كمعلم. يتم حفظ تقدمك تلقائيًا.",
     "wizard.about.firstName": "الاسم",
     "wizard.about.lastName": "اللقب",
     "wizard.about.country": "بلد الميلاد",
@@ -1082,16 +1237,13 @@ export const translations = {
     "wizard.about.confirmOver18": "أؤكد أن عمري أكثر من 18 سنة",
     "wizard.about.errRequired": "يرجى تعبئة جميع الحقول المطلوبة.",
     "wizard.about.errOver18": "يرجى تأكيد أن عمرك أكثر من 18 سنة.",
-    "wizard.about.errPhoneDz":
-      "رقم الهاتف الجزائري يتكون من 9 أرقام يبدأ بـ 5 أو 6 أو 7.",
+    "wizard.about.errPhoneDz": "رقم الهاتف الجزائري يتكون من 9 أرقام يبدأ بـ 5 أو 6 أو 7.",
     "wizard.about.errPhoneGeneric": "يرجى إدخال رقم هاتف صالح.",
-    "wizard.about.errPhoneDzHint":
-      "الأرقام الجزائرية من 9 أرقام تبدأ بـ 5 أو 6 أو 7.",
+    "wizard.about.errPhoneDzHint": "الأرقام الجزائرية من 9 أرقام تبدأ بـ 5 أو 6 أو 7.",
     "wizard.about.errPhoneHint": "أدخل رقم هاتف صالح.",
 
     "wizard.photo.title": "صورة الملف الشخصي",
-    "wizard.photo.subtitle":
-      "اختر صورة تساعد المتعلمين على التعرف عليك.",
+    "wizard.photo.subtitle": "اختر صورة تساعد المتعلمين على التعرف عليك.",
     "wizard.photo.rulesTitle": "شروط الصورة:",
     "wizard.photo.rule1": "الوجه ظاهر بوضوح وينظر إلى الكاميرا",
     "wizard.photo.rule2": "خلفية بسيطة ومحايدة (بدون فوضى)",
@@ -1104,45 +1256,33 @@ export const translations = {
     "wizard.photo.cancel": "إلغاء",
     "wizard.photo.remove": "إزالة واختيار صورة أخرى",
     "wizard.photo.errNoPhoto": "يرجى تحميل أو التقاط صورة شخصية.",
-    "wizard.photo.errCamera":
-      "تعذر الوصول إلى الكاميرا. تحقق من الأذونات أو استخدم رفع ملف.",
+    "wizard.photo.errCamera": "تعذر الوصول إلى الكاميرا. تحقق من الأذونات أو استخدم رفع ملف.",
     "wizard.photo.errSave": "تعذر حفظ الصورة. حاول مرة أخرى.",
 
     "wizard.id.title": "وثيقة الهوية",
-    "wizard.id.subtitle":
-      "نحتاجها للتحقق من هويتك. تبقى خاصة ولا تُعرض علنًا أبدًا.",
-    "wizard.id.errNoFile":
-      "يرجى تحميل أو التقاط صورة لوثيقة هويتك.",
-    "wizard.id.errCamera":
-      "تعذر الوصول إلى الكاميرا. تحقق من الأذونات أو استخدم رفع ملف.",
-    "wizard.id.errSave":
-      "تعذر حفظ وثيقة الهوية. حاول مرة أخرى.",
+    "wizard.id.subtitle": "نحتاجها للتحقق من هويتك. تبقى خاصة ولا تُعرض علنًا أبدًا.",
+    "wizard.id.errNoFile": "يرجى تحميل أو التقاط صورة لوثيقة هويتك.",
+    "wizard.id.errCamera": "تعذر الوصول إلى الكاميرا. تحقق من الأذونات أو استخدم رفع ملف.",
+    "wizard.id.errSave": "تعذر حفظ وثيقة الهوية. حاول مرة أخرى.",
 
     "wizard.cert.title": "شهادة التدريس",
-    "wizard.cert.subtitle":
-      "أضف شهادة للغة التي تدرّسها. مطلوبة قبل الإرسال.",
+    "wizard.cert.subtitle": "أضف شهادة للغة التي تدرّسها. مطلوبة قبل الإرسال.",
     "wizard.cert.submitted": "تم إرسال الشهادة. سيراجعها فريقنا.",
     "wizard.cert.description": "الوصف",
     "wizard.cert.descriptionPlaceholder": "مثال: شهادة TEFL، CELTA...",
     "wizard.cert.issuedBy": "صادرة من",
-    "wizard.cert.issuedByPlaceholder":
-      "مثال: Cambridge، British Council...",
+    "wizard.cert.issuedByPlaceholder": "مثال: Cambridge، British Council...",
     "wizard.cert.yearFrom": "من سنة",
     "wizard.cert.yearTo": "إلى سنة",
-    "wizard.cert.upload":
-      "حمّل شهادتك (JPG أو PNG، بحد أقصى 20 ميغا)",
+    "wizard.cert.upload": "حمّل شهادتك (JPG أو PNG، بحد أقصى 20 ميغا)",
     "wizard.cert.submit": "إرسال الشهادة",
-    "wizard.cert.errMissingLang":
-      "حدث خطأ — يرجى العودة إلى خطوة النبذة.",
-    "wizard.cert.errRequired":
-      "يرجى تعبئة جميع الحقول وتحميل الشهادة.",
-    "wizard.cert.errYearOrder":
-      "لا يمكن أن تكون سنة النهاية قبل سنة البداية.",
+    "wizard.cert.errMissingLang": "حدث خطأ — يرجى العودة إلى خطوة النبذة.",
+    "wizard.cert.errRequired": "يرجى تعبئة جميع الحقول وتحميل الشهادة.",
+    "wizard.cert.errYearOrder": "لا يمكن أن تكون سنة النهاية قبل سنة البداية.",
     "wizard.cert.errSave": "تعذر حفظ الشهادة. حاول مرة أخرى.",
 
     "wizard.edu.title": "التعليم",
-    "wizard.edu.subtitle":
-      "أخبرنا عن دراستك الجامعية. إضافة الدبلوم اختيارية لكنها تدعم طلبك.",
+    "wizard.edu.subtitle": "أخبرنا عن دراستك الجامعية. إضافة الدبلوم اختيارية لكنها تدعم طلبك.",
     "wizard.edu.university": "الجامعة",
     "wizard.edu.universityPlaceholder": "مثال: جامعة الجزائر",
     "wizard.edu.degree": "الشهادة",
@@ -1153,20 +1293,15 @@ export const translations = {
     "wizard.edu.specializationPlaceholder": "مثال: الأدب الإنجليزي",
     "wizard.edu.yearFrom": "من سنة",
     "wizard.edu.yearTo": "إلى سنة",
-    "wizard.edu.uploadDiploma":
-      "تحميل الدبلوم (اختياري، JPG أو PNG)",
-    "wizard.edu.errRequired":
-      "يرجى تعبئة الجامعة والشهادة والسنوات.",
-    "wizard.edu.errYearOrder":
-      "لا يمكن أن تكون سنة النهاية قبل سنة البداية.",
+    "wizard.edu.uploadDiploma": "تحميل الدبلوم (اختياري، JPG أو PNG)",
+    "wizard.edu.errRequired": "يرجى تعبئة الجامعة والشهادة والسنوات.",
+    "wizard.edu.errYearOrder": "لا يمكن أن تكون سنة النهاية قبل سنة البداية.",
     "wizard.edu.errSave": "تعذر حفظ التعليم. حاول مرة أخرى.",
 
     "wizard.desc.title": "وصف الملف الشخصي",
-    "wizard.desc.subtitle":
-      "اكتب نبذة قصيرة باللغة التي تدرّسها. هذا ما سيراه المتعلمون.",
+    "wizard.desc.subtitle": "اكتب نبذة قصيرة باللغة التي تدرّسها. هذا ما سيراه المتعلمون.",
     "wizard.desc.label": "نبذة عنك ({count}/20 كحد أدنى)",
-    "wizard.desc.placeholder":
-      "عرّف بنفسك وبأسلوبك في التدريس وما يجعل دروسك ممتعة...",
+    "wizard.desc.placeholder": "عرّف بنفسك وبأسلوبك في التدريس وما يجعل دروسك ممتعة...",
     "wizard.desc.errShort": "يرجى كتابة 20 حرفًا على الأقل.",
     "wizard.desc.errSave": "تعذر حفظ الوصف.",
 
@@ -1175,13 +1310,11 @@ export const translations = {
     "wizard.avail.empty": "لا توجد فترات. أضف الأولى أدناه.",
     "wizard.avail.addSlot": "+ إضافة فترة",
     "wizard.avail.errEmpty": "يرجى إضافة فترة توفر واحدة على الأقل.",
-    "wizard.avail.errOrder":
-      "يجب أن يكون وقت النهاية بعد وقت البداية.",
+    "wizard.avail.errOrder": "يجب أن يكون وقت النهاية بعد وقت البداية.",
     "wizard.avail.errSave": "تعذر حفظ التوفر.",
 
     "wizard.pricing.title": "السعر",
-    "wizard.pricing.subtitle":
-      "أدخل أجرك المطلوب للساعة بالدينار الجزائري. يراجعه فريقنا قبل الموافقة على طلبك.",
+    "wizard.pricing.subtitle": "أدخل أجرك المطلوب للساعة بالدينار الجزائري. يراجعه فريقنا قبل الموافقة على طلبك.",
     "wizard.pricing.rate": "الأجر بالساعة (دج)",
     "wizard.pricing.ratePlaceholder": "مثال: 1500",
     "wizard.pricing.errRate": "يرجى إدخال أجر ساعي صالح بالدينار.",
@@ -1191,10 +1324,8 @@ export const translations = {
     "wizard.errLoad": "تعذر تحميل طلبك. حاول مرة أخرى.",
     "wizard.errGenericSave": "تعذر الحفظ. حاول مرة أخرى.",
     "wizard.errSubmit": "تعذر إرسال الطلب. حاول مرة أخرى.",
-        "common.tryAgain": "إعادة المحاولة",
-    "common.failedToLoad": "فشل التحميل",
-    "common.backToDashboard": "← العودة إلى لوحة التحكم",
 
+    // ---- student ----
     "student.welcome": "مرحبًا",
     "student.subtitle": "لوحة تعلّمك",
     "student.logout": "تسجيل الخروج",
@@ -1219,6 +1350,7 @@ export const translations = {
     "student.bookings": "حجوزاتي",
     "student.bookingsSub": "الحصص المجدولة",
 
+    // ---- bookings ----
     "bookings.title": "حجوزاتي",
     "bookings.upcoming": "القادمة",
     "bookings.completed": "المكتملة",
@@ -1234,6 +1366,7 @@ export const translations = {
     "bookings.statusCancelled": "ملغى",
     "bookings.statusCompleted": "مكتمل",
 
+    // ---- packages ----
     "packages.title": "شراء الدقائق",
     "packages.subtitle": "اختر باقة لتبدأ التعلم",
     "packages.package": "باقة",
@@ -1245,6 +1378,7 @@ export const translations = {
     "packages.purchased": "✅ تم شراء {minutes} دقيقة! الرصيد الجديد: {balance}",
     "packages.failed": "فشلت عملية الشراء",
 
+    // ---- progress ----
     "progress.title": "تقدمي",
     "progress.subtitle": "تابع نقاطك وارتقِ في المستويات",
     "progress.currentLevel": "المستوى الحالي",
@@ -1257,7 +1391,9 @@ export const translations = {
     "progress.srcLesson": "📚 درس",
     "progress.srcAdmin": "⚙️ إدارة",
     "progress.srcStreak": "🔥 سلسلة",
-        "vocab.title": "مفرداتي",
+
+    // ---- vocabulary ----
+    "vocab.title": "مفرداتي",
     "vocab.subtitle": "الكلمات التي تعلمتها من البودكاست",
     "vocab.searchPh": "ابحث عن كلمة...",
     "vocab.empty": "لا توجد كلمات بعد",
@@ -1266,6 +1402,7 @@ export const translations = {
     "vocab.noMatch": "لا توجد كلمات مطابقة لـ \"{q}\"",
     "vocab.from": "من: {title}",
 
+    // ---- notifications ----
     "notif.title": "الإشعارات",
     "notif.unreadOne": "لديك إشعار واحد غير مقروء",
     "notif.unreadMany": "لديك {n} إشعارات غير مقروءة",
@@ -1274,6 +1411,7 @@ export const translations = {
     "notif.empty": "لا توجد إشعارات بعد",
     "notif.emptySub": "سنُعلمك عند حدوث أي شيء",
 
+    // ---- groups ----
     "groups.title": "الحصص الجماعية",
     "groups.subtitle": "حصص ممتعة للأطفال في مجموعة صغيرة",
     "groups.empty": "لا توجد حصص جماعية متاحة",
@@ -1287,6 +1425,7 @@ export const translations = {
     "groups.age6_11": "6-11 سنة",
     "groups.age12_14": "12-14 سنة",
 
+    // ---- my podcasts ----
     "mypod.title": "بودكاستي",
     "mypod.subtitle": "كل البودكاست التي اشتريتها",
     "mypod.empty": "لا يوجد بودكاست بعد",
@@ -1294,6 +1433,7 @@ export const translations = {
     "mypod.browse": "تصفح البودكاست",
     "mypod.listen": "▶ استمع الآن",
 
+    // ---- call ----
     "call.backToDashboard": "← العودة إلى لوحة التحكم",
     "call.title": "اتصل بأستاذ",
     "call.balance": "رصيدك: {balance}",
@@ -1314,7 +1454,9 @@ export const translations = {
     "call.studentBal": "رصيد الطالب",
     "call.teacherEarned": "أرباح الأستاذ",
     "call.backToTeachers": "العودة إلى الأساتذة",
-        "parent.welcome": "مرحبًا",
+
+    // ---- parent ----
+    "parent.welcome": "مرحبًا",
     "parent.dashboard": "لوحة ولي الأمر",
     "parent.logout": "تسجيل الخروج",
     "parent.totalChildren": "إجمالي الأبناء",
@@ -1326,6 +1468,7 @@ export const translations = {
     "parent.payments": "💳 المدفوعات",
     "parent.paymentsSub": "عرض سجل المدفوعات",
 
+    // ---- children ----
     "children.title": "أبنائي",
     "children.subtitle": "إدارة حسابات أبنائك",
     "children.addBtn": "+ إضافة ابن",
@@ -1345,6 +1488,7 @@ export const translations = {
     "children.cat12_14": "12-14 سنة",
     "children.catUnknown": "غير معروف",
 
+    // ---- parent payments ----
     "ppay.title": "المدفوعات",
     "ppay.subtitle": "سجل مدفوعاتك",
     "ppay.totalSpent": "إجمالي الإنفاق",
@@ -1354,7 +1498,9 @@ export const translations = {
     "ppay.noPodcasts": "لا توجد عمليات شراء للبودكاست",
     "ppay.minutesPkg": "باقة {n} دقيقة",
     "ppay.backToDashboard": "← العودة إلى لوحة التحكم",
-        "admin.title": "لوحة الإدارة",
+
+    // ---- admin ----
+    "admin.title": "لوحة الإدارة",
     "admin.subtitle": "أدر منصتك",
     "admin.manage": "إدارة",
     "admin.students": "الطلاب",
@@ -1372,6 +1518,7 @@ export const translations = {
     "admin.manageActivities": "إدارة الأنشطة التعليمية",
     "admin.backToAdmin": "← العودة إلى الإدارة",
 
+    // ---- admin users ----
     "aUsers.title": "المستخدمون",
     "aUsers.subtitle": "إدارة جميع مستخدمي المنصة",
     "aUsers.all": "الكل",
@@ -1383,6 +1530,7 @@ export const translations = {
     "aUsers.suspend": "إيقاف",
     "aUsers.reactivate": "إعادة التنشيط",
 
+    // ---- admin packages ----
     "aPkg.title": "الباقات",
     "aPkg.updated": "✅ تم تحديث الباقة",
     "aPkg.minutes": "{n} دقيقة",
@@ -1396,6 +1544,7 @@ export const translations = {
     "aPkg.minutesPh": "الدقائق",
     "aPkg.sortPh": "الترتيب",
 
+    // ---- admin content ----
     "aContent.title": "المحتوى",
     "aContent.subtitle": "الأنشطة التعليمية",
     "aContent.newBtn": "+ نشاط جديد",
@@ -1422,6 +1571,7 @@ export const translations = {
     "aContent.typeStory": "📖 قصة",
     "aContent.typeVocab": "📚 مفردات",
 
+    // ---- admin podcasts ----
     "aPod.title": "البودكاست",
     "aPod.updated": "✅ تم تحديث البودكاست",
     "aPod.edit": "تحرير",
@@ -1434,6 +1584,7 @@ export const translations = {
     "aPod.meta": "{lang} · {level} · {price} دج · {xp} نقطة",
     "aPod.inactive": " · غير مفعل",
 
+    // ---- admin analytics ----
     "aAnalytics.title": "التحليلات",
     "aAnalytics.subtitle": "نظرة عامة على المنصة",
     "aAnalytics.totalRevenue": "إجمالي الإيرادات",
@@ -1454,11 +1605,64 @@ export const translations = {
     "aAnalytics.recent": "أحدث عمليات شراء الباقات",
     "aAnalytics.noRecent": "لا توجد مشتريات حديثة",
     "aAnalytics.minLine": "{minutes} دقيقة · {date}",
+        "legal.privacyTitle": "سياسة الخصوصية",
+    "legal.termsTitle": "شروط الخدمة",
+    "legal.lastUpdated": "آخر تحديث: {date}",
+    "legal.draftNotice": "هذه مسودة عمل. سيتم استبدالها بنسخة نهائية تمت مراجعتها قانونيًا قبل الإطلاق العام.",
+    "legal.backHome": "← العودة إلى الرئيسية",
+    "register.agreePre": "أوافق على",
+    "register.agreeTerms": "شروط الخدمة",
+    "register.agreeAnd": "و",
+    "register.agreePrivacy": "سياسة الخصوصية",
+    "register.agreeErr": "يجب الموافقة على الشروط وسياسة الخصوصية للمتابعة.",
+        "tpay.title": "المدفوعات",
+    "tpay.subtitle": "تابع أرباحك من التدريس واطلب الدفعات.",
+    "tpay.available": "متاح",
+    "tpay.pending": "قيد الانتظار",
+    "tpay.approved": "معتمد",
+    "tpay.paid": "مدفوع",
+    "tpay.totalPaid": "إجمالي المدفوع",
+    "tpay.estimatedPayout": "القيمة التقديرية",
+    "tpay.rate": "الأجر الداخلي",
+    "tpay.perHour": "دج/ساعة",
+    "tpay.requestBtn": "طلب دفعة",
+    "tpay.requesting": "جارٍ الطلب...",
+    "tpay.requestHint": "يجمد كل الوقت المتاح في طلب دفع جديد.",
+    "tpay.noRateHint": "لم يتم تحديد أجرك الداخلي بعد. تواصل مع الدعم.",
+    "tpay.history": "سجل المدفوعات",
+    "tpay.noHistory": "لا توجد طلبات دفع بعد.",
+    "tpay.frozen": "مجمّد",
+    "tpay.seconds": "ثانية",
+    "tpay.statusPending": "قيد الانتظار",
+    "tpay.statusApproved": "معتمد",
+    "tpay.statusPaid": "مدفوع",
+    "tpay.statusRejected": "مرفوض",
+    "tpay.statusCancelled": "ملغى",
+    "tpay.alreadyActive": "لديك طلب نشط بالفعل. انتظر دفعه.",
+
+    "atp.title": "مدفوعات الأساتذة",
+    "atp.subtitle": "راجع واعتمد طلبات الدفع من الأساتذة.",
+    "atp.all": "الكل",
+    "atp.pending": "قيد الانتظار",
+    "atp.approved": "معتمدة",
+    "atp.paid": "مدفوعة",
+    "atp.rejected": "مرفوضة",
+    "atp.teacher": "الأستاذ",
+    "atp.frozen": "المجمد",
+    "atp.payout": "الدفعة",
+    "atp.status": "الحالة",
+    "atp.requested": "تاريخ الطلب",
+    "atp.actions": "إجراءات",
+    "atp.approve": "اعتماد",
+    "atp.markPaid": "تحديد كمدفوع",
+    "atp.reject": "رفض",
+    "atp.none": "لا توجد طلبات دفع",
+    "atp.notSet": "غير محدد",
   },
-  // ---------- Date/time locale helpers ----------
-
-
 } as const;
+
+// ---------- Date/time locale helpers ----------
+
 const LOCALE_TAG: Record<Locale, string> = {
   en: "en-GB",
   fr: "fr-FR",

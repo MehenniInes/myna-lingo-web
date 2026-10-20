@@ -5,11 +5,10 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   Globe2, GraduationCap, Award, Clock, BookOpen,
-  Wifi, WifiOff, Phone, CalendarPlus, ChevronLeft, Star, Briefcase,Play,
+  Wifi, WifiOff, Phone, CalendarPlus, ChevronLeft, Star, Briefcase,
 } from "lucide-react";
 import { api, getUser } from "@/lib/api";
 import { useLanguage } from "@/app/language-provider";
-import TeacherVideoGallery, { TeacherVideoItem } from "@/components/TeacherVideoGallery";
 
 interface TeacherProfile {
   id: string;
@@ -62,7 +61,6 @@ export default function TeacherProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
-  const [videos, setVideos] = useState<TeacherVideoItem[]>([]);
 
   useEffect(() => {
     const user = getUser();
@@ -77,12 +75,8 @@ export default function TeacherProfilePage() {
     setError("");
     setNotFound(false);
     try {
-            const [data, vids] = await Promise.all([
-        api<TeacherProfile>(`/teachers/${id}`),
-        api<TeacherVideoItem[]>(`/teachers/${id}/videos`).catch(() => []),
-      ]);
+      const data = await api<TeacherProfile>(`/teachers/${id}`);
       setTeacher(data);
-      setVideos(Array.isArray(vids) ? vids : []);
     } catch (err: any) {
       if (/not found|404/i.test(err.message)) setNotFound(true);
       else setError(err.message);
@@ -101,7 +95,7 @@ export default function TeacherProfilePage() {
         <div className="max-w-md text-center bg-white rounded-3xl shadow-sm p-10">
           <p className="font-display text-2xl font-bold text-myna-charcoal">Teacher not available</p>
           <p className="text-myna-charcoal/60 mt-2 text-sm">
-            This profile doesn&apos;t exist or hasn&apos;t been approved yet.
+            This profile doesn't exist or hasn't been approved yet.
           </p>
           <Link
             href="/find-teacher"
@@ -237,7 +231,7 @@ export default function TeacherProfilePage() {
               {teacher.isOnline ? "Call now" : "Offline"}
             </button>
             <Link
-              href={`/student/bookings/new?teacherId=${teacher.id}`}
+              href={`/student/bookings?teacherId=${teacher.id}`}
               className="flex-1 py-3 rounded-full font-semibold bg-myna-charcoal text-white hover:bg-myna-charcoal/90 transition flex items-center justify-center gap-2"
             >
               <CalendarPlus size={16} />
@@ -245,11 +239,7 @@ export default function TeacherProfilePage() {
             </Link>
           </div>
         </div>
-                  {videos.length > 0 && (
-              <Section title="Intro videos" icon={<Play size={16} />}>
-                <TeacherVideoGallery videos={videos} />
-              </Section>
-            )}
+
         {/* Body grid */}
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           {/* Left column */}
@@ -371,7 +361,6 @@ export default function TeacherProfilePage() {
       </div>
     </main>
   );
-
 }
 
 function Section({
