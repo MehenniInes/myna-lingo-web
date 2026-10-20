@@ -117,6 +117,10 @@ export default function AdminDashboard() {
             <p className="font-bold">💸 Teacher Payments</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">Approve and mark paid teacher payouts</p>
           </a>
+              <a href="/admin/payments" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md">
+            <p className="font-bold">💰 Student Payments</p>
+            <p className="text-xs text-myna-charcoal/60 mt-1">Activate or refund package purchases</p>
+          </a>
         </div>
       </div>
     </main>
