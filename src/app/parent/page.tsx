@@ -14,6 +14,7 @@ export default function ParentDashboard() {
   const [user, setUser] = useState<any>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
+  const [switching, setSwitching] = useState<string | null>(null); // 👈 حالة جديدة
 
   useEffect(() => {
     const currentUser = getUser();
@@ -30,6 +31,27 @@ export default function ParentDashboard() {
       setChildren(data);
     } catch { /* silent */ } finally {
       setLoading(false);
+    }
+  }
+
+  // 👈 الدالة الجديدة باش ندخلو لحساب الطفل
+  async function handleLoginAsChild(childId: string) {
+    setSwitching(childId);
+    try {
+      const data = await api<{ accessToken: string; user: any }>(`/children/${childId}/login-as-child`, {
+        method: "POST",
+        auth: true,
+      });
+
+      // نبدلو الـ Session
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // نوجهوه للداشبورد ديال الطالب
+      router.push("/student");
+    } catch (err: any) {
+      alert(err.message || "Failed to switch to child account");
+      setSwitching(null);
     }
   }
 
@@ -91,9 +113,19 @@ export default function ParentDashboard() {
                     </div>
                     <p className="font-semibold text-myna-charcoal">{child.fullName}</p>
                   </div>
-                  <span className="text-xs font-bold text-myna-orange px-3 py-1 rounded-full bg-myna-orange/10">
-                    {child.ageCategory === "AGE_6_11" ? t("children.cat6_11") : t("children.cat12_14")}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-myna-orange px-3 py-1 rounded-full bg-myna-orange/10">
+                      {child.ageCategory === "AGE_6_11" ? t("children.cat6_11") : t("children.cat12_14")}
+                    </span>
+                    {/* 👈 الزر الجديد */}
+                    <button
+                      onClick={() => handleLoginAsChild(child.id)}
+                      disabled={switching === child.id}
+                      className="px-4 py-2 rounded-full bg-myna-charcoal text-white text-xs font-semibold hover:bg-myna-charcoal/80 disabled:opacity-50"
+                    >
+                      {switching === child.id ? "..." : "Enter App"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -105,7 +137,7 @@ export default function ParentDashboard() {
             <p className="font-bold text-myna-charcoal">{t("parent.manageChildren")}</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("parent.manageChildrenSub")}</p>
           </a>
-          <a href="/parent/payments" className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition">
+          <a href="/parent/payments" className="bg-white rounded-2xl shadow-sm transition hover:shadow-md p-6">
             <p className="font-bold text-myna-charcoal">{t("parent.payments")}</p>
             <p className="text-xs text-myna-charcoal/60 mt-1">{t("parent.paymentsSub")}</p>
           </a>

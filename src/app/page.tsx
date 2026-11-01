@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "./language-provider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -12,18 +13,37 @@ interface Language {
 }
 
 export default function Home() {
+  const router = useRouter();
   const { locale, setLocale, t } = useLanguage();
   const [user, setUser] = useState<{ fullName: string; role: string } | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true); // 👈 حالة جديدة باش نمنعو وميض الصفحة
   const [languages, setLanguages] = useState<Language[]>([]);
 
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("user");
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch {}
+    const token = localStorage.getItem("accessToken");
+
+    // 👈 إذا كان المستخدم مسجل دخول، نوجهوه ديركت للداشبورد ديالو
+    if (stored && token) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+        
+        if (parsed.role === "STUDENT") router.push("/student");
+        else if (parsed.role === "PARENT") router.push("/parent");
+        else if (parsed.role === "TEACHER") router.push("/teacher");
+        else if (parsed.role === "ADMIN") router.push("/admin");
+        else router.push("/");
+        
+        return; // كنرجعو هنا باش ما نعرضوش صفحة الهوم
+      } catch {}
     }
-  }, []);
+    
+    // إلا ما كانش مسجل دخول، كنعرضو صفحة الهوم عادية
+    setCheckingAuth(false);
+  }, [router]);
 
   useEffect(() => {
     fetch(`${API_URL}/languages`)
@@ -36,6 +56,16 @@ export default function Home() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     setUser(null);
+    router.refresh(); // باش نعاودو نحملو الصفحة
+  }
+
+  // 👈 إلا كان كنشيكي على الـ Login، كنعرضو لودينغ باش ما تبانش الصفحة الرئيسية
+  if (checkingAuth) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-[#FFFDF7]">
+        <p className="text-myna-charcoal font-semibold animate-pulse text-lg">Loading...</p>
+      </main>
+    );
   }
 
   return (
