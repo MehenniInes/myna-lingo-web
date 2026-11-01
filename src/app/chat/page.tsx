@@ -2,13 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, getUser } from "@/lib/api";
+import { api, getUser, getToken } from "@/lib/api";
 import { getChatSocket } from "@/lib/chatSocket";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 type User = { id: string; fullName: string; role: string };
 type Conversation = { user: User; lastMessage: string; lastMessageAt: string };
-// 👇 زدنا isRead فـ النوع
-type Message = { id: string; senderId: string; receiverId: string; content: string; createdAt: string; isRead?: boolean };
+type Message = { 
+  id: string; 
+  senderId: string; 
+  receiverId: string; 
+  content: string | null; 
+  type: string; 
+  fileUrl?: string; 
+  fileName?: string; 
+  createdAt: string; 
+  isRead?: boolean 
+};
 
 export default function ChatPage() {
   const router = useRouter();
@@ -19,9 +30,11 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [showUsers, setShowUsers] = useState(false);
-
+  const [uploading, setUploading] = useState(false); // 👈 حالة الرفع
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socket = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // 👈 الـ Ref ديال زر الملفات
 
   useEffect(() => {
     const u = getUser();
@@ -32,18 +45,16 @@ export default function ChatPage() {
 
     socket.current = getChatSocket();
     
-       socket.current.on("messages_read", ({ by }: { by: string }) => {
-      console.log(`[Socket] Received messages_read from user: ${by}. Active chat is: ${activeChat?.id}`);
-      
-      if (activeChat && by === activeChat.id) {
-        console.log("✅ Marking messages as read in UI");
-        setMessages((prev) =>
-          prev.map((m) => (m.senderId === u.id ? { ...m, isRead: true } : m))
-        );
+    socket.current.on("new_message", (msg: Message) => {
+      if (
+        (msg.senderId === u.id && msg.receiverId === activeChat?.id) ||
+        (msg.senderId === activeChat?.id && msg.receiverId === u.id)
+      ) {
+        setMessages((prev) => [...prev, msg]);
       }
+      loadConversations();
     });
 
-    // 👇 ملي كيوصل إشعار بلي الرسائل تقرات، كنعلمو الرسائل ديالنا بـ isRead: true
     socket.current.on("messages_read", ({ by }: { by: string }) => {
       if (activeChat && by === activeChat.id) {
         setMessages((prev) =>
@@ -82,8 +93,6 @@ export default function ChatPage() {
     try {
       const history = await api<Message[]>(`/chat/history/${user.id}`, { auth: true });
       setMessages(history);
-      
-      // ملي كتحل الشات، علم السيرفر بلي قريتي الرسائل
       socket.current?.emit("mark_read", { senderId: user.id });
     } catch (e) { console.error(e); }
   }
@@ -95,8 +104,49 @@ export default function ChatPage() {
     socket.current?.emit("send_message", {
       receiverId: activeChat.id,
       content: newMessage,
+      type: "TEXT",
     });
     setNewMessage("");
+  }
+
+  // 👈 دالة رفع الملفات
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !activeChat) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(`${API_URL}/chat/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      const isImage = file.type.startsWith("image/");
+
+      // صيفط الرسالة عبر WebSocket
+      socket.current?.emit("send_message", {
+        receiverId: activeChat.id,
+        content: "",
+        type: isImage ? "IMAGE" : "FILE",
+        fileUrl: data.url,
+        fileName: data.fileName,
+      });
+
+    } catch (err) {
+      alert("Error uploading file");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   if (!currentUser) return null;
@@ -161,12 +211,31 @@ export default function ChatPage() {
                 return (
                   <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[70%] p-3 rounded-2xl ${isMe ? "bg-myna-orange text-white rounded-tr-sm" : "bg-white text-gray-800 rounded-tl-sm shadow-sm"}`}>
-                      <p>{m.content}</p>
+                      
+                      {/* 👈 عرض حسب نوع الرسالة */}
+                      {m.type === "IMAGE" && m.fileUrl ? (
+                        <img 
+                          src={`${API_URL}${m.fileUrl}`} 
+                          alt="attachment" 
+                          className="max-w-full rounded-lg mb-2"
+                        />
+                      ) : m.type === "FILE" && m.fileUrl ? (
+                        <a 
+                          href={`${API_URL}${m.fileUrl}`} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className={`flex items-center gap-2 p-2 rounded-lg mb-2 ${isMe ? "bg-white/20" : "bg-gray-100"}`}
+                        >
+                          📎 {m.fileName || "Download File"}
+                        </a>
+                      ) : (
+                        <p>{m.content}</p>
+                      )}
+
                       <div className="flex items-center justify-end gap-1 mt-1">
                         <span className={`text-[10px] ${isMe ? "text-white/70" : "text-gray-400"}`}>
                           {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
-                        {/* 👇 هنا كنعرضو الحالة من الرسالة نفسها m.isRead */}
                         {isMe && (
                           <span className="text-[10px] text-white/90 font-bold ml-1">
                             {m.isRead ? "✓✓ Seen" : "✓ Sent"}
@@ -180,7 +249,25 @@ export default function ChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={sendMessage} className="p-4 bg-white border-t flex gap-2">
+            <form onSubmit={sendMessage} className="p-4 bg-white border-t flex gap-2 items-center">
+              {/* 👈 زر رفع الملفات */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                className="hidden" 
+                accept="image/*,application/pdf,application/zip" 
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="p-2 text-gray-500 hover:text-myna-orange disabled:opacity-50"
+                title="Attach file"
+              >
+                {uploading ? "⏳" : "📎"}
+              </button>
+
               <input
                 type="text"
                 value={newMessage}
