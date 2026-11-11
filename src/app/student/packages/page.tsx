@@ -36,17 +36,29 @@ export default function PackagesPage() {
     }
   }
 
-  async function buyPackage(packageId: string) {
+   async function buyPackage(packageId: string) {
     setBuying(packageId); setMessage(""); setError("");
     try {
-      const result = await api<{ purchaseId: string; minutesAdded: number; newBalanceSeconds: number }>(
-        `/packages/${packageId}/purchase`,
-        { method: "POST", auth: true }
+      const result = await api<{ 
+        paymentId: string; 
+        checkoutUrl: string; 
+        amountDA: number; 
+        provider?: string 
+      }>(
+        `/payments/checkout/package`,
+        { 
+          method: "POST", 
+          auth: true,
+          body: { packageId }
+        }
       );
-      const balance = `${Math.floor(result.newBalanceSeconds / 60)}:${(result.newBalanceSeconds % 60)
-        .toString()
-        .padStart(2, "0")}`;
-      setMessage(t("packages.purchased", { minutes: result.minutesAdded, balance }));
+
+      
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        setError("Checkout URL was not provided by the server.");
+      }
     } catch (err: any) {
       setError(err.message || t("packages.failed"));
     } finally {
